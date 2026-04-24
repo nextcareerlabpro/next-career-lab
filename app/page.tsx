@@ -37,12 +37,23 @@ export default function Page() {
 
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [result, setResult] = useState({
+  const emptyResult = {
     score: 0,
     matched: [] as string[],
     missing: [] as string[],
     suggestions: [] as string[],
-  });
+  };
+
+  const [result, setResult] = useState(emptyResult);
+
+  function normalize(data: any) {
+    return {
+      score: Number(data?.score ?? 0),
+      matched: Array.isArray(data?.matched) ? data.matched : [],
+      missing: Array.isArray(data?.missing) ? data.missing : [],
+      suggestions: Array.isArray(data?.suggestions) ? data.suggestions : [],
+    };
+  }
 
   useEffect(() => {
     setDark(localStorage.getItem("theme") !== "light");
@@ -70,10 +81,12 @@ export default function Page() {
     );
 
     setHistory(
-      snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      })).reverse()
+      snap.docs
+        .map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }))
+        .reverse()
     );
   }
 
@@ -90,14 +103,14 @@ export default function Page() {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
 
-      if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-        await signInWithRedirect(auth, provider);
-      } else {
+      try {
         await signInWithPopup(auth, provider);
+      } catch {
+        await signInWithRedirect(auth, provider);
       }
     } catch (e) {
       console.error(e);
-      alert("Login failed.");
+      alert("Google login failed.");
     }
   }
 
@@ -121,12 +134,14 @@ export default function Page() {
       });
 
       const data = await res.json();
+      console.log("API RESPONSE:", data);
+      const finalData = normalize(data);
 
-      setResult(data);
+      setResult(finalData);
 
       await addDoc(collection(db, "reports"), {
         uid: user.uid,
-        ...data,
+        ...finalData,
         createdAt: serverTimestamp(),
       });
 
@@ -156,8 +171,7 @@ export default function Page() {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
 
-      text +=
-        content.items.map((x: any) => x.str || "").join(" ") + "\n";
+      text += content.items.map((x: any) => x.str || "").join(" ") + "\n";
     }
 
     setResume(text);
@@ -166,25 +180,14 @@ export default function Page() {
   function clearAll() {
     setResume("");
     setJob("");
-    setResult({
-      score: 0,
-      matched: [],
-      missing: [],
-      suggestions: [],
-    });
+    setResult(emptyResult);
   }
 
   function loadReport(item: any) {
     if (!requireLogin()) return;
 
     setActionState(item.id + "-opening");
-
-    setResult({
-      score: item.score || 0,
-      matched: item.matched || [],
-      missing: item.missing || [],
-      suggestions: item.suggestions || [],
-    });
+    setResult(normalize(item));
 
     setTimeout(() => setActionState(""), 800);
   }
@@ -203,22 +206,28 @@ export default function Page() {
   function exportPdf(data?: any) {
     if (!requireLogin()) return;
 
-    const d = data || result;
+    const d = normalize(data || result);
+
+    if (!d.score) {
+      alert("Please analyze first.");
+      return;
+    }
+
     setActionState("downloading");
 
     const pdf = new jsPDF();
 
     pdf.text("Next Career Lab ATS Report", 20, 20);
     pdf.text(`Score: ${d.score}%`, 20, 35);
-    pdf.text(`Matched: ${(d.matched || []).join(", ")}`, 20, 50);
-    pdf.text(`Missing: ${(d.missing || []).join(", ")}`, 20, 65);
+    pdf.text(`Matched: ${d.matched.join(", ")}`, 20, 50);
+    pdf.text(`Missing: ${d.missing.join(", ")}`, 20, 65);
 
     pdf.save("ATS_Report.pdf");
 
     setTimeout(() => setActionState(""), 1000);
   }
 
-  const score = result.score;
+  const score = Number(result.score || 0);
   const angle = score * 3.6;
 
   const ring =
@@ -249,7 +258,6 @@ export default function Page() {
     <main className={`min-h-screen ${bg}`}>
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
-        {/* Header */}
         <section
           className={`rounded-3xl border ${card} shadow-2xl p-6 flex flex-col lg:flex-row gap-5 justify-between items-center`}
         >
@@ -305,7 +313,6 @@ export default function Page() {
           </div>
         </section>
 
-        {/* Main Grid */}
         <section
           className={`grid gap-6 grid-cols-1 ${
             sidebarOpen
@@ -313,7 +320,6 @@ export default function Page() {
               : "xl:grid-cols-[78px_1fr_360px]"
           }`}
         >
-          {/* Sidebar */}
           <aside
             className={`rounded-3xl border ${card} shadow-xl p-4 transition-all duration-300`}
           >
@@ -365,7 +371,6 @@ export default function Page() {
             </div>
           </aside>
 
-          {/* Analyzer */}
           <section
             id="analyzeBox"
             className={`rounded-3xl border ${card} shadow-xl p-5 space-y-4`}
@@ -429,7 +434,6 @@ export default function Page() {
             </div>
           </section>
 
-          {/* Result */}
           <section
             className={`rounded-3xl border ${card} shadow-xl p-5 space-y-4`}
           >
@@ -443,12 +447,8 @@ export default function Page() {
                 <div
                   className={`w-28 h-28 rounded-full flex flex-col items-center justify-center ${soft}`}
                 >
-                  <span className="text-4xl font-black">
-                    {score}%
-                  </span>
-                  <span className="text-xs opacity-70">
-                    {status}
-                  </span>
+                  <span className="text-4xl font-black">{score}%</span>
+                  <span className="text-xs opacity-70">{status}</span>
                 </div>
               </div>
 
@@ -459,7 +459,6 @@ export default function Page() {
             <Info title="Missing Keywords" data={result.missing} soft={soft} />
             <Info title="Suggestions" data={result.suggestions} soft={soft} />
 
-            {/* History */}
             <div id="historyBox">
               <h3 className="font-bold mb-2">History</h3>
 
@@ -479,9 +478,7 @@ export default function Page() {
                             : "Saved Report"}
                         </span>
 
-                        <span className="font-bold">
-                          {h.score}%
-                        </span>
+                        <span className="font-bold">{h.score}%</span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 text-xs">
@@ -560,7 +557,6 @@ function Info({
   return (
     <div className={`rounded-2xl border p-4 ${soft}`}>
       <h3 className="font-bold">{title}</h3>
-
       <p className="text-sm opacity-80 mt-2">
         {data.length ? data.join(", ") : "None"}
       </p>
