@@ -46,7 +46,7 @@ export default function Page() {
 
   useEffect(() => {
     setDark(localStorage.getItem("theme") !== "light");
-    
+
     getRedirectResult(auth).catch(console.error);
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -83,18 +83,15 @@ export default function Page() {
   }
 
   async function login() {
-    try {
-      const provider = new GoogleAuthProvider();
-
-if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-  await signInWithRedirect(auth, provider);
-} else {
-  await signInWithPopup(auth, provider);
-}
-    } catch (err) {
-      console.error(err);
-    }
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    await signInWithRedirect(auth, provider);
+  } catch (err) {
+    console.error(err);
+    alert("Login failed. Please try again.");
   }
+}
 
   async function logout() {
     await signOut(auth);
