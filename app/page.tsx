@@ -3,12 +3,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import { auth, db } from "./firebase";
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  onAuthStateChanged,
+  signOut
+} from "firebase/auth";
 import { addDoc, collection, getDocs, query, serverTimestamp, where } from "firebase/firestore";
 
 export default function Page() {
   const [dark, setDark] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [resume, setResume] = useState("");
   const [job, setJob] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +25,14 @@ export default function Page() {
 
   useEffect(() => { setDark(localStorage.getItem("theme") !== "light"); return onAuthStateChanged(auth, setUser); }, []);
   useEffect(() => { user ? loadHistory() : setHistory([]); }, [user]);
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    setUser(currentUser);
+    setLoading(false);
+  });
 
+  return () => unsubscribe();
+}, []);
   async function loadHistory() {
     const snap = await getDocs(query(collection(db, "reports"), where("uid", "==", user.uid)));
     setHistory(snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse());
