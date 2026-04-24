@@ -26,11 +26,14 @@ export default function Page() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [booting, setBooting] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [resume, setResume] = useState("");
   const [job, setJob] = useState("");
 
   const [history, setHistory] = useState<any[]>([]);
+  const [actionState, setActionState] = useState<string>("");
+
   const [result, setResult] = useState({
     score: 0,
     matched: [] as string[],
@@ -68,6 +71,14 @@ export default function Page() {
     );
   }
 
+  function requireLogin() {
+    if (!user) {
+      alert("Please login first.");
+      return false;
+    }
+    return true;
+  }
+
   async function login() {
     try {
       if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
@@ -85,6 +96,7 @@ export default function Page() {
   }
 
   async function analyze() {
+    if (!requireLogin()) return;
     if (!resume.trim() || !job.trim()) return;
 
     setLoading(true);
@@ -101,15 +113,13 @@ export default function Page() {
       const data = await res.json();
       setResult(data);
 
-      if (user) {
-        await addDoc(collection(db, "reports"), {
-          uid: user.uid,
-          ...data,
-          createdAt: serverTimestamp(),
-        });
+      await addDoc(collection(db, "reports"), {
+        uid: user.uid,
+        ...data,
+        createdAt: serverTimestamp(),
+      });
 
-        loadHistory();
-      }
+      loadHistory();
     } catch (err) {
       console.error(err);
     }
@@ -142,26 +152,23 @@ export default function Page() {
   }
 
   function exportPdf() {
+    if (!requireLogin()) return;
     exportCustomPdf(result);
   }
 
   function exportCustomPdf(data: any) {
+    setActionState("downloading");
+
     const docu = new jsPDF();
 
     docu.text("Next Career Lab ATS Report", 20, 20);
     docu.text(`Score: ${data.score}%`, 20, 35);
-    docu.text(
-      `Matched: ${(data.matched || []).join(", ")}`,
-      20,
-      50
-    );
-    docu.text(
-      `Missing: ${(data.missing || []).join(", ")}`,
-      20,
-      65
-    );
+    docu.text(`Matched: ${(data.matched || []).join(", ")}`, 20, 50);
+    docu.text(`Missing: ${(data.missing || []).join(", ")}`, 20, 65);
 
     docu.save("ATS_Report.pdf");
+
+    setTimeout(() => setActionState(""), 1000);
   }
 
   function clearAll() {
@@ -176,11 +183,19 @@ export default function Page() {
   }
 
   async function deleteHistory(id: string) {
+    if (!requireLogin()) return;
+
+    setActionState(id + "-deleting");
     await deleteDoc(doc(db, "reports", id));
-    loadHistory();
+    await loadHistory();
+    setActionState("");
   }
 
   function loadReport(item: any) {
+    if (!requireLogin()) return;
+
+    setActionState(item.id + "-opening");
+
     setResult({
       score: item.score || 0,
       matched: item.matched || [],
@@ -191,6 +206,8 @@ export default function Page() {
     document
       .getElementById("analyzer")
       ?.scrollIntoView({ behavior: "smooth" });
+
+    setTimeout(() => setActionState(""), 800);
   }
 
   const bg = dark
@@ -212,11 +229,7 @@ export default function Page() {
   const score = result.score || 0;
 
   const meterColor =
-    score < 40
-      ? "#ef4444"
-      : score < 70
-      ? "#f59e0b"
-      : "#10b981";
+    score < 40 ? "#ef4444" : score < 70 ? "#f59e0b" : "#10b981";
 
   const angle = score * 3.6;
 
@@ -239,7 +252,7 @@ export default function Page() {
         >
           <div>
             <p className="text-xs uppercase tracking-[0.3em] opacity-60">
-              AI Career Tools
+              AI CAREER TOOLS
             </p>
 
             <h1 className="text-4xl font-black mt-2">
@@ -260,10 +273,7 @@ export default function Page() {
               onClick={() => {
                 const n = !dark;
                 setDark(n);
-                localStorage.setItem(
-                  "theme",
-                  n ? "dark" : "light"
-                );
+                localStorage.setItem("theme", n ? "dark" : "light");
               }}
               className="px-4 py-2 rounded-2xl border border-indigo-300 bg-indigo-100 text-indigo-700 font-semibold"
             >
@@ -272,9 +282,7 @@ export default function Page() {
 
             {user ? (
               <>
-                <div
-                  className={`px-3 py-2 rounded-2xl border ${soft}`}
-                >
+                <div className={`px-3 py-2 rounded-2xl border ${soft}`}>
                   {user.displayName || user.email}
                 </div>
 
@@ -296,60 +304,64 @@ export default function Page() {
           </div>
         </header>
 
-        {/* Main Grid */}
-        <section className="grid lg:grid-cols-[240px_1fr_360px] gap-6">
-
+        {/* Grid */}
+        <section
+          className={`grid gap-6 ${
+            sidebarOpen
+              ? "lg:grid-cols-[230px_1fr_360px]"
+              : "lg:grid-cols-[70px_1fr_360px]"
+          }`}
+        >
           {/* Sidebar */}
           <aside
-            className={`rounded-3xl border ${card} shadow-xl p-5`}
+            className={`rounded-3xl border ${card} shadow-xl p-4 transition-all duration-300`}
           >
-            <h3 className="font-bold text-lg mb-4">Dashboard</h3>
+            <div className="flex justify-between items-center mb-4">
+              {sidebarOpen && (
+                <h3 className="font-black text-lg">Dashboard</h3>
+              )}
+
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="px-2 py-1 rounded-lg bg-blue-600 text-white text-sm"
+              >
+                {sidebarOpen ? "◀" : "▶"}
+              </button>
+            </div>
 
             <div className="space-y-3 text-sm">
 
-              <button
+              <SideBtn
+                icon="✨"
+                label="Analyze Resume"
+                open={sidebarOpen}
                 onClick={() =>
                   document
                     .getElementById("analyzer")
                     ?.scrollIntoView({ behavior: "smooth" })
                 }
-                className={`w-full text-left px-3 py-3 rounded-xl border ${soft}`}
-              >
-                ✨ Analyze Resume
-              </button>
+                soft={soft}
+              />
 
-              <button
+              <SideBtn
+                icon="📄"
+                label="Export Report"
+                open={sidebarOpen}
                 onClick={exportPdf}
-                disabled={score === 0}
-                className={`w-full text-left px-3 py-3 rounded-xl border ${soft} disabled:opacity-50`}
-              >
-                📄 Export Report
-              </button>
+                soft={soft}
+              />
 
-              <button
+              <SideBtn
+                icon="📚"
+                label="Saved History"
+                open={sidebarOpen}
                 onClick={() =>
                   document
                     .getElementById("historyBox")
                     ?.scrollIntoView({ behavior: "smooth" })
                 }
-                className={`w-full text-left px-3 py-3 rounded-xl border ${soft}`}
-              >
-                📚 Saved History
-              </button>
-
-              <button
-                onClick={() => {
-                  const n = !dark;
-                  setDark(n);
-                  localStorage.setItem(
-                    "theme",
-                    n ? "dark" : "light"
-                  );
-                }}
-                className={`w-full text-left px-3 py-3 rounded-xl border ${soft}`}
-              >
-                🌙 Theme Mode
-              </button>
+                soft={soft}
+              />
             </div>
           </aside>
 
@@ -370,7 +382,7 @@ export default function Page() {
 
             <button
               onClick={() => fileRef.current?.click()}
-              className="w-full py-3 rounded-2xl bg-slate-700 text-white font-semibold"
+              className="w-full py-3 rounded-2xl bg-slate-700 text-white font-bold"
             >
               📄 Upload Resume PDF
             </button>
@@ -405,7 +417,9 @@ export default function Page() {
                 disabled={score === 0}
                 className="py-3 rounded-2xl bg-white text-slate-900 border font-bold disabled:opacity-50"
               >
-                📄 Download PDF
+                {actionState === "downloading"
+                  ? "Downloading..."
+                  : "📄 Download PDF"}
               </button>
 
               <button
@@ -431,54 +445,38 @@ export default function Page() {
                 <div
                   className={`w-28 h-28 rounded-full flex flex-col items-center justify-center ${soft}`}
                 >
-                  <span className="text-4xl font-black">
-                    {score}%
-                  </span>
-                  <span className="text-xs opacity-70">
-                    {label}
-                  </span>
+                  <span className="text-4xl font-black">{score}%</span>
+                  <span className="text-xs opacity-70">{label}</span>
                 </div>
               </div>
 
               <p className="opacity-70 mt-3">ATS Score</p>
             </div>
 
-            <Info
-              title="Matched Keywords"
-              data={result.matched}
-              soft={soft}
-            />
-
-            <Info
-              title="Missing Keywords"
-              data={result.missing}
-              soft={soft}
-            />
-
-            <Info
-              title="Suggestions"
-              data={result.suggestions}
-              soft={soft}
-            />
+            <Info title="Matched Keywords" data={result.matched} soft={soft} />
+            <Info title="Missing Keywords" data={result.missing} soft={soft} />
+            <Info title="Suggestions" data={result.suggestions} soft={soft} />
 
             {/* History */}
             <div id="historyBox">
-              <h3 className="font-semibold mb-2">History</h3>
+              <h3 className="font-bold mb-2">History</h3>
 
               <div className="space-y-2 max-h-72 overflow-auto">
                 {history.length ? (
-                  history.map((h, i) => (
+                  history.map((h) => (
                     <div
                       key={h.id}
                       className={`rounded-2xl border p-3 ${soft}`}
                     >
-                      <div className="flex justify-between mb-2">
+                      <div className="flex justify-between mb-2 text-xs">
                         <span>
-                          Report #{history.length - i}
+                          {h.createdAt?.seconds
+                            ? new Date(
+                                h.createdAt.seconds * 1000
+                              ).toLocaleString()
+                            : "Saved Report"}
                         </span>
-                        <span className="font-bold">
-                          {h.score}%
-                        </span>
+                        <span className="font-bold">{h.score}%</span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 text-xs">
@@ -486,25 +484,27 @@ export default function Page() {
                           onClick={() => loadReport(h)}
                           className="py-2 rounded bg-blue-600 text-white"
                         >
-                          Open
+                          {actionState === h.id + "-opening"
+                            ? "Opening..."
+                            : "Open"}
                         </button>
 
                         <button
-                          onClick={() =>
-                            exportCustomPdf(h)
-                          }
+                          onClick={() => exportCustomPdf(h)}
                           className="py-2 rounded bg-emerald-600 text-white"
                         >
-                          PDF
+                          {actionState === "downloading"
+                            ? "Downloading..."
+                            : "PDF"}
                         </button>
 
                         <button
-                          onClick={() =>
-                            deleteHistory(h.id)
-                          }
+                          onClick={() => deleteHistory(h.id)}
                           className="py-2 rounded bg-rose-600 text-white"
                         >
-                          Delete
+                          {actionState === h.id + "-deleting"
+                            ? "Deleting..."
+                            : "Delete"}
                         </button>
                       </div>
                     </div>
@@ -525,6 +525,24 @@ export default function Page() {
   );
 }
 
+function SideBtn({
+  icon,
+  label,
+  open,
+  onClick,
+  soft,
+}: any) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl border ${soft} font-bold hover:scale-[1.02] transition`}
+    >
+      <span>{icon}</span>
+      {open && <span>{label}</span>}
+    </button>
+  );
+}
+
 function Info({
   title,
   data,
@@ -537,7 +555,6 @@ function Info({
   return (
     <div className={`rounded-2xl border p-4 ${soft}`}>
       <h3 className="font-semibold">{title}</h3>
-
       <p className="text-sm opacity-80 mt-2">
         {data.length ? data.join(", ") : "None"}
       </p>
