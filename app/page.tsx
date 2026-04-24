@@ -7,6 +7,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
@@ -45,6 +46,8 @@ export default function Page() {
 
   useEffect(() => {
     setDark(localStorage.getItem("theme") !== "light");
+    
+    getRedirectResult(auth).catch(console.error);
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -81,11 +84,13 @@ export default function Page() {
 
   async function login() {
     try {
-      if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-        await signInWithRedirect(auth, new GoogleAuthProvider());
-      } else {
-        await signInWithPopup(auth, new GoogleAuthProvider());
-      }
+      const provider = new GoogleAuthProvider();
+
+if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+  await signInWithRedirect(auth, provider);
+} else {
+  await signInWithPopup(auth, provider);
+}
     } catch (err) {
       console.error(err);
     }
@@ -306,16 +311,18 @@ export default function Page() {
 
         {/* Grid */}
         <section
-          className={`grid gap-6 ${
-            sidebarOpen
-              ? "lg:grid-cols-[230px_1fr_360px]"
-              : "lg:grid-cols-[70px_1fr_360px]"
-          }`}
-        >
+  className={`grid gap-6 ${
+    sidebarOpen
+      ? "grid-cols-1 lg:grid-cols-[230px_1fr_360px]"
+      : "grid-cols-[70px_1fr] lg:grid-cols-[70px_1fr_360px]"
+  }`}
+>
           {/* Sidebar */}
           <aside
-            className={`rounded-3xl border ${card} shadow-xl p-4 transition-all duration-300`}
-          >
+  className={`rounded-3xl border ${card} shadow-xl p-4 transition-all duration-300 ${
+    sidebarOpen ? "w-full" : "w-[70px]"
+  }`}
+>
             <div className="flex justify-between items-center mb-4">
               {sidebarOpen && (
                 <h3 className="font-black text-lg">Dashboard</h3>
