@@ -15,24 +15,29 @@ import { addDoc, collection, getDocs, query, serverTimestamp, where } from "fire
 export default function Page() {
   const [dark, setDark] = useState(true);
   const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [resume, setResume] = useState("");
   const [job, setJob] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [booting, setBooting] = useState(true);
   const [history, setHistory] = useState<any[]>([]);
   const [result, setResult] = useState({ score: 0, matched: [], missing: [], suggestions: [] as string[] });
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { setDark(localStorage.getItem("theme") !== "light"); return onAuthStateChanged(auth, setUser); }, []);
-  useEffect(() => { user ? loadHistory() : setHistory([]); }, [user]);
-useEffect(() => {
+  useEffect(() => {
+  setDark(localStorage.getItem("theme") !== "light");
+
   const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
     setUser(currentUser);
-    setLoading(false);
+    setBooting(false);
   });
 
   return () => unsubscribe();
 }, []);
+
+useEffect(() => {
+  if (user) loadHistory();
+  else setHistory([]);
+}, [user]);
   async function loadHistory() {
     const snap = await getDocs(query(collection(db, "reports"), where("uid", "==", user.uid)));
     setHistory(snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse());
