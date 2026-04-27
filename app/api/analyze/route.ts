@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-function cleanWords(text: string) {
+function cleanWords(text: string = "") {
   const stopWords = new Set([
     "the","and","for","with","you","your","are","this","that","from","have",
     "has","had","was","were","will","shall","can","could","would","should",
@@ -22,7 +22,14 @@ function cleanWords(text: string) {
 
 export async function POST(req: Request) {
   try {
-    const { resume, job } = await req.json();
+    const body = await req.json();
+
+    const resume = body.resume || "";
+    const job =
+      body.job ||
+      body.jobDescription ||
+      body.jd ||
+      "";
 
     const resumeWords = [...new Set(cleanWords(resume))];
     const jobWords = [...new Set(cleanWords(job))];
@@ -46,16 +53,15 @@ export async function POST(req: Request) {
         "Improve project impact statements."
       ],
     });
-  } catch {
+  } catch (error) {
     return NextResponse.json({
       score: 0,
       matched: [],
       missing: [],
       suggestions: [
-        "Add measurable achievements.",
-        "Include relevant technical skills.",
-        "Tailor resume to the job description.",
-        "Improve project impact statements."
+        "Unable to analyze now.",
+        "Check resume/job description input.",
+        "Try again in a moment."
       ],
     });
   }
