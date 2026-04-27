@@ -1,5 +1,6 @@
 "use client";
 
+import { Sun, Moon, LogOut } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import { auth, db } from "./firebase";
