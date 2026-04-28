@@ -453,7 +453,7 @@ function Info({title,data,soft,color}:any){
   return (
     <div className={`p-4 rounded-xl ${soft}`}>
       <h3 className="font-bold text-sm" style={{color}}>{title}</h3>
-      <p className="text-sm mt-2" style={{color:"#94a3b8"}}>{data.length ? data.join(", ") : "None"}</p>
+      <p className="text-sm mt-2" style={{color:"#cbd5e1", fontWeight:"500"}}>{data.length ? data.join(", ") : "None"}</p>
     </div>
   );
 }
