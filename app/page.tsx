@@ -360,9 +360,9 @@ export default function Page() {
                     </div>
                     <p className="mt-2 text-sm" style={{color:"#64748b"}}>ATS Score</p>
                   </div>
-                  <Info title="Matched Keywords" data={result.matched} soft={soft} color="#34d399" />
-                  <Info title="Missing Keywords" data={result.missing} soft={soft} color="#ef4444" />
-                  <Info title="Suggestions" data={result.suggestions} soft={soft} color="#f59e0b" />
+                  <Info title="Matched Keywords" data={result.matched} soft={soft} color="#34d399" dark={dark} />
+<Info title="Missing Keywords" data={result.missing} soft={soft} color="#ef4444" dark={dark}  />
+<Info title="Suggestions" data={result.suggestions} soft={soft} color="#f59e0b" dark={dark}  />
                   <div>
                     <h3 className="font-bold mb-2" style={{color:"#38bdf8"}}>History</h3>
                     <div className="space-y-2 max-h-72 overflow-auto">
@@ -449,11 +449,14 @@ function NavBtn({label,active,onClick,dark}:any){
   );
 }
 
-function Info({title,data,soft,color}:any){
+function Info({title,data,soft,color,dark}:any){
   return (
     <div className={`p-4 rounded-xl ${soft}`}>
       <h3 className="font-bold text-sm" style={{color}}>{title}</h3>
-      <p className="text-sm mt-2" style={{color:"#cbd5e1", fontWeight:"500"}}>{data.length ? data.join(", ") : "None"}</p>
+      <p className="text-sm mt-2"
+        style={{color: dark ? "#ffffff" : "#0f172a", fontWeight:"500"}}>
+        {data.length ? data.join(", ") : "None"}
+      </p>
     </div>
   );
 }
