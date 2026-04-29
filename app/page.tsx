@@ -18,6 +18,7 @@ import {
   getDocs,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 
@@ -30,6 +31,10 @@ export default function Page() {
   const [booting, setBooting] = useState(true);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState("");
+  const [scansUsed, setScansUsed] = useState(0);
+  const [actionLoading, setActionLoading] = useState<string>("");
+  const [scanLimit] = useState(3);
+  const [isPro, setIsPro] = useState(false);
 
   const [resume, setResume] = useState("");
   const [job, setJob] = useState("");
@@ -75,9 +80,15 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (user) loadHistory();
-    else setHistory([]);
-  }, [user]);
+  if (user) {
+    loadHistory();
+    loadUserPlan();
+  } else {
+    setHistory([]);
+    setScansUsed(0);
+    setIsPro(false);
+  }
+}, [user]);
 
   async function loadHistory() {
     if (!user) return;
@@ -86,6 +97,42 @@ export default function Page() {
     docs.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     setHistory(docs);
   }
+
+  async function loadUserPlan() {
+  if (!user) return;
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDocs(
+    query(collection(db, "users"), where("uid", "==", user.uid))
+  );
+
+  if (userSnap.empty) {
+    await addDoc(collection(db, "users"), {
+      uid: user.uid,
+      email: user.email,
+      plan: "free",
+      scansUsed: 0,
+      scansLimit: 3,
+      monthYear: new Date().toISOString().slice(0, 7),
+      createdAt: serverTimestamp(),
+    });
+    setScansUsed(0);
+    setIsPro(false);
+  } else {
+    const userData = userSnap.docs[0].data();
+    const currentMonth = new Date().toISOString().slice(0, 7);
+
+    if (userData.monthYear !== currentMonth) {
+      await updateDoc(userSnap.docs[0].ref, {
+        scansUsed: 0,
+        monthYear: currentMonth,
+      });
+      setScansUsed(0);
+    } else {
+      setScansUsed(userData.scansUsed || 0);
+    }
+    setIsPro(userData.plan === "pro");
+  }
+}
 
   function requireLogin() {
     if (!user) { alert("Please login first."); return false; }
@@ -105,9 +152,15 @@ export default function Page() {
   }
 
   async function analyze() {
-    if (!requireLogin()) return;
-    if (!resume.trim() || !job.trim()) return;
-    setLoading(true);
+  if (!requireLogin()) return;
+  if (!resume.trim() || !job.trim()) return;
+
+  if (!isPro && scansUsed >= scanLimit) {
+    showToast("Free limit reached! Upgrade to Pro for unlimited scans.");
+    return;
+  }
+
+  setLoading(true);
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -117,7 +170,23 @@ export default function Page() {
       const data = await res.json();
       const finalData = normalize(data);
       setResult(finalData);
-      await addDoc(collection(db, "reports"), { uid: user.uid, ...finalData, createdAt: serverTimestamp() });
+      await addDoc(collection(db, "reports"), {
+        uid: user.uid,
+        ...finalData,
+        createdAt: serverTimestamp(),
+      });
+
+      if (!isPro) {
+        const userSnap = await getDocs(
+          query(collection(db, "users"), where("uid", "==", user.uid))
+        );
+        if (!userSnap.empty) {
+          const newCount = (userSnap.docs[0].data().scansUsed || 0) + 1;
+          await updateDoc(userSnap.docs[0].ref, { scansUsed: newCount });
+          setScansUsed(newCount);
+        }
+      }
+
       await loadHistory();
     } catch { alert("Analyze failed."); }
     setLoading(false);
@@ -141,9 +210,16 @@ export default function Page() {
   function loadReport(item: any) { setResult(normalize(item)); }
 
   async function removeReport(id: string) {
+  setActionLoading(`delete-${id}`);
+  try {
     await deleteDoc(doc(db, "reports", id));
     await loadHistory();
+    showToast("Report deleted!");
+  } catch {
+    showToast("Delete failed. Try again.");
   }
+  setActionLoading("");
+}
 
   function exportPdf(data?: any) {
     const d = normalize(data || result);
@@ -317,6 +393,28 @@ export default function Page() {
           </aside>
 
           <section>
+           {tab==="ats" && !isPro && (
+  <div className="w-full px-4 py-2 rounded-xl text-sm font-bold text-center mb-3 flex items-center justify-center gap-4"
+    style={{
+      background: scansUsed >= scanLimit ? "#450a0a" : "#0f172a",
+      border: scansUsed >= scanLimit ? "1px solid #ef4444" : "1px solid #38bdf8",
+      color: scansUsed >= scanLimit ? "#ef4444" : "#94a3b8"
+    }}>
+    <span>
+      {scansUsed >= scanLimit
+        ? "🚫 Free limit reached! Upgrade to Pro for unlimited scans."
+        : `📊 Free Scans: ${scansUsed}/${scanLimit} used this month`}
+    </span>
+    {scansUsed >= scanLimit && (
+      <button
+        onClick={() => setTab("billing")}
+        className="px-3 py-1 rounded-lg text-xs font-bold transition-all"
+        style={{background:"#ef4444", color:"#fff", border:"1px solid #f87171"}}>
+        Upgrade to Pro →
+      </button>
+    )}
+  </div>
+)}
             {tab==="ats" && (
               <div className="grid xl:grid-cols-[1fr_340px] gap-6">
                 <div className={`rounded-2xl border ${card} p-5 space-y-4`}>
@@ -349,6 +447,7 @@ export default function Page() {
                   </div>
                 </div>
 
+
                 <div className={`rounded-2xl border ${card} p-5 space-y-4`}>
                   <div className="text-center">
                     <div className="mx-auto w-40 h-40 rounded-full flex items-center justify-center"
@@ -373,13 +472,25 @@ export default function Page() {
                             <span style={{color:"#38bdf8"}}>{h.score}%</span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 text-xs">
-                            <button onClick={()=>loadReport(h)} className="py-2 rounded font-bold"
-                              style={{background:"#38bdf8", color:"#0f172a"}}>Open</button>
-                            <button onClick={()=>exportPdf(h)} className="py-2 rounded font-bold"
-                              style={{background:"#34d399", color:"#0f172a"}}>PDF</button>
-                            <button onClick={()=>removeReport(h.id)} className="py-2 rounded font-bold"
-                              style={{background:"#ef4444", color:"#fff"}}>Delete</button>
-                          </div>
+  <button
+    onClick={() => { setActionLoading(`open-${h.id}`); loadReport(h); setActionLoading(""); }}
+    className="py-2 rounded font-bold transition-all"
+    style={{background: actionLoading===`open-${h.id}` ? "#0ea5e9" : "#38bdf8", color:"#0f172a"}}>
+    {actionLoading===`open-${h.id}` ? "Opening..." : "📂 Open"}
+  </button>
+  <button
+    onClick={() => { setActionLoading(`pdf-${h.id}`); exportPdf(h); setActionLoading(""); }}
+    className="py-2 rounded font-bold transition-all"
+    style={{background: actionLoading===`pdf-${h.id}` ? "#059669" : "#34d399", color:"#0f172a"}}>
+    {actionLoading===`pdf-${h.id}` ? "Downloading..." : "⬇ PDF"}
+  </button>
+  <button
+    onClick={() => removeReport(h.id)}
+    className="py-2 rounded font-bold transition-all"
+    style={{background: actionLoading===`delete-${h.id}` ? "#b91c1c" : "#ef4444", color:"#fff"}}>
+    {actionLoading===`delete-${h.id}` ? "Deleting..." : "🗑 Delete"}
+  </button>
+</div>
                         </div>
                       ))}
                     </div>
@@ -421,14 +532,44 @@ export default function Page() {
             )}
 
             {tab==="billing" && (
-              <ModuleCard title="Billing & Plans" card={card}>
-                <div className="p-5 rounded-xl text-center space-y-2"
-                  style={{background:"#0f172a", border:"1px solid #334155"}}>
-                  <p style={{color:"#38bdf8"}} className="text-lg font-bold">Razorpay / Stripe</p>
-                  <p style={{color:"#64748b"}} className="text-sm">Payment integration coming soon.</p>
-                </div>
-              </ModuleCard>
-            )}
+  <ModuleCard title="Billing & Plans" card={card}>
+    <div className="grid md:grid-cols-2 gap-4">
+      <div className="p-5 rounded-xl space-y-3"
+        style={{background:"#0f172a", border:"2px solid #334155"}}>
+        <p className="text-lg font-bold" style={{color:"#94a3b8"}}>Free Plan</p>
+        <p className="text-3xl font-black" style={{color:"#ffffff"}}>₹0</p>
+        <ul className="space-y-2 text-sm" style={{color:"#64748b"}}>
+          <li>✅ 3 ATS scans/month</li>
+          <li>❌ AI Resume Writer</li>
+          <li>❌ Cover Letter</li>
+          <li>❌ LinkedIn Optimizer</li>
+        </ul>
+        <div className="px-4 py-2 rounded-xl text-center text-sm font-bold"
+          style={{background:"#1e293b", color:"#64748b"}}>
+          {isPro ? "Not Active" : "Current Plan"}
+        </div>
+      </div>
+
+      <div className="p-5 rounded-xl space-y-3"
+        style={{background:"#0f172a", border:"2px solid #38bdf8"}}>
+        <p className="text-lg font-bold" style={{color:"#38bdf8"}}>Pro Plan</p>
+        <p className="text-3xl font-black" style={{color:"#ffffff"}}>₹299<span className="text-sm font-normal">/month</span></p>
+        <ul className="space-y-2 text-sm" style={{color:"#94a3b8"}}>
+          <li>✅ Unlimited ATS scans</li>
+          <li>✅ AI Resume Writer</li>
+          <li>✅ Cover Letter</li>
+          <li>✅ LinkedIn Optimizer</li>
+        </ul>
+        <button
+          onClick={() => showToast("Payment coming soon!")}
+          className="w-full py-2 rounded-xl font-bold transition-all"
+          style={{background:"#38bdf8", color:"#0f172a"}}>
+          {isPro ? "Active ✅" : "Upgrade to Pro"}
+        </button>
+      </div>
+    </div>
+  </ModuleCard>
+)}
           </section>
         </section>
       </div>
