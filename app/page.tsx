@@ -42,6 +42,7 @@ export default function Page() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadFileName, setUploadFileName] = useState("");
   const [uploadStatus, setUploadStatus] = useState<"idle"|"uploading"|"done">("idle");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [resume, setResume] = useState("");
   const [job, setJob] = useState("");
@@ -57,17 +58,6 @@ export default function Page() {
   const fileRef = useRef<HTMLInputElement>(null);
   const emptyResult = { score: 0, matched: [] as string[], missing: [] as string[], suggestions: [] as string[] };
   const [result, setResult] = useState(emptyResult);
-
-  const theme = {
-    bg: "linear-gradient(135deg, #e6faf5 0%, #fef9f0 60%, #fde8e8 100%)",
-    primary: "#059669",
-    accent: "#f97316",
-    text: "#111827",
-    textMuted: "#6b7280",
-    textLight: "#9ca3af",
-    inputBg: "#ffffff",
-    inputBorder: "#d1fae5",
-  };
 
   function normalize(data: any) {
     return {
@@ -228,37 +218,37 @@ export default function Page() {
     pdf.setFillColor(254, 249, 240); pdf.rect(0, 100, W, 97, "F");
     pdf.setFillColor(253, 232, 232); pdf.rect(0, 197, W, 100, "F");
     pdf.setFillColor(5, 150, 105); pdf.rect(0, 0, W, 38, "F");
-    pdf.setTextColor(255, 255, 255); pdf.setFontSize(20); pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(255,255,255); pdf.setFontSize(20); pdf.setFont("helvetica","bold");
     pdf.text("Next Career Lab", 15, 16);
-    pdf.setFontSize(9); pdf.setFont("helvetica", "normal");
-    pdf.setTextColor(167, 243, 208); pdf.text("ATS Resume Analysis Report", 15, 26);
-    pdf.setTextColor(253, 232, 200); pdf.text(new Date().toLocaleDateString("en-IN"), 162, 26);
+    pdf.setFontSize(9); pdf.setFont("helvetica","normal");
+    pdf.setTextColor(167,243,208); pdf.text("ATS Resume Analysis Report", 15, 26);
+    pdf.setTextColor(253,232,200); pdf.text(new Date().toLocaleDateString("en-IN"), 162, 26);
     const sc = d.score >= 70 ? [5,150,105] : d.score >= 40 ? [249,115,22] : [220,38,38];
-    pdf.setFillColor(255,255,255); pdf.roundedRect(15, 46, 85, 34, 5, 5, "F");
-    pdf.setDrawColor(209,250,229); pdf.setLineWidth(0.5); pdf.roundedRect(15, 46, 85, 34, 5, 5, "S");
+    pdf.setFillColor(255,255,255); pdf.roundedRect(15,46,85,34,5,5,"F");
+    pdf.setDrawColor(209,250,229); pdf.setLineWidth(0.5); pdf.roundedRect(15,46,85,34,5,5,"S");
     pdf.setTextColor(sc[0],sc[1],sc[2]); pdf.setFontSize(28); pdf.setFont("helvetica","bold");
     pdf.text(`${d.score}%`, 32, 67);
     pdf.setFontSize(9); pdf.setFont("helvetica","normal"); pdf.setTextColor(107,114,128); pdf.text("ATS Score", 22, 75);
     const label = d.score >= 70 ? "Strong Match" : d.score >= 40 ? "Moderate Match" : "Needs Improvement";
     const lbg = d.score >= 70 ? [209,250,229] : d.score >= 40 ? [253,232,200] : [254,226,226];
-    pdf.setFillColor(lbg[0],lbg[1],lbg[2]); pdf.roundedRect(108, 46, 82, 34, 5, 5, "F");
+    pdf.setFillColor(lbg[0],lbg[1],lbg[2]); pdf.roundedRect(108,46,82,34,5,5,"F");
     pdf.setTextColor(sc[0],sc[1],sc[2]); pdf.setFontSize(13); pdf.setFont("helvetica","bold"); pdf.text(label, 118, 67);
-    pdf.setFillColor(255,255,255); pdf.roundedRect(15, 88, 180, 36, 5, 5, "F");
-    pdf.setDrawColor(209,250,229); pdf.roundedRect(15, 88, 180, 36, 5, 5, "S");
+    pdf.setFillColor(255,255,255); pdf.roundedRect(15,88,180,36,5,5,"F");
+    pdf.setDrawColor(209,250,229); pdf.roundedRect(15,88,180,36,5,5,"S");
     pdf.setTextColor(5,150,105); pdf.setFontSize(10); pdf.setFont("helvetica","bold"); pdf.text("Matched Keywords", 22, 100);
     pdf.setTextColor(55,65,81); pdf.setFontSize(8.5); pdf.setFont("helvetica","normal");
     pdf.text(pdf.splitTextToSize(d.matched.length ? d.matched.join("  •  ") : "None", 168).slice(0,2), 22, 110);
-    pdf.setFillColor(255,255,255); pdf.roundedRect(15, 132, 180, 36, 5, 5, "F");
-    pdf.setDrawColor(254,226,226); pdf.roundedRect(15, 132, 180, 36, 5, 5, "S");
+    pdf.setFillColor(255,255,255); pdf.roundedRect(15,132,180,36,5,5,"F");
+    pdf.setDrawColor(254,226,226); pdf.roundedRect(15,132,180,36,5,5,"S");
     pdf.setTextColor(220,38,38); pdf.setFontSize(10); pdf.setFont("helvetica","bold"); pdf.text("Missing Keywords", 22, 144);
     pdf.setTextColor(55,65,81); pdf.setFontSize(8.5); pdf.setFont("helvetica","normal");
     pdf.text(pdf.splitTextToSize(d.missing.length ? d.missing.join("  •  ") : "None", 168).slice(0,2), 22, 154);
-    pdf.setFillColor(255,255,255); pdf.roundedRect(15, 176, 180, 68, 5, 5, "F");
-    pdf.setDrawColor(253,232,200); pdf.roundedRect(15, 176, 180, 68, 5, 5, "S");
+    pdf.setFillColor(255,255,255); pdf.roundedRect(15,176,180,68,5,5,"F");
+    pdf.setDrawColor(253,232,200); pdf.roundedRect(15,176,180,68,5,5,"S");
     pdf.setTextColor(249,115,22); pdf.setFontSize(10); pdf.setFont("helvetica","bold"); pdf.text("Improvement Suggestions", 22, 188);
     pdf.setTextColor(55,65,81); pdf.setFontSize(8.5); pdf.setFont("helvetica","normal");
     d.suggestions.forEach((s: string, i: number) => { pdf.text(pdf.splitTextToSize(`${i+1}.  ${s}`, 166)[0], 22, 198 + i * 11); });
-    pdf.setFillColor(5,150,105); pdf.rect(0, 282, W, 15, "F");
+    pdf.setFillColor(5,150,105); pdf.rect(0,282,W,15,"F");
     pdf.setTextColor(167,243,208); pdf.setFontSize(7.5);
     pdf.text("Generated by Next Career Lab — AI Powered Career Suite", 15, 291);
     pdf.text("nextcareerlab.vercel.app", 162, 291);
@@ -336,363 +326,445 @@ export default function Page() {
 
   function handleLockedTab(t: TabType) {
     if (!isPro && t !== "ats" && t !== "billing" && t !== "help") {
-      showToast("This feature requires Pro plan. Upgrade to unlock!"); setTab("billing"); return;
+      showToast("This feature requires Pro plan!"); setTab("billing"); return;
     }
     setTab(t);
+    setSidebarOpen(false);
   }
 
   if (booting) return null;
 
-  const inputStyle: any = { background: "#fff", border: "1.5px solid #d1fae5", color: "#111827", borderRadius: "10px", padding: "12px 14px", width: "100%", fontSize: "14px", outline: "none", fontFamily: "inherit" };
+  const inp: any = { background: "#fff", border: "1.5px solid #d1fae5", color: "#111827", borderRadius: "10px", padding: "12px 14px", width: "100%", fontSize: "14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
+
+  const navItems = [
+    { id: "ats", label: "🔍 ATS Analyzer", locked: false },
+    { id: "resume", label: "✍️ AI Resume Writer", locked: !isPro },
+    { id: "cover", label: "📝 Cover Letter", locked: !isPro },
+    { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: !isPro },
+    { id: "billing", label: "💳 Billing & Plans", locked: false },
+    { id: "help", label: "❓ Help & Tutorials", locked: false },
+  ];
 
   return (
-    <main style={{ minHeight: "100vh", background: theme.bg, fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      {toast && (
-        <div style={{ position: "fixed", top: "20px", left: "50%", transform: "translateX(-50%)", zIndex: 50, padding: "10px 24px", borderRadius: "12px", fontSize: "13px", fontWeight: 600, background: "#fff", border: "1.5px solid #059669", color: "#059669", boxShadow: "0 4px 20px rgba(5,150,105,0.15)" }}>
-          {toast}
-        </div>
-      )}
+    <>
+      <style>{`
+        * { box-sizing: border-box; }
+        body { margin: 0; }
+        .page-bg { min-height: 100vh; background: linear-gradient(135deg, #e6faf5 0%, #fef9f0 60%, #fde8e8 100%); font-family: 'Inter', -apple-system, sans-serif; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px 20px" }}>
+        /* Header */
+        .header { background: #fff; border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border: 1px solid #d1fae5; box-shadow: 0 2px 12px rgba(5,150,105,0.08); }
+        .logo { font-size: 22px; font-weight: 700; }
+        .logo-n { color: #059669; }
+        .logo-c { color: #111827; }
+        .logo-l { color: #f97316; }
+        .logo-sub { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+        .header-right { display: flex; gap: 8px; align-items: center; }
+        .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; font-size: 22px; color: #059669; }
 
-        {/* Header */}
-        <header style={{ background: "#fff", borderRadius: "16px", padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", border: "1px solid #d1fae5", boxShadow: "0 2px 12px rgba(5,150,105,0.08)" }}>
-          <div>
-            <h1 style={{ fontSize: "26px", fontWeight: 700, lineHeight: 1.2 }}>
-              <span style={{ color: "#059669" }}>Next </span>
-              <span style={{ color: "#111827" }}>Career </span>
-              <span style={{ color: "#f97316" }}>Lab</span>
-            </h1>
-            <p style={{ fontSize: "12px", color: "#9ca3af", marginTop: "2px" }}>AI Powered Career Suite</p>
-          </div>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            {user ? (
-              <>
-                <div style={{ fontSize: "13px", fontWeight: 600, color: "#059669", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px", padding: "6px 14px" }}>
-                  {user.displayName?.split(" ")[0] || user.email}
-                  {isPro && <span style={{ marginLeft: "6px", color: "#f97316" }}>⭐ PRO</span>}
-                </div>
-                <button onClick={logout} style={{ fontSize: "13px", fontWeight: 600, color: "#fff", background: "#f97316", border: "none", borderRadius: "8px", padding: "7px 16px", cursor: "pointer" }}>Logout</button>
-              </>
-            ) : (
-              <>
-                <button onClick={login} style={{ fontSize: "13px", fontWeight: 600, color: "#374151", background: "#fff", border: "1.5px solid #374151", borderRadius: "8px", padding: "7px 16px", cursor: "pointer" }}>Sign in</button>
-                <button onClick={login} style={{ fontSize: "13px", fontWeight: 600, color: "#fff", background: "#059669", border: "none", borderRadius: "8px", padding: "7px 18px", cursor: "pointer" }}>Get Started</button>
-              </>
-            )}
-          </div>
-        </header>
+        /* Sidebar overlay */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 40; }
+        .sidebar-overlay.open { display: block; }
 
-        {/* Main Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "20px" }}>
+        /* Sidebar */
+        .sidebar { background: #fff; border-radius: 14px; padding: 16px 12px; border: 1px solid #d1fae5; box-shadow: 0 2px 12px rgba(5,150,105,0.06); }
+        .sidebar-label { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; padding-left: 8px; }
+        .nav-btn { width: 100%; text-align: left; padding: 10px 12px; border-radius: 10px; font-size: 13px; margin-bottom: 4px; background: transparent; color: #374151; border: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s; }
+        .nav-btn.active { background: #059669; color: #fff; font-weight: 600; }
+        .nav-btn.locked { color: #d1d5db; }
 
-          {/* Sidebar */}
-          <aside style={{ background: "#fff", borderRadius: "16px", padding: "16px 12px", border: "1px solid #d1fae5", height: "fit-content", boxShadow: "0 2px 12px rgba(5,150,105,0.06)" }}>
-            <p style={{ fontSize: "10px", fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px", paddingLeft: "8px" }}>Menu</p>
-            {([
-              { id: "ats", label: "ATS Analyzer", locked: false },
-              { id: "resume", label: "AI Resume Writer", locked: !isPro },
-              { id: "cover", label: "Cover Letter", locked: !isPro },
-              { id: "linkedin", label: "LinkedIn Optimizer", locked: !isPro },
-              { id: "billing", label: "Billing & Plans", locked: false },
-              { id: "help", label: "Help & Tutorials", locked: false },
-            ] as any[]).map((item) => (
-              <button key={item.id} onClick={() => handleLockedTab(item.id as TabType)}
-                style={{ width: "100%", textAlign: "left", padding: "9px 12px", borderRadius: "10px", fontSize: "13px", fontWeight: tab === item.id ? 600 : 400, marginBottom: "4px", background: tab === item.id ? "#059669" : "transparent", color: tab === item.id ? "#fff" : item.locked ? "#d1d5db" : "#374151", border: "none", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>{item.label}</span>
-                {item.locked && <span style={{ fontSize: "11px" }}>🔒</span>}
-              </button>
-            ))}
-          </aside>
+        /* Layout */
+        .main-grid { display: grid; grid-template-columns: 220px 1fr; gap: 16px; }
 
-          {/* Content */}
-          <section>
+        /* Cards */
+        .card { background: rgba(255,255,255,0.92); border-radius: 16px; border: 1px solid #d1fae5; padding: 20px; box-shadow: 0 2px 12px rgba(5,150,105,0.06); }
+        .card-title { font-size: 20px; font-weight: 700; color: #059669; margin-bottom: 16px; }
 
-            {/* ATS Tab */}
-            {tab === "ats" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {user && isPro && (
-                  <div style={{ background: "rgba(255,255,255,0.9)", border: "1px solid #a7f3d0", borderRadius: "10px", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", fontWeight: 500 }}>
-                    <span style={{ color: "#059669" }}>✅ Pro {userPlan === "quarterly" ? "Quarterly" : userPlan === "annual" ? "Annual" : "Monthly"} Active{proSince ? ` since ${proSince}` : ""}</span>
-                    <span style={{ color: "#f97316", fontWeight: 600 }}>{scansUsed} scans this month</span>
-                  </div>
-                )}
-                {user && !isPro && (
-                  <div style={{ background: scansUsed >= scanLimit ? "#fff1f2" : "rgba(255,255,255,0.9)", border: `1px solid ${scansUsed >= scanLimit ? "#fecdd3" : "#a7f3d0"}`, borderRadius: "10px", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", fontWeight: 500 }}>
-                    <span style={{ color: scansUsed >= scanLimit ? "#e11d48" : "#059669" }}>
-                      {scansUsed >= scanLimit ? "Free limit reached! Upgrade to Pro." : `Free Scans: ${scansUsed}/${scanLimit} used this month`}
-                    </span>
-                    {scansUsed >= scanLimit && (
-                      <button onClick={() => setTab("billing")} style={{ fontSize: "12px", fontWeight: 600, color: "#fff", background: "#f97316", border: "none", borderRadius: "6px", padding: "5px 12px", cursor: "pointer" }}>Upgrade →</button>
-                    )}
-                  </div>
-                )}
+        /* ATS grid */
+        .ats-grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "16px" }}>
-                  <div style={{ background: "rgba(255,255,255,0.92)", borderRadius: "16px", border: "1px solid #d1fae5", padding: "20px", boxShadow: "0 2px 12px rgba(5,150,105,0.06)" }}>
-                    <input ref={fileRef} hidden type="file" accept=".pdf,.docx,.txt" onChange={(e) => uploadFile(e.target.files?.[0])} />
-                    <div onClick={() => fileRef.current?.click()} style={{ border: "2px dashed #6ee7b7", borderRadius: "12px", padding: "20px", textAlign: "center", background: "rgba(255,255,255,0.7)", cursor: "pointer", marginBottom: "16px" }}>
-                      <div style={{ fontSize: "28px", marginBottom: "6px" }}>📄</div>
-                      <p style={{ fontSize: "14px", fontWeight: 600, color: "#059669" }}>{uploadStatus === "done" ? uploadFileName : "Upload Resume"}</p>
-                      <p style={{ fontSize: "12px", color: "#9ca3af", marginTop: "3px" }}>{uploadStatus === "idle" ? "Drag & drop or click to browse" : uploadStatus === "uploading" ? "Uploading..." : "Upload complete!"}</p>
-                      <div style={{ display: "flex", gap: "6px", justifyContent: "center", marginTop: "8px" }}>
-                        {["PDF", "DOCX", "TXT"].map(ft => <span key={ft} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "5px", background: "#fde8d8", color: "#c2410c", fontWeight: 600 }}>{ft}</span>)}
-                      </div>
-                      {uploadStatus !== "idle" && (
-                        <div style={{ marginTop: "10px" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#9ca3af", marginBottom: "4px" }}>
-                            <span>{uploadFileName}</span><span>{uploadProgress}%</span>
-                          </div>
-                          <div style={{ height: "4px", background: "#d1fae5", borderRadius: "10px", overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${uploadProgress}%`, background: uploadStatus === "done" ? "#059669" : "linear-gradient(90deg,#059669,#f97316)", borderRadius: "10px", transition: "width 0.3s" }} />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Resume Text</p>
-                    <textarea rows={6} value={resume} onChange={(e) => setResume(e.target.value)} placeholder="Or paste your resume text here..." style={{ ...inputStyle, resize: "vertical", marginBottom: "12px" }} />
-                    <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Job Description</p>
-                    <textarea rows={6} value={job} onChange={(e) => setJob(e.target.value)} placeholder="Paste the job description here..." style={{ ...inputStyle, resize: "vertical", marginBottom: "16px" }} />
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
-                      <button onClick={analyze} disabled={!resume.trim() || !job.trim()} style={{ padding: "11px", borderRadius: "10px", fontSize: "13px", fontWeight: 600, background: "#059669", color: "#fff", border: "none", cursor: "pointer", opacity: (!resume.trim() || !job.trim()) ? 0.5 : 1 }}>
-                        {loading ? "Analyzing..." : "Analyze"}
-                      </button>
-                      <button onClick={() => exportPdf()} disabled={score === 0} style={{ padding: "11px", borderRadius: "10px", fontSize: "13px", fontWeight: 600, background: "#fff", color: "#059669", border: "1.5px solid #059669", cursor: "pointer", opacity: score === 0 ? 0.5 : 1 }}>
-                        Download PDF
-                      </button>
-                      <button onClick={clearAll} style={{ padding: "11px", borderRadius: "10px", fontSize: "13px", fontWeight: 600, background: "#fef9f0", color: "#9ca3af", border: "1px solid #e5e7eb", cursor: "pointer" }}>
-                        Clear
-                      </button>
-                    </div>
-                  </div>
+        /* Upload zone */
+        .upload-zone { border: 2px dashed #6ee7b7; border-radius: 12px; padding: 20px; text-align: center; background: rgba(255,255,255,0.7); cursor: pointer; margin-bottom: 16px; }
 
-                  <div style={{ background: "rgba(255,255,255,0.92)", borderRadius: "16px", border: "1px solid #d1fae5", padding: "20px", display: "flex", flexDirection: "column", gap: "14px", boxShadow: "0 2px 12px rgba(5,150,105,0.06)" }}>
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ width: "140px", height: "140px", borderRadius: "50%", background: `conic-gradient(${ring} ${angle}deg,#e5e7eb ${angle}deg)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
-                        <div style={{ width: "100px", height: "100px", borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-                          <span style={{ fontSize: "28px", fontWeight: 700, color: ring }}>{score}%</span>
-                        </div>
-                      </div>
-                      <p style={{ fontSize: "12px", color: "#9ca3af", marginTop: "8px", fontWeight: 500 }}>ATS Score</p>
-                      {score > 0 && (
-                        <span style={{ fontSize: "11px", fontWeight: 600, padding: "3px 12px", borderRadius: "20px", background: score >= 70 ? "#d1fae5" : score >= 40 ? "#fde8d8" : "#fee2e2", color: score >= 70 ? "#059669" : score >= 40 ? "#c2410c" : "#dc2626" }}>
-                          {score >= 70 ? "Strong Match" : score >= 40 ? "Moderate Match" : "Needs Improvement"}
-                        </span>
-                      )}
-                    </div>
-                    <KwBox title="Matched Keywords" data={result.matched} color="#059669" tagBg="#d1fae5" tagColor="#065f46" />
-                    <KwBox title="Missing Keywords" data={result.missing} color="#dc2626" tagBg="#fee2e2" tagColor="#991b1b" />
-                    <KwBox title="Suggestions" data={result.suggestions} color="#f97316" tagBg="#fde8d8" tagColor="#c2410c" isList />
-                    <div>
-                      <p style={{ fontSize: "12px", fontWeight: 600, color: "#059669", marginBottom: "8px" }}>History</p>
-                      <div style={{ maxHeight: "220px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
-                        {history.map((h) => (
-                          <div key={h.id} style={{ background: "rgba(255,255,255,0.8)", borderRadius: "10px", border: "1px solid #e5e7eb", padding: "10px" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#9ca3af", marginBottom: "8px" }}>
-                              <span>{h.createdAt?.seconds ? new Date(h.createdAt.seconds * 1000).toLocaleString() : "Saved"}</span>
-                              <span style={{ fontWeight: 600, color: "#059669" }}>{h.score}%</span>
-                            </div>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px" }}>
-                              <button onClick={() => { setActionLoading(`open-${h.id}`); loadReport(h); setActionLoading(""); }} style={{ padding: "6px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "#059669", color: "#fff", border: "none", cursor: "pointer" }}>
-                                {actionLoading === `open-${h.id}` ? "..." : "📂 Open"}
-                              </button>
-                              <button onClick={() => { setActionLoading(`pdf-${h.id}`); exportPdf(h); setActionLoading(""); }} style={{ padding: "6px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "#fde8d8", color: "#c2410c", border: "none", cursor: "pointer" }}>
-                                {actionLoading === `pdf-${h.id}` ? "..." : "⬇ PDF"}
-                              </button>
-                              <button onClick={() => removeReport(h.id)} style={{ padding: "6px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "#fee2e2", color: "#dc2626", border: "none", cursor: "pointer" }}>
-                                {actionLoading === `delete-${h.id}` ? "..." : "🗑"}
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                        {history.length === 0 && <p style={{ fontSize: "12px", color: "#9ca3af", textAlign: "center", padding: "12px 0" }}>No reports yet</p>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        /* Buttons */
+        .btn-primary { padding: 11px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; background: #059669; color: #fff; border: none; cursor: pointer; }
+        .btn-outline { padding: 11px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; background: #fff; color: #059669; border: 1.5px solid #059669; cursor: pointer; }
+        .btn-ghost { padding: 11px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; background: #fef9f0; color: #9ca3af; border: 1px solid #e5e7eb; cursor: pointer; }
+        .btn-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+        /* Score */
+        .score-section { display: flex; flex-direction: column; gap: 14px; }
+        .score-center { text-align: center; }
+
+        /* Strip */
+        .status-strip { border-radius: 10px; padding: 10px 14px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; margin-bottom: 14px; }
+
+        /* Billing grid */
+        .billing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .plan-card { background: #fff; border-radius: 14px; padding: 18px; }
+
+        /* Help tabs */
+        .help-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+        /* Toast */
+        .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 999; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; background: #fff; border: 1.5px solid #059669; color: #059669; box-shadow: 0 4px 20px rgba(5,150,105,0.15); white-space: nowrap; }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+          .hamburger { display: block; }
+          .user-name { display: none; }
+          .main-grid { grid-template-columns: 1fr; }
+
+          .sidebar {
+            position: fixed; top: 0; left: -280px; width: 260px; height: 100vh;
+            z-index: 50; border-radius: 0; transition: left 0.25s ease;
+            overflow-y: auto; padding-top: 24px;
+          }
+          .sidebar.open { left: 0; }
+
+          .ats-grid { grid-template-columns: 1fr; }
+          .billing-grid { grid-template-columns: 1fr; }
+          .btn-3 { grid-template-columns: 1fr 1fr; }
+          .btn-3 .btn-primary { grid-column: 1 / -1; }
+
+          .logo { font-size: 18px; }
+          .container { padding: 12px; }
+          .card { padding: 16px; }
+          .header { padding: 12px 14px; }
+          .status-strip { font-size: 12px; }
+          .toast { font-size: 12px; max-width: 90vw; white-space: normal; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+          .billing-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <div className="page-bg">
+        {toast && <div className="toast">{toast}</div>}
+
+        {/* Sidebar overlay */}
+        <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)} />
+
+        <div className="container">
+
+          {/* Header */}
+          <header className="header">
+            <div>
+              <div className="logo">
+                <span className="logo-n">Next </span>
+                <span className="logo-c">Career </span>
+                <span className="logo-l">Lab</span>
               </div>
-            )}
+              <div className="logo-sub">AI Powered Career Suite</div>
+            </div>
+            <div className="header-right">
+              {user ? (
+                <>
+                  <div className="user-name" style={{ fontSize: "13px", fontWeight: 600, color: "#059669", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px", padding: "6px 12px" }}>
+                    {user.displayName?.split(" ")[0] || user.email}
+                    {isPro && <span style={{ marginLeft: "5px", color: "#f97316" }}>⭐</span>}
+                  </div>
+                  <button onClick={logout} style={{ fontSize: "13px", fontWeight: 600, color: "#fff", background: "#f97316", border: "none", borderRadius: "8px", padding: "7px 14px", cursor: "pointer" }}>Logout</button>
+                </>
+              ) : (
+                <>
+                  <button onClick={login} style={{ fontSize: "13px", fontWeight: 600, color: "#374151", background: "#fff", border: "1.5px solid #374151", borderRadius: "8px", padding: "7px 12px", cursor: "pointer" }}>Sign in</button>
+                  <button onClick={login} style={{ fontSize: "13px", fontWeight: 600, color: "#fff", background: "#059669", border: "none", borderRadius: "8px", padding: "7px 14px", cursor: "pointer" }}>Get Started</button>
+                </>
+              )}
+              <button className="hamburger" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
+            </div>
+          </header>
 
-            {tab === "resume" && isPro && (
-              <Card title="AI Resume Writer">
-                <Label>Paste a weak bullet point</Label>
-                <textarea rows={5} value={resumeLine} onChange={(e) => setResumeLine(e.target.value)} placeholder="e.g. Managed team and handled projects..." style={{ ...inputStyle, resize: "vertical" }} />
-                <Btn onClick={improveResume}>Improve Bullet</Btn>
-                <Label>Improved Result</Label>
-                <textarea rows={6} value={resumeOutput} readOnly style={{ ...inputStyle, background: "#f9fafb", resize: "vertical" }} />
-              </Card>
-            )}
+          {/* Main */}
+          <div className="main-grid">
 
-            {tab === "cover" && isPro && (
-              <Card title="Cover Letter Writer">
-                <Label>Job Role</Label>
-                <input value={coverRole} onChange={(e) => setCoverRole(e.target.value)} placeholder="e.g. Software Engineer" style={inputStyle} />
-                <div style={{ height: "12px" }} />
-                <Label>Company Name</Label>
-                <input value={coverCompany} onChange={(e) => setCoverCompany(e.target.value)} placeholder="e.g. Google" style={inputStyle} />
-                <div style={{ height: "12px" }} />
-                <Btn onClick={generateCover}>Generate Cover Letter</Btn>
-                <Label>Generated Letter</Label>
-                <textarea rows={10} value={coverOutput} readOnly style={{ ...inputStyle, background: "#f9fafb", resize: "vertical" }} />
-              </Card>
-            )}
+            {/* Sidebar */}
+            <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", padding: "0 4px" }}>
+                <p className="sidebar-label" style={{ margin: 0 }}>Menu</p>
+                <button onClick={() => setSidebarOpen(false)} style={{ display: "none", background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#6b7280" }} className="close-btn">✕</button>
+              </div>
+              {navItems.map((item) => (
+                <button key={item.id} className={`nav-btn ${tab === item.id ? "active" : ""} ${item.locked ? "locked" : ""}`}
+                  onClick={() => handleLockedTab(item.id as TabType)}>
+                  <span>{item.label}</span>
+                  {item.locked && <span style={{ fontSize: "11px" }}>🔒</span>}
+                </button>
+              ))}
+              {user && (
+                <div style={{ marginTop: "16px", padding: "12px", borderRadius: "10px", background: isPro ? "#f0fdf4" : "#fef9f0", border: `1px solid ${isPro ? "#bbf7d0" : "#fed7aa"}` }}>
+                  <p style={{ fontSize: "11px", fontWeight: 600, color: isPro ? "#059669" : "#f97316", margin: "0 0 4px" }}>
+                    {isPro ? "⭐ Pro Active" : "Free Plan"}
+                  </p>
+                  <p style={{ fontSize: "11px", color: "#6b7280", margin: 0 }}>
+                    {isPro ? `${scansUsed} scans this month` : `${scansUsed}/${scanLimit} scans used`}
+                  </p>
+                </div>
+              )}
+            </aside>
 
-            {tab === "linkedin" && isPro && (
-              <Card title="LinkedIn Optimizer">
-                <Label>Target Role</Label>
-                <input value={linkedinRole} onChange={(e) => setLinkedinRole(e.target.value)} placeholder="e.g. Frontend Developer" style={inputStyle} />
-                <div style={{ height: "12px" }} />
-                <Btn onClick={generateLinkedin}>Generate LinkedIn Profile</Btn>
-                <Label>Generated Profile</Label>
-                <textarea rows={10} value={linkedinOutput} readOnly style={{ ...inputStyle, background: "#f9fafb", resize: "vertical" }} />
-              </Card>
-            )}
+            {/* Content */}
+            <section>
 
-            {tab === "billing" && (
-              <Card title="Billing & Plans">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+              {/* ATS Tab */}
+              {tab === "ats" && (
+                <div>
+                  {user && isPro && (
+                    <div className="status-strip" style={{ background: "rgba(255,255,255,0.9)", border: "1px solid #a7f3d0" }}>
+                      <span style={{ color: "#059669" }}>✅ Pro {userPlan === "quarterly" ? "Quarterly" : userPlan === "annual" ? "Annual" : "Monthly"}{proSince ? ` · ${proSince}` : ""}</span>
+                      <span style={{ color: "#f97316", fontWeight: 600 }}>{scansUsed} scans</span>
+                    </div>
+                  )}
+                  {user && !isPro && (
+                    <div className="status-strip" style={{ background: scansUsed >= scanLimit ? "#fff1f2" : "rgba(255,255,255,0.9)", border: `1px solid ${scansUsed >= scanLimit ? "#fecdd3" : "#a7f3d0"}` }}>
+                      <span style={{ color: scansUsed >= scanLimit ? "#e11d48" : "#059669" }}>
+                        {scansUsed >= scanLimit ? "Free limit reached!" : `Free: ${scansUsed}/${scanLimit} scans used`}
+                      </span>
+                      {scansUsed >= scanLimit && (
+                        <button onClick={() => setTab("billing")} style={{ fontSize: "12px", fontWeight: 600, color: "#fff", background: "#f97316", border: "none", borderRadius: "6px", padding: "5px 12px", cursor: "pointer" }}>Upgrade →</button>
+                      )}
+                    </div>
+                  )}
 
-                  {/* Free */}
-                  <div style={{ background: "#fff", borderRadius: "14px", border: !isPro ? "2px solid #059669" : "1px solid #e5e7eb", padding: "20px" }}>
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#6b7280" }}>Free</p>
-                    <p style={{ fontSize: "32px", fontWeight: 700, color: "#111827", margin: "8px 0 4px" }}>₹0<span style={{ fontSize: "13px", fontWeight: 400, color: "#9ca3af" }}>/mo</span></p>
-                    <ul style={{ listStyle: "none", fontSize: "12px", color: "#6b7280", lineHeight: "2" }}>
-                      <li>✅ 3 ATS scans/month</li>
-                      <li>✅ PDF report</li>
-                      <li>✅ Keyword analysis</li>
-                      <li style={{ color: "#d1d5db" }}>✗ AI Resume Writer</li>
-                      <li style={{ color: "#d1d5db" }}>✗ Cover Letter</li>
-                      <li style={{ color: "#d1d5db" }}>✗ LinkedIn Optimizer</li>
-                    </ul>
-                    <div style={{ marginTop: "14px", padding: "8px", borderRadius: "8px", background: "#f9fafb", textAlign: "center", fontSize: "12px", color: "#6b7280", fontWeight: 600 }}>
-                      {!isPro ? "Current Plan ✓" : "Not Active"}
+                  <div className="ats-grid">
+                    {/* Input card */}
+                    <div className="card">
+                      <input ref={fileRef} hidden type="file" accept=".pdf,.docx,.txt" onChange={(e) => uploadFile(e.target.files?.[0])} />
+                      <div className="upload-zone" onClick={() => fileRef.current?.click()}>
+                        <div style={{ fontSize: "28px", marginBottom: "6px" }}>📄</div>
+                        <p style={{ fontSize: "14px", fontWeight: 600, color: "#059669", margin: "0 0 3px" }}>
+                          {uploadStatus === "done" ? uploadFileName : "Upload Resume"}
+                        </p>
+                        <p style={{ fontSize: "12px", color: "#9ca3af", margin: 0 }}>
+                          {uploadStatus === "idle" ? "Tap to browse" : uploadStatus === "uploading" ? "Uploading..." : "✅ Done!"}
+                        </p>
+                        <div style={{ display: "flex", gap: "6px", justifyContent: "center", marginTop: "8px" }}>
+                          {["PDF","DOCX","TXT"].map(ft => <span key={ft} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "5px", background: "#fde8d8", color: "#c2410c", fontWeight: 600 }}>{ft}</span>)}
+                        </div>
+                        {uploadStatus !== "idle" && (
+                          <div style={{ marginTop: "10px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#9ca3af", marginBottom: "4px" }}>
+                              <span style={{ overflow: "hidden", textOverflow: "ellipsis", maxWidth: "70%" }}>{uploadFileName}</span>
+                              <span>{uploadProgress}%</span>
+                            </div>
+                            <div style={{ height: "4px", background: "#d1fae5", borderRadius: "10px", overflow: "hidden" }}>
+                              <div style={{ height: "100%", width: `${uploadProgress}%`, background: uploadStatus === "done" ? "#059669" : "linear-gradient(90deg,#059669,#f97316)", borderRadius: "10px", transition: "width 0.3s" }} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Resume Text</p>
+                      <textarea rows={6} value={resume} onChange={(e) => setResume(e.target.value)} placeholder="Or paste your resume text here..." style={{ ...inp, resize: "vertical", marginBottom: "12px" }} />
+                      <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Job Description</p>
+                      <textarea rows={6} value={job} onChange={(e) => setJob(e.target.value)} placeholder="Paste the job description here..." style={{ ...inp, resize: "vertical", marginBottom: "16px" }} />
+                      <div className="btn-3">
+                        <button className="btn-primary" onClick={analyze} disabled={!resume.trim()||!job.trim()} style={{ opacity: (!resume.trim()||!job.trim()) ? 0.5 : 1 }}>
+                          {loading ? "Analyzing..." : "Analyze"}
+                        </button>
+                        <button className="btn-outline" onClick={() => exportPdf()} disabled={score===0} style={{ opacity: score===0 ? 0.5 : 1 }}>PDF</button>
+                        <button className="btn-ghost" onClick={clearAll}>Clear</button>
+                      </div>
+                    </div>
+
+                    {/* Score card */}
+                    <div className="card score-section">
+                      <div className="score-center">
+                        <div style={{ width: "130px", height: "130px", borderRadius: "50%", background: `conic-gradient(${ring} ${angle}deg,#e5e7eb ${angle}deg)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
+                          <div style={{ width: "94px", height: "94px", borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <span style={{ fontSize: "26px", fontWeight: 700, color: ring }}>{score}%</span>
+                          </div>
+                        </div>
+                        <p style={{ fontSize: "12px", color: "#9ca3af", marginTop: "8px", fontWeight: 500 }}>ATS Score</p>
+                        {score > 0 && (
+                          <span style={{ fontSize: "11px", fontWeight: 600, padding: "3px 12px", borderRadius: "20px", background: score>=70?"#d1fae5":score>=40?"#fde8d8":"#fee2e2", color: score>=70?"#059669":score>=40?"#c2410c":"#dc2626" }}>
+                            {score>=70?"Strong Match":score>=40?"Moderate Match":"Needs Improvement"}
+                          </span>
+                        )}
+                      </div>
+
+                      <KwBox title="Matched" data={result.matched} color="#059669" tagBg="#d1fae5" tagColor="#065f46" />
+                      <KwBox title="Missing" data={result.missing} color="#dc2626" tagBg="#fee2e2" tagColor="#991b1b" />
+                      <KwBox title="Suggestions" data={result.suggestions} color="#f97316" tagBg="#fde8d8" tagColor="#c2410c" isList />
+
+                      <div>
+                        <p style={{ fontSize: "12px", fontWeight: 600, color: "#059669", marginBottom: "8px" }}>History</p>
+                        <div style={{ maxHeight: "200px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
+                          {history.map((h) => (
+                            <div key={h.id} style={{ background: "rgba(255,255,255,0.8)", borderRadius: "10px", border: "1px solid #e5e7eb", padding: "10px" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#9ca3af", marginBottom: "8px" }}>
+                                <span>{h.createdAt?.seconds ? new Date(h.createdAt.seconds*1000).toLocaleDateString() : "Saved"}</span>
+                                <span style={{ fontWeight: 600, color: "#059669" }}>{h.score}%</span>
+                              </div>
+                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px" }}>
+                                <button onClick={() => { loadReport(h); }} style={{ padding: "6px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "#059669", color: "#fff", border: "none", cursor: "pointer" }}>📂</button>
+                                <button onClick={() => exportPdf(h)} style={{ padding: "6px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "#fde8d8", color: "#c2410c", border: "none", cursor: "pointer" }}>⬇ PDF</button>
+                                <button onClick={() => removeReport(h.id)} style={{ padding: "6px", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "#fee2e2", color: "#dc2626", border: "none", cursor: "pointer" }}>
+                                  {actionLoading===`delete-${h.id}` ? "..." : "🗑"}
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          {history.length === 0 && <p style={{ fontSize: "12px", color: "#9ca3af", textAlign: "center", padding: "12px 0" }}>No reports yet</p>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {tab === "resume" && isPro && (
+                <div className="card">
+                  <p className="card-title">AI Resume Writer</p>
+                  <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Paste weak bullet point</p>
+                  <textarea rows={4} value={resumeLine} onChange={(e) => setResumeLine(e.target.value)} placeholder="e.g. Managed team and handled projects..." style={{ ...inp, resize: "vertical", marginBottom: "12px" }} />
+                  <button className="btn-primary" onClick={improveResume} style={{ marginBottom: "12px" }}>Improve Bullet</button>
+                  <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Improved Result</p>
+                  <textarea rows={6} value={resumeOutput} readOnly style={{ ...inp, background: "#f9fafb", resize: "vertical" }} />
+                </div>
+              )}
+
+              {tab === "cover" && isPro && (
+                <div className="card">
+                  <p className="card-title">Cover Letter Writer</p>
+                  <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Job Role</p>
+                  <input value={coverRole} onChange={(e) => setCoverRole(e.target.value)} placeholder="e.g. Software Engineer" style={{ ...inp, marginBottom: "12px" }} />
+                  <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Company Name</p>
+                  <input value={coverCompany} onChange={(e) => setCoverCompany(e.target.value)} placeholder="e.g. Google" style={{ ...inp, marginBottom: "12px" }} />
+                  <button className="btn-primary" onClick={generateCover} style={{ marginBottom: "12px" }}>Generate Cover Letter</button>
+                  <textarea rows={10} value={coverOutput} readOnly style={{ ...inp, background: "#f9fafb", resize: "vertical" }} />
+                </div>
+              )}
+
+              {tab === "linkedin" && isPro && (
+                <div className="card">
+                  <p className="card-title">LinkedIn Optimizer</p>
+                  <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Target Role</p>
+                  <input value={linkedinRole} onChange={(e) => setLinkedinRole(e.target.value)} placeholder="e.g. Frontend Developer" style={{ ...inp, marginBottom: "12px" }} />
+                  <button className="btn-primary" onClick={generateLinkedin} style={{ marginBottom: "12px" }}>Generate LinkedIn Profile</button>
+                  <textarea rows={10} value={linkedinOutput} readOnly style={{ ...inp, background: "#f9fafb", resize: "vertical" }} />
+                </div>
+              )}
+
+              {tab === "billing" && (
+                <div className="card">
+                  <p className="card-title">Billing & Plans</p>
+                  <div className="billing-grid">
+                    <div className="plan-card" style={{ border: !isPro ? "2px solid #059669" : "1px solid #e5e7eb" }}>
+                      <p style={{ fontSize: "13px", fontWeight: 600, color: "#6b7280", margin: "0 0 6px" }}>Free</p>
+                      <p style={{ fontSize: "28px", fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>₹0<span style={{ fontSize: "13px", fontWeight: 400, color: "#9ca3af" }}>/mo</span></p>
+                      <ul style={{ listStyle: "none", fontSize: "12px", color: "#6b7280", lineHeight: "1.9", padding: 0, margin: "10px 0" }}>
+                        <li>✅ 3 ATS scans/month</li>
+                        <li>✅ PDF report</li>
+                        <li style={{ color: "#d1d5db" }}>✗ AI tools</li>
+                      </ul>
+                      <div style={{ padding: "8px", borderRadius: "8px", background: "#f9fafb", textAlign: "center", fontSize: "12px", color: "#6b7280", fontWeight: 600 }}>
+                        {!isPro ? "Current Plan ✓" : "Not Active"}
+                      </div>
+                    </div>
+
+                    <div className="plan-card" style={{ border: isPro && userPlan==="monthly" ? "2px solid #059669" : "1px solid #d1fae5" }}>
+                      <p style={{ fontSize: "13px", fontWeight: 600, color: "#059669", margin: "0 0 6px" }}>Pro Monthly</p>
+                      <p style={{ fontSize: "28px", fontWeight: 700, color: "#111827", margin: "0 0 2px" }}>₹299<span style={{ fontSize: "12px", fontWeight: 400, color: "#9ca3af" }}>/mo</span></p>
+                      <p style={{ fontSize: "11px", color: "#9ca3af", margin: "0 0 10px" }}>₹9.96/day</p>
+                      <ul style={{ listStyle: "none", fontSize: "12px", color: "#6b7280", lineHeight: "1.9", padding: 0, margin: "0 0 12px" }}>
+                        <li>✅ Unlimited scans</li>
+                        <li>✅ All AI tools</li>
+                        <li>✅ Priority support</li>
+                      </ul>
+                      {!isPro ? (
+                        <button onClick={() => handlePayment("monthly",29900)} disabled={paymentLoading} style={{ width:"100%", padding:"9px", borderRadius:"8px", fontSize:"13px", fontWeight:600, background:"#059669", color:"#fff", border:"none", cursor:"pointer" }}>
+                          {paymentLoading&&selectedPlan==="monthly" ? "Processing..." : "Get Monthly"}
+                        </button>
+                      ) : <div style={{ padding:"8px", borderRadius:"8px", background:"#f0fdf4", textAlign:"center", fontSize:"12px", color:"#059669", fontWeight:600 }}>{userPlan==="monthly"?"Active ✅":"Not Active"}</div>}
+                    </div>
+
+                    <div className="plan-card" style={{ background: "linear-gradient(135deg,#f0fdf4,#ecfeff)", border: "2px solid #06b6d4", position: "relative" }}>
+                      <span style={{ position:"absolute", top:"-10px", left:"14px", background:"#06b6d4", color:"#fff", fontSize:"10px", fontWeight:700, padding:"3px 10px", borderRadius:"20px" }}>POPULAR</span>
+                      <p style={{ fontSize:"13px", fontWeight:600, color:"#06b6d4", margin:"0 0 6px" }}>Pro Quarterly</p>
+                      <p style={{ fontSize:"28px", fontWeight:700, color:"#111827", margin:"0 0 2px" }}>₹199<span style={{ fontSize:"12px", fontWeight:400, color:"#9ca3af" }}>/mo</span></p>
+                      <p style={{ fontSize:"11px", color:"#06b6d4", margin:"0 0 10px" }}>₹597 / 3 months · Save 33%</p>
+                      <ul style={{ listStyle:"none", fontSize:"12px", color:"#6b7280", lineHeight:"1.9", padding:0, margin:"0 0 12px" }}>
+                        <li>✅ Everything in Monthly</li>
+                        <li>✅ Early access features</li>
+                        <li>✅ ₹6.63/day only!</li>
+                      </ul>
+                      {!isPro ? (
+                        <button onClick={() => handlePayment("quarterly",59700)} disabled={paymentLoading} style={{ width:"100%", padding:"9px", borderRadius:"8px", fontSize:"13px", fontWeight:600, background:"#06b6d4", color:"#fff", border:"none", cursor:"pointer" }}>
+                          {paymentLoading&&selectedPlan==="quarterly" ? "Processing..." : "Get Quarterly — ₹597"}
+                        </button>
+                      ) : <div style={{ padding:"8px", borderRadius:"8px", background:"#ecfeff", textAlign:"center", fontSize:"12px", color:"#06b6d4", fontWeight:600 }}>{userPlan==="quarterly"?"Active ✅":"Not Active"}</div>}
+                    </div>
+
+                    <div className="plan-card" style={{ background:"linear-gradient(135deg,#f0fdf4,#fff7ed)", border:"2px solid #f97316", position:"relative" }}>
+                      <span style={{ position:"absolute", top:"-10px", right:"14px", background:"#f97316", color:"#fff", fontSize:"10px", fontWeight:700, padding:"3px 10px", borderRadius:"20px" }}>BEST VALUE</span>
+                      <p style={{ fontSize:"13px", fontWeight:600, color:"#f97316", margin:"0 0 6px" }}>Pro Annual</p>
+                      <p style={{ fontSize:"28px", fontWeight:700, color:"#111827", margin:"0 0 2px" }}>₹149<span style={{ fontSize:"12px", fontWeight:400, color:"#9ca3af" }}>/mo</span></p>
+                      <p style={{ fontSize:"11px", color:"#f97316", margin:"0 0 10px" }}>₹1,788/yr · Save 50% · ☕ ₹4.96/day</p>
+                      <ul style={{ listStyle:"none", fontSize:"12px", color:"#6b7280", lineHeight:"1.9", padding:0, margin:"0 0 12px" }}>
+                        <li>✅ Everything in Quarterly</li>
+                        <li>✅ Resume templates (soon)</li>
+                        <li>✅ Dedicated support</li>
+                      </ul>
+                      {!isPro ? (
+                        <button onClick={() => handlePayment("annual",178800)} disabled={paymentLoading} style={{ width:"100%", padding:"9px", borderRadius:"8px", fontSize:"13px", fontWeight:600, background:"#f97316", color:"#fff", border:"none", cursor:"pointer" }}>
+                          {paymentLoading&&selectedPlan==="annual" ? "Processing..." : "Get Annual — ₹1,788/yr"}
+                        </button>
+                      ) : <div style={{ padding:"8px", borderRadius:"8px", background:"#fff7ed", textAlign:"center", fontSize:"12px", color:"#f97316", fontWeight:600 }}>{userPlan==="annual"?"Active ✅":"Not Active"}</div>}
                     </div>
                   </div>
 
-                  {/* Pro Monthly */}
-                  <div style={{ background: "#fff", borderRadius: "14px", border: isPro && userPlan === "monthly" ? "2px solid #059669" : "1px solid #d1fae5", padding: "20px" }}>
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#059669" }}>Pro Monthly</p>
-                    <p style={{ fontSize: "32px", fontWeight: 700, color: "#111827", margin: "8px 0 2px" }}>₹299<span style={{ fontSize: "13px", fontWeight: 400, color: "#9ca3af" }}>/mo</span></p>
-                    <p style={{ fontSize: "11px", color: "#9ca3af", marginBottom: "8px" }}>Billed monthly · ₹9.96/day</p>
-                    <ul style={{ listStyle: "none", fontSize: "12px", color: "#6b7280", lineHeight: "2" }}>
-                      <li>✅ Unlimited ATS scans</li>
-                      <li>✅ AI Resume Writer</li>
-                      <li>✅ Cover Letter</li>
-                      <li>✅ LinkedIn Optimizer</li>
-                      <li>✅ PDF reports</li>
-                      <li>✅ Priority support</li>
-                    </ul>
-                    {!isPro ? (
-                      <button onClick={() => handlePayment("monthly", 29900)} disabled={paymentLoading}
-                        style={{ marginTop: "14px", width: "100%", padding: "10px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, background: "#059669", color: "#fff", border: "none", cursor: "pointer", opacity: paymentLoading && selectedPlan === "monthly" ? 0.7 : 1 }}>
-                        {paymentLoading && selectedPlan === "monthly" ? "Processing..." : "Get Monthly"}
-                      </button>
-                    ) : (
-                      <div style={{ marginTop: "14px", padding: "8px", borderRadius: "8px", background: "#f0fdf4", textAlign: "center", fontSize: "12px", color: "#059669", fontWeight: 600 }}>
-                        {userPlan === "monthly" ? "Active ✅" : "Not Active"}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Pro Quarterly */}
-                  <div style={{ background: "linear-gradient(135deg,#f0fdf4,#ecfeff)", borderRadius: "14px", border: isPro && userPlan === "quarterly" ? "2px solid #06b6d4" : "2px solid #06b6d4", padding: "20px", position: "relative" }}>
-                    <span style={{ position: "absolute", top: "-10px", left: "14px", background: "#06b6d4", color: "#fff", fontSize: "10px", fontWeight: 700, padding: "3px 10px", borderRadius: "20px" }}>POPULAR</span>
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#06b6d4" }}>Pro Quarterly</p>
-                    <p style={{ fontSize: "32px", fontWeight: 700, color: "#111827", margin: "8px 0 2px" }}>₹199<span style={{ fontSize: "13px", fontWeight: 400, color: "#9ca3af" }}>/mo</span></p>
-                    <p style={{ fontSize: "11px", color: "#06b6d4", marginBottom: "8px" }}>₹597 billed every 3 months · Save 33%</p>
-                    <ul style={{ listStyle: "none", fontSize: "12px", color: "#6b7280", lineHeight: "2" }}>
-                      <li>✅ Everything in Monthly</li>
-                      <li>✅ Unlimited ATS scans</li>
-                      <li>✅ All AI tools</li>
-                      <li>✅ Priority support</li>
-                      <li>✅ Early access features</li>
-                      <li>✅ ₹6.63/day only!</li>
-                    </ul>
-                    {!isPro ? (
-                      <button onClick={() => handlePayment("quarterly", 59700)} disabled={paymentLoading}
-                        style={{ marginTop: "14px", width: "100%", padding: "10px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, background: "#06b6d4", color: "#fff", border: "none", cursor: "pointer", opacity: paymentLoading && selectedPlan === "quarterly" ? 0.7 : 1 }}>
-                        {paymentLoading && selectedPlan === "quarterly" ? "Processing..." : "Get Quarterly — ₹597"}
-                      </button>
-                    ) : (
-                      <div style={{ marginTop: "14px", padding: "8px", borderRadius: "8px", background: "#ecfeff", textAlign: "center", fontSize: "12px", color: "#06b6d4", fontWeight: 600 }}>
-                        {userPlan === "quarterly" ? "Active ✅" : "Not Active"}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Pro Annual */}
-                  <div style={{ background: "linear-gradient(135deg,#f0fdf4,#fff7ed)", borderRadius: "14px", border: "2px solid #f97316", padding: "20px", position: "relative" }}>
-                    <span style={{ position: "absolute", top: "-10px", right: "14px", background: "#f97316", color: "#fff", fontSize: "10px", fontWeight: 700, padding: "3px 10px", borderRadius: "20px" }}>BEST VALUE</span>
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#f97316" }}>Pro Annual</p>
-                    <p style={{ fontSize: "32px", fontWeight: 700, color: "#111827", margin: "8px 0 2px" }}>₹149<span style={{ fontSize: "13px", fontWeight: 400, color: "#9ca3af" }}>/mo</span></p>
-                    <p style={{ fontSize: "11px", color: "#f97316", marginBottom: "8px" }}>₹1,788/yr · Save 50% · ☕ ₹4.96/day</p>
-                    <ul style={{ listStyle: "none", fontSize: "12px", color: "#6b7280", lineHeight: "2" }}>
-                      <li>✅ Everything in Quarterly</li>
-                      <li>✅ Unlimited everything</li>
-                      <li>✅ Resume templates (soon)</li>
-                      <li>✅ Interview prep (soon)</li>
-                      <li>✅ Dedicated support</li>
-                      <li>✅ Less than a cup of chai!</li>
-                    </ul>
-                    {!isPro ? (
-                      <button onClick={() => handlePayment("annual", 178800)} disabled={paymentLoading}
-                        style={{ marginTop: "14px", width: "100%", padding: "10px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, background: "#f97316", color: "#fff", border: "none", cursor: "pointer", opacity: paymentLoading && selectedPlan === "annual" ? 0.7 : 1 }}>
-                        {paymentLoading && selectedPlan === "annual" ? "Processing..." : "Get Annual — ₹1,788/yr"}
-                      </button>
-                    ) : (
-                      <div style={{ marginTop: "14px", padding: "8px", borderRadius: "8px", background: "#fff7ed", textAlign: "center", fontSize: "12px", color: "#f97316", fontWeight: 600 }}>
-                        {userPlan === "annual" ? "Active ✅" : "Not Active"}
-                      </div>
-                    )}
-                  </div>
-
+                  {isPro && (
+                    <div style={{ marginTop:"14px", padding:"12px 16px", borderRadius:"10px", background:"#f0fdf4", border:"1px solid #bbf7d0", color:"#059669", fontSize:"13px", fontWeight:500 }}>
+                      ✅ Pro {userPlan==="quarterly"?"Quarterly":userPlan==="annual"?"Annual":"Monthly"} Plan active{proSince ? ` since ${proSince}` : ""}
+                    </div>
+                  )}
                 </div>
-                {isPro && (
-                  <div style={{ marginTop: "14px", padding: "12px 18px", borderRadius: "10px", background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#059669", fontSize: "13px", fontWeight: 500 }}>
-                    ✅ You are on Pro {userPlan === "quarterly" ? "Quarterly" : userPlan === "annual" ? "Annual" : "Monthly"} Plan{proSince ? ` since ${proSince}` : ""}. Enjoying unlimited access!
+              )}
+
+              {tab === "help" && (
+                <div className="card">
+                  <p className="card-title">Help & Tutorials</p>
+                  <div className="help-tabs">
+                    {["ats","resume","cover","linkedin"].map((t) => (
+                      <button key={t} onClick={() => setHelpTab(t)}
+                        style={{ padding:"7px 14px", borderRadius:"8px", fontSize:"12px", fontWeight:600, background:helpTab===t?"#059669":"#fff", color:helpTab===t?"#fff":"#374151", border:`1px solid ${helpTab===t?"#059669":"#e5e7eb"}`, cursor:"pointer" }}>
+                        {t==="ats"?"ATS":t==="resume"?"Resume":t==="cover"?"Cover":t==="linkedin"?"LinkedIn":""}
+                      </button>
+                    ))}
                   </div>
-                )}
-              </Card>
-            )}
-
-            {tab === "help" && (
-              <Card title="Help & Tutorials">
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
-                  {["ats","resume","cover","linkedin"].map((t) => (
-                    <button key={t} onClick={() => setHelpTab(t)}
-                      style={{ padding: "7px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, background: helpTab === t ? "#059669" : "#fff", color: helpTab === t ? "#fff" : "#374151", border: `1px solid ${helpTab === t ? "#059669" : "#e5e7eb"}`, cursor: "pointer" }}>
-                      {t === "ats" ? "ATS Analyzer" : t === "resume" ? "Resume Writer" : t === "cover" ? "Cover Letter" : "LinkedIn"}
-                    </button>
-                  ))}
+                  {helpTab==="ats" && <HelpSteps title="ATS Analyzer" steps={["Upload resume (PDF/DOCX/TXT) or paste text","Paste full job description","Click Analyze","Green 70%+ = Strong. Orange = Moderate. Red = Needs work","Add missing keywords to your resume","Download PDF report"]} tip="Tailor your resume for each job by naturally adding missing keywords." />}
+                  {helpTab==="resume" && <HelpSteps title="AI Resume Writer" steps={["Pick a weak bullet point from resume","Paste it in the text box","Click Improve Bullet","AI rewrites with measurable impact","Copy and replace in your resume","Repeat for all weak lines"]} tip="Include numbers and metrics for even better AI suggestions." />}
+                  {helpTab==="cover" && <HelpSteps title="Cover Letter Writer" steps={["Enter job title","Enter company name","Click Generate","Review and customize","Add personal touches","Paste in job application"]} tip="Add 1-2 specific things you know about the company." />}
+                  {helpTab==="linkedin" && <HelpSteps title="LinkedIn Optimizer" steps={["Enter your target job title","Click Generate","Copy headline to LinkedIn profile","Copy About section to summary","Update and wait for recruiters","Refresh every 3 months"]} tip="Use keywords that recruiters in your industry search for." />}
                 </div>
-                {helpTab === "ats" && <HelpSteps title="ATS Analyzer" steps={["Upload your resume PDF, DOCX or TXT — or paste text directly","Paste the full job description from any job portal","Click Analyze — get your ATS score instantly","Green 70%+ = Strong Match. Yellow 40-69% = Moderate. Red = Needs work","Add missing keywords naturally to your resume","Download PDF report to share with career counselor"]} tip="Tailor your resume for each job by naturally adding missing keywords." />}
-                {helpTab === "resume" && <HelpSteps title="AI Resume Writer" steps={["Pick a weak bullet point from your resume","Paste it in the text box","Click Improve Bullet","AI rewrites it with measurable impact and action verbs","Copy the improved line and replace in your resume","Repeat for all weak bullet points"]} tip="Include numbers and metrics in your original bullet for even better results." />}
-                {helpTab === "cover" && <HelpSteps title="Cover Letter Writer" steps={["Enter the job title you are applying for","Enter the company name","Click Generate Cover Letter","AI writes a personalized professional letter","Review and add personal touches","Paste in your job application"]} tip="Always add 1-2 specific things you know about the company." />}
-                {helpTab === "linkedin" && <HelpSteps title="LinkedIn Optimizer" steps={["Enter your target job title","Click Generate LinkedIn Profile","Copy the headline to your LinkedIn profile","Copy the About section to your LinkedIn summary","Update your profile and wait for recruiter messages","Refresh every 3 months to stay relevant"]} tip="Use keywords that recruiters in your industry actually search for." />}
-              </Card>
-            )}
+              )}
 
-          </section>
+            </section>
+          </div>
         </div>
       </div>
-    </main>
+    </>
   );
 }
 
 function KwBox({ title, data, color, tagBg, tagColor, isList }: any) {
   return (
-    <div style={{ background: "rgba(255,255,255,0.8)", borderRadius: "10px", border: "1px solid #e5e7eb", padding: "12px" }}>
-      <p style={{ fontSize: "11px", fontWeight: 600, color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>{title}</p>
+    <div style={{ background:"rgba(255,255,255,0.8)", borderRadius:"10px", border:"1px solid #e5e7eb", padding:"12px" }}>
+      <p style={{ fontSize:"11px", fontWeight:600, color, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:"8px", margin:"0 0 8px" }}>{title}</p>
       {data.length === 0 ? (
-        <p style={{ fontSize: "12px", color: "#9ca3af" }}>None</p>
+        <p style={{ fontSize:"12px", color:"#9ca3af", margin:0 }}>None</p>
       ) : isList ? (
-        <ul style={{ listStyle: "none", fontSize: "12px", color: "#374151", lineHeight: "1.7" }}>
-          {data.map((s: string, i: number) => <li key={i}><span style={{ color, fontWeight: 600 }}>{i + 1}.</span> {s}</li>)}
+        <ul style={{ listStyle:"none", fontSize:"12px", color:"#374151", lineHeight:"1.7", padding:0, margin:0 }}>
+          {data.map((s: string, i: number) => <li key={i}><span style={{ color, fontWeight:600 }}>{i+1}.</span> {s}</li>)}
         </ul>
       ) : (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+        <div style={{ display:"flex", flexWrap:"wrap", gap:"5px" }}>
           {data.map((kw: string, i: number) => (
-            <span key={i} style={{ fontSize: "11px", padding: "3px 9px", borderRadius: "20px", background: tagBg, color: tagColor, fontWeight: 500 }}>{kw}</span>
+            <span key={i} style={{ fontSize:"11px", padding:"3px 9px", borderRadius:"20px", background:tagBg, color:tagColor, fontWeight:500 }}>{kw}</span>
           ))}
         </div>
       )}
@@ -700,38 +772,17 @@ function KwBox({ title, data, color, tagBg, tagColor, isList }: any) {
   );
 }
 
-function Card({ title, children }: any) {
-  return (
-    <div style={{ background: "rgba(255,255,255,0.92)", borderRadius: "16px", border: "1px solid #d1fae5", padding: "24px", boxShadow: "0 2px 12px rgba(5,150,105,0.06)", display: "flex", flexDirection: "column", gap: "14px" }}>
-      <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#059669" }}>{title}</h2>
-      {children}
-    </div>
-  );
-}
-
-function Label({ children }: any) {
-  return <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em" }}>{children}</p>;
-}
-
-function Btn({ children, onClick }: any) {
-  return (
-    <button onClick={onClick} style={{ padding: "11px 22px", borderRadius: "10px", fontSize: "13px", fontWeight: 600, background: "#059669", color: "#fff", border: "none", cursor: "pointer", alignSelf: "flex-start" }}>
-      {children}
-    </button>
-  );
-}
-
 function HelpSteps({ title, steps, tip }: any) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#059669" }}>{title} — How to use</h3>
+    <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
+      <h3 style={{ fontSize:"15px", fontWeight:600, color:"#059669", margin:"0 0 4px" }}>{title} — How to use</h3>
       {steps.map((s: string, i: number) => (
-        <div key={i} style={{ display: "flex", gap: "12px", alignItems: "flex-start", background: "rgba(255,255,255,0.8)", borderRadius: "10px", border: "1px solid #e5e7eb", padding: "12px" }}>
-          <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "#059669", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
-          <p style={{ fontSize: "13px", color: "#374151", lineHeight: "1.6" }}>{s}</p>
+        <div key={i} style={{ display:"flex", gap:"10px", alignItems:"flex-start", background:"rgba(255,255,255,0.8)", borderRadius:"10px", border:"1px solid #e5e7eb", padding:"10px 12px" }}>
+          <div style={{ width:"26px", height:"26px", borderRadius:"50%", background:"#059669", color:"#fff", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"12px", fontWeight:700, flexShrink:0 }}>{i+1}</div>
+          <p style={{ fontSize:"13px", color:"#374151", lineHeight:"1.6", margin:0 }}>{s}</p>
         </div>
       ))}
-      <div style={{ padding: "12px 16px", borderRadius: "10px", background: "#fff7ed", border: "1px solid #fed7aa", color: "#c2410c", fontSize: "13px", fontWeight: 500 }}>
+      <div style={{ padding:"12px 14px", borderRadius:"10px", background:"#fff7ed", border:"1px solid #fed7aa", color:"#c2410c", fontSize:"13px", fontWeight:500 }}>
         💡 {tip}
       </div>
     </div>
