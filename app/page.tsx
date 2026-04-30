@@ -22,7 +22,7 @@ import {
   where,
 } from "firebase/firestore";
 
-type TabType = "ats" | "resume" | "cover" | "linkedin" | "billing" | "help";
+type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "billing" | "help";
 
 export default function Page() {
   const [tab, setTab] = useState<TabType>("ats");
@@ -40,6 +40,7 @@ export default function Page() {
   const [actionLoading, setActionLoading] = useState<string>("");
   const [helpTab, setHelpTab] = useState("ats");
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadFileName, setUploadFileName] = useState("");
   const [uploadStatus, setUploadStatus] = useState<"idle"|"uploading"|"done">("idle");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,6 +55,9 @@ export default function Page() {
   const [coverOutput, setCoverOutput] = useState("");
   const [linkedinRole, setLinkedinRole] = useState("");
   const [linkedinOutput, setLinkedinOutput] = useState("");
+
+  // ── Template states ──────────────────────────────────────────
+   
 
   const fileRef = useRef<HTMLInputElement>(null);
   const emptyResult = { score: 0, matched: [] as string[], missing: [] as string[], suggestions: [] as string[] };
@@ -124,11 +128,16 @@ export default function Page() {
   }
 
   async function login() {
-    try {
+  try {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      await signInWithRedirect(auth, provider);
+    } else {
       try { await signInWithPopup(auth, provider); }
       catch { await signInWithRedirect(auth, provider); }
-    } catch { alert("Login failed."); }
-  }
+    }
+  } catch { alert("Login failed. Please try again."); }
+}
 
   async function logout() {
     await signOut(auth);
@@ -188,8 +197,14 @@ export default function Page() {
         clearInterval(interval); setUploadStatus("idle"); return;
       }
       setResume(text);
+      sessionStorage.setItem("ncl_resume_text", text);
       clearInterval(interval);
       setUploadProgress(100);
+      setTimeout(() => {
+        setUploadProgress(0);
+        setUploadSuccess(true);
+        setTimeout(() => setUploadSuccess(false), 3000);
+      }, 600);
       setUploadStatus("done");
       showToast(`${file.name} uploaded!`);
     } catch {
@@ -325,6 +340,11 @@ export default function Page() {
   const ring = score < 40 ? "#dc2626" : score < 70 ? "#f97316" : "#059669";
 
   function handleLockedTab(t: TabType) {
+    if (t === "templates") {
+      sessionStorage.setItem("ncl_resume_text", resume);
+      window.location.href = "/templates";
+      return;
+    }
     if (!isPro && t !== "ats" && t !== "billing" && t !== "help") {
       showToast("This feature requires Pro plan!"); setTab("billing"); return;
     }
@@ -341,6 +361,7 @@ export default function Page() {
     { id: "resume", label: "✍️ AI Resume Writer", locked: !isPro },
     { id: "cover", label: "📝 Cover Letter", locked: !isPro },
     { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: !isPro },
+    { id: "templates", label: "📄 Resume Templates", locked: false },
     { id: "billing", label: "💳 Billing & Plans", locked: false },
     { id: "help", label: "❓ Help & Tutorials", locked: false },
   ];
@@ -403,6 +424,15 @@ export default function Page() {
         /* Billing grid */
         .billing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .plan-card { background: #fff; border-radius: 14px; padding: 18px; }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+          .tmpl-gallery { grid-template-columns: 1fr 1fr; }
+          .tmpl-form-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+          .tmpl-gallery { grid-template-columns: 1fr; }
+        }
 
         /* Help tabs */
         .help-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -544,17 +574,23 @@ export default function Page() {
                         <div style={{ display: "flex", gap: "6px", justifyContent: "center", marginTop: "8px" }}>
                           {["PDF","DOCX","TXT"].map(ft => <span key={ft} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "5px", background: "#fde8d8", color: "#c2410c", fontWeight: 600 }}>{ft}</span>)}
                         </div>
-                        {uploadStatus !== "idle" && (
-                          <div style={{ marginTop: "10px" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#9ca3af", marginBottom: "4px" }}>
-                              <span style={{ overflow: "hidden", textOverflow: "ellipsis", maxWidth: "70%" }}>{uploadFileName}</span>
-                              <span>{uploadProgress}%</span>
-                            </div>
-                            <div style={{ height: "4px", background: "#d1fae5", borderRadius: "10px", overflow: "hidden" }}>
-                              <div style={{ height: "100%", width: `${uploadProgress}%`, background: uploadStatus === "done" ? "#059669" : "linear-gradient(90deg,#059669,#f97316)", borderRadius: "10px", transition: "width 0.3s" }} />
-                            </div>
-                          </div>
-                        )}
+                        {uploadSuccess && (
+  <div style={{ marginTop: "10px", padding: "10px 14px", borderRadius: "10px", background: "#f0fdf4", border: "1.5px solid #059669", display: "flex", alignItems: "center", gap: "8px" }}>
+    <span style={{ fontSize: "18px" }}>✅</span>
+    <span style={{ fontSize: "13px", fontWeight: 600, color: "#059669" }}>Resume uploaded successfully!</span>
+  </div>
+)}
+{uploadProgress > 0 && !uploadSuccess && (
+  <div style={{ marginTop: "10px" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+      <span style={{ fontSize: "12px", color: "#6b7280" }}>Uploading...</span>
+      <span style={{ fontSize: "12px", fontWeight: 600, color: "#059669" }}>{uploadProgress}%</span>
+    </div>
+    <div style={{ height: "6px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
+      <div style={{ height: "100%", width: `${uploadProgress}%`, background: "linear-gradient(90deg, #059669, #34d399)", borderRadius: "10px", transition: "width 0.3s ease" }}></div>
+    </div>
+  </div>
+)}
                       </div>
 
                       <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Resume Text</p>
@@ -706,7 +742,7 @@ export default function Page() {
                       <p style={{ fontSize:"11px", color:"#f97316", margin:"0 0 10px" }}>₹1,788/yr · Save 50% · ☕ ₹4.96/day</p>
                       <ul style={{ listStyle:"none", fontSize:"12px", color:"#6b7280", lineHeight:"1.9", padding:0, margin:"0 0 12px" }}>
                         <li>✅ Everything in Quarterly</li>
-                        <li>✅ Resume templates (soon)</li>
+                        <li>✅ Resume templates ✅</li>
                         <li>✅ Dedicated support</li>
                       </ul>
                       {!isPro ? (
