@@ -44,7 +44,23 @@ export default function Page() {
   const [uploadFileName, setUploadFileName] = useState("");
   const [uploadStatus, setUploadStatus] = useState<"idle"|"uploading"|"done">("idle");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  async function sendEmail(type: string, extraData?: any) {
+    if (!user) return;
+    try {
+      await fetch("/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          email: user.email,
+          name: user.displayName || user.email?.split("@")[0] || "User",
+          ...extraData,
+        }),
+      });
+    } catch (err) {
+      console.error("Email send failed:", err);
+    }
+  }
   const [resume, setResume] = useState("");
   const [job, setJob] = useState("");
   const [history, setHistory] = useState<any[]>([]);
@@ -107,6 +123,7 @@ export default function Page() {
         createdAt: serverTimestamp(),
       });
       setScansUsed(0); setIsPro(false);
+      sendEmail("welcome");
     } else {
       const data = snap.docs[0].data();
       const currentMonth = new Date().toISOString().slice(0, 7);
@@ -295,6 +312,12 @@ export default function Page() {
             const snap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
             if (!snap.empty) await updateDoc(snap.docs[0].ref, { plan: "pro", proPlan: planType, proSince: now.toISOString(), proExpiry: expiry.toISOString() });
             setIsPro(true); setUserPlan(planType);
+            sendEmail("payment", {
+          plan: planType,
+          amount: `Rs. ${selectedPlan?.price || ""}`,
+          orderId: response.razorpay_order_id || "",
+        });
+        sendEmail("pro_activation", { plan: planType });
             setProSince(now.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
             showToast(`Payment successful! ${planLabels[planType]} activated!`);
           } else { showToast("Verification failed. Contact support."); }
