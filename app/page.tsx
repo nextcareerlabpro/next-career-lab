@@ -123,7 +123,7 @@ export default function Page() {
         createdAt: serverTimestamp(),
       });
       setScansUsed(0); setIsPro(false);
-      sendEmail("welcome");
+      
     } else {
       const data = snap.docs[0].data();
       const currentMonth = new Date().toISOString().slice(0, 7);
@@ -314,7 +314,7 @@ export default function Page() {
             setIsPro(true); setUserPlan(planType);
             sendEmail("payment", {
           plan: planType,
-          amount: `Rs. ${selectedPlan?.price || ""}`,
+          amount: `Rs. ${selectedPlan || ""}`,
           orderId: response.razorpay_order_id || "",
         });
         sendEmail("pro_activation", { plan: planType });
