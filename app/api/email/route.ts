@@ -178,6 +178,42 @@ export async function POST(req: Request) {
       html,
     });
 
+    // Owner notification — sirf payment pe
+    if (type === "payment") {
+      await transporter.sendMail({
+        from: FROM,
+        to: "nextcareerlab.pro@gmail.com",
+        subject: `New Payment Received — ${plan || "Pro"} Plan`,
+        html: `
+          <div style="font-family:Arial,sans-serif;padding:24px;background:#f0fdf4;border-radius:12px;">
+            <h2 style="color:#059669;">💰 New Payment Received!</h2>
+            <p><strong>User:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Plan:</strong> ${plan || "Pro"}</p>
+            <p><strong>Amount:</strong> ${amount || ""}</p>
+            <p><strong>Order ID:</strong> ${orderId || ""}</p>
+            <p><strong>Date:</strong> ${new Date().toLocaleDateString("en-IN", { day:"numeric", month:"long", year:"numeric", hour:"2-digit", minute:"2-digit" })}</p>
+          </div>
+        `,
+      });
+    }
+
+    return NextResponse.json({ success: true });
+      from: FROM,
+      to: "nextcareerlab.pro@gmail.com",
+      subject: `New Payment Received — ${plan || "Pro"} Plan`,
+      html: `
+        <div style="font-family:Arial,sans-serif;padding:24px;background:#f0fdf4;border-radius:12px;">
+          <h2 style="color:#059669;">💰 New Payment Received!</h2>
+          <p><strong>User:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Plan:</strong> ${plan || "Pro"}</p>
+          <p><strong>Amount:</strong> ${amount || ""}</p>
+          <p><strong>Order ID:</strong> ${orderId || ""}</p>
+          <p><strong>Date:</strong> ${new Date().toLocaleDateString("en-IN", { day:"numeric", month:"long", year:"numeric", hour:"2-digit", minute:"2-digit" })}</p>
+        </div>
+      `,
+    });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Email error:", err);
