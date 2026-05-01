@@ -213,6 +213,7 @@ export default function TemplatesPage() {
   const [downloading, setDownloading] = useState(false);
   const [resumeText, setResumeText] = useState("");
   const [data, setData] = useState<ResumeData>(emptyResumeData);
+  const [includeDeclaration, setIncludeDeclaration] = useState(false);
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(""), 3500); }
 
@@ -269,7 +270,8 @@ export default function TemplatesPage() {
     if (!data.name.trim()) { showToast("Please fill your name first!"); return; }
     setDownloading(true);
     try {
-      generateResumePdf(data, selectedId);
+      console.log("includeDeclaration value:", includeDeclaration);
+      generateResumePdf(data, selectedId, includeDeclaration);
       showToast("✅ Resume downloaded!");
     } catch { showToast("Download failed. Try again."); }
     setDownloading(false);
@@ -523,6 +525,19 @@ export default function TemplatesPage() {
                 </div>
 
                 {/* Action buttons */}
+                {/* Declaration Checkbox */}
+                  <div style={{ marginTop: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <input
+                      type="checkbox"
+                      id="includeDeclaration"
+                      checked={includeDeclaration}
+                      onChange={e => setIncludeDeclaration(e.target.checked)}
+                      style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#059669" }}
+                    />
+                    <label htmlFor="includeDeclaration" style={{ fontSize: "13px", color: "#374151", cursor: "pointer", fontWeight: 600 }}>
+                      Include Declaration in Resume
+                    </label>
+
                 <div className="form-actions">
                   <button
                     onClick={handleDownload}
@@ -537,6 +552,8 @@ export default function TemplatesPage() {
                   >
                     {downloading ? "⏳ Generating PDF..." : isPro ? "⬇ Download Resume PDF" : "🔒 Upgrade to Download"}
                   </button>
+
+                  </div>
                   <button onClick={() => setStep("gallery")} className="btn-back">← Change Template</button>
                 </div>
 

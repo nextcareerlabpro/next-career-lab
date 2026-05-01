@@ -73,13 +73,57 @@ export default function Page() {
       const res = await fetch("/api/jdanalyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resume, jdText }),
+        body: JSON.stringify({ resume, jdText, isPro }),
       });
       const data = await res.json();
       setJdResult(data);
     } catch { showToast("Analysis failed. Try again."); }
     setJdLoading(false);
   }
+  const downloadJDPdf = () => {
+  if (!jdResult) return;
+  const doc = new jsPDF();
+  let y = 20;
+
+  doc.setFontSize(18);
+  doc.setFont("helvetica", "bold");
+  doc.text("JD Match Analysis Report", 105, y, { align: "center" });
+  y += 12;
+
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Position: ${jdResult.jobTitle || "N/A"}`, 20, y); y += 7;
+  doc.text(`Company: ${jdResult.company || "N/A"}`, 20, y); y += 7;
+  doc.text(`Match Score: ${jdResult.matchScore || 0}%`, 20, y); y += 7;
+  doc.text(`Overall: ${jdResult.overallVerdict || ""}`, 20, y, { maxWidth: 170 }); y += 14;
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Missing Keywords:", 20, y); y += 7;
+  doc.setFont("helvetica", "normal");
+  doc.text((jdResult.missingKeywords || []).join(", ") || "None", 20, y, { maxWidth: 170 }); y += 10;
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Present Keywords:", 20, y); y += 7;
+  doc.setFont("helvetica", "normal");
+  doc.text((jdResult.presentKeywords || []).join(", ") || "None", 20, y, { maxWidth: 170 }); y += 10;
+
+  doc.setFont("helvetica", "bold");
+  doc.text("AI Suggestions:", 20, y); y += 7;
+  doc.setFont("helvetica", "normal");
+  (jdResult.suggestions || []).forEach((s: string) => {
+    doc.text(`• ${s}`, 20, y, { maxWidth: 170 }); y += 8;
+  });
+  y += 4;
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Resume Tweaks:", 20, y); y += 7;
+  doc.setFont("helvetica", "normal");
+  (jdResult.resumeTweaks || []).forEach((t: string) => {
+    doc.text(`• ${t}`, 20, y, { maxWidth: 170 }); y += 8;
+  });
+
+  doc.save("JD-Match-Report.pdf");
+};
   const [resume, setResume] = useState("");
   const [job, setJob] = useState("");
   const [history, setHistory] = useState<any[]>([]);
@@ -387,7 +431,7 @@ export default function Page() {
       window.location.href = "/templates";
       return;
     }
-    if (!isPro && t !== "ats" && t !== "billing" && t !== "help" && t !== "jdanalyzer") {
+    if (!isPro && t !== "ats" && t !== "billing" && t !== "help") {
       showToast("This feature requires Pro plan!"); setTab("billing"); return;
     }
     setTab(t);
@@ -403,7 +447,7 @@ export default function Page() {
     { id: "resume", label: "✍️ AI Resume Writer", locked: !isPro },
     { id: "cover", label: "📝 Cover Letter", locked: !isPro },
     { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: !isPro },
-    { id: "templates", label: "📄 Resume Templates", locked: false },
+    { id: "templates", label: "📄 Resume Templates — Coming Soon", locked: true },
     { id: "jdanalyzer", label: "🎯 JD Analyzer", locked: !isPro },
     { id: "billing", label: "💳 Billing & Plans", locked: false },
     { id: "help", label: "❓ Help & Tutorials", locked: false },
@@ -730,6 +774,16 @@ export default function Page() {
 
               {tab === "jdanalyzer" && (
                 <div className="card">
+                  {!isPro && (
+                    <div style={{ padding:"16px", borderRadius:"12px", background:"#fff7ed", border:"1px solid #fed7aa", marginBottom:"16px", textAlign:"center" }}>
+                      <p style={{ fontSize:"15px", fontWeight:700, color:"#c2410c", margin:"0 0 8px" }}>🔒 Pro Feature</p>
+                      <p style={{ fontSize:"13px", color:"#9a3412", margin:"0 0 12px" }}>JD Analyzer is available for Pro users only.</p>
+                      <button onClick={() => setTab("billing")} style={{ padding:"10px 24px", borderRadius:"9px", fontSize:"13px", fontWeight:700, background:"#f97316", color:"#fff", border:"none", cursor:"pointer" }}>
+                        Upgrade to Pro →
+                      </button>
+                    </div>
+                  )}
+                  {isPro && (<div>
                   <p className="card-title">🎯 Job Description Analyzer</p>
                   <p style={{ fontSize:"13px", color:"#6b7280", marginBottom:"20px" }}>
                     Paste any job description — AI will analyze your resume against it and tell you exactly what to improve.
@@ -840,6 +894,14 @@ export default function Page() {
                         </div>
                       )}
 
+                      {isPro && (
+                        <div
+                          onClick={downloadJDPdf}
+                          style={{ marginTop:"16px", marginRight:"10px", padding:"10px 20px", borderRadius:"9px", fontSize:"13px", fontWeight:600, background:"#059669", color:"#fff", cursor:"pointer", display:"inline-block" }}
+                        >
+                          📄 Download PDF Report
+                        </div>
+                      )}
                       <button
                         onClick={() => { setJdResult(null); setJdText(""); }}
                         style={{ marginTop:"16px", padding:"10px 20px", borderRadius:"9px", fontSize:"13px", fontWeight:600, background:"#f3f4f6", color:"#374151", border:"1px solid #e5e7eb", cursor:"pointer" }}
@@ -848,6 +910,7 @@ export default function Page() {
                       </button>
                     </div>
                   )}
+                  </div>)}
                 </div>
               )}
               {tab === "billing" && (

@@ -286,18 +286,9 @@ function generateSharp(pdf: jsPDF, d: ResumeData) {
     });
     ry += 3;
   }
-  // Declaration
-  if (ry + 20 > 272) rightNewPage();
-  ry += 8;
-  pdf.setDrawColor(200, 200, 200); pdf.setLineWidth(0.3);
-  pdf.line(rX, ry, rX + rW, ry); ry += 8;
-  pdf.setFontSize(8); pdf.setFont("helvetica", "normal"); pdf.setTextColor(107, 114, 128);
-  pdf.text("I hereby declare that all the above information is correct to the best of my knowledge.", rX, ry); ry += 8;
-  pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(15, 23, 42);
-  pdf.text(d.name, rX, ry); 
-  pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.5); pdf.setTextColor(107, 114, 128);
-  pdf.text("Date: _______________", rX + rW - 50, ry);
+
 }
+  
 
 // ─── TEMPLATE 2: IVY (elegant single column) ─────────────────────
 function generateIvy(pdf: jsPDF, d: ResumeData) {
@@ -391,17 +382,7 @@ function generateIvy(pdf: jsPDF, d: ResumeData) {
     pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 45, 30);
     pdf.text(splitComma(d.languages).join("   ·   "), W / 2, y, { align: "center" }); y += 8;
   }
-  // Declaration
-  if (y + 24 > 272) { pdf.addPage(); y = 18; }
-  y += 14;
-  pdf.setDrawColor(200, 200, 200); pdf.setLineWidth(0.3);
-  pdf.line(15, y, W - 15, y); y += 8;
-  pdf.setFontSize(8); pdf.setFont("helvetica", "normal"); pdf.setTextColor(107, 114, 128);
-  pdf.text("I hereby declare that all the above information is correct to the best of my knowledge.", W / 2, y, { align: "center" }); y += 8;
-  pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(60, 40, 10);
-  pdf.text(d.name, 15, y);
-  pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.5); pdf.setTextColor(107, 114, 128);
-  pdf.text("Date: _______________", W - 15, y, { align: "right" });
+
 }
 
 // dummy ry for ivy template fix
@@ -521,22 +502,7 @@ function generateSlate(pdf: jsPDF, d: ResumeData) {
     const al = pdf.splitTextToSize(d.additionalExp.split("|").join("  ·  "), rW2);
     pdf.text(al, rX2, ry2); ry2 += al.length * 4.5 + 4;
   }
-  // Declaration
-  if (ry2 + 24 > 272) {
-    pdf.addPage();
-    pdf.setFillColor(15, 118, 110); pdf.rect(0, 0, sideW, 297, "F");
-    pdf.setFillColor(247, 254, 254); pdf.rect(sideW, 0, W - sideW, 297, "F");
-    ry2 = 14;
-  }
-  ry2 += 14;
-  pdf.setDrawColor(200, 200, 200); pdf.setLineWidth(0.3);
-  pdf.line(rX2, ry2, rX2 + rW2, ry2); ry2 += 8;
-  pdf.setFontSize(8); pdf.setFont("helvetica", "normal"); pdf.setTextColor(107, 114, 128);
-  pdf.text("I hereby declare that all the above information is correct to the best of my knowledge.", rX2, ry2); ry2 += 8;
-  pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(17, 24, 39);
-  pdf.text(d.name, rX2, ry2);
-  pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.5); pdf.setTextColor(107, 114, 128);
-  pdf.text("Date: _______________", rX2 + rW2, ry2, { align: "right" });
+  
 }
 
 // ─── TEMPLATE 4: EMBER (warm tones, creative) ────────────────────
@@ -635,17 +601,7 @@ function generateEmber(pdf: jsPDF, d: ResumeData) {
     pdf.text(splitComma(d.languages).join("   ·   "), 15, y3); y3 += 8;
   }
 
-  // Declaration
-  if (y3 + 24 > 272) { pdf.addPage(); pdf.setFillColor(255, 247, 237); pdf.rect(0, 0, W, 297, "F"); y3 = 18; }
-  y3 += 14;
-  pdf.setDrawColor(200, 200, 200); pdf.setLineWidth(0.3);
-  pdf.line(15, y3, W - 15, y3); y3 += 8;
-  pdf.setFontSize(8); pdf.setFont("helvetica", "normal"); pdf.setTextColor(107, 114, 128);
-  pdf.text("I hereby declare that all the above information is correct to the best of my knowledge.", 15, y3); y3 += 8;
-  pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(17, 24, 39);
-  pdf.text(d.name, 15, y3);
-  pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.5); pdf.setTextColor(107, 114, 128);
-  pdf.text("Date: _______________", W - 15, y3, { align: "right" });
+  
 }
 
 // ─── TEMPLATE 5: CLARITY (ultra minimal) ────────────────────────
@@ -735,17 +691,7 @@ function generateClarity(pdf: jsPDF, d: ResumeData) {
     pdf.text(splitComma(d.languages).join("   ·   "), 22, y4); y4 += 8;
   }
 
-  // Declaration
-  if (y4 + 24 > 272) { pdf.addPage(); pdf.setFillColor(255,255,255); pdf.rect(0,0,W,297,"F"); pdf.setDrawColor(17,24,39); pdf.setLineWidth(2); pdf.line(15,0,15,297); y4 = 18; }
-  y4 += 14;
-  pdf.setDrawColor(200,200,200); pdf.setLineWidth(0.3);
-  pdf.line(22, y4, W-15, y4); y4 += 8;
-  pdf.setFontSize(8); pdf.setFont("helvetica","normal"); pdf.setTextColor(107,114,128);
-  pdf.text("I hereby declare that all the above information is correct to the best of my knowledge.", 22, y4); y4 += 8;
-  pdf.setFontSize(9); pdf.setFont("helvetica","bold"); pdf.setTextColor(17,24,39);
-  pdf.text(d.name, 22, y4);
-  pdf.setFont("helvetica","normal"); pdf.setFontSize(8.5); pdf.setTextColor(107,114,128);
-  pdf.text("Date: _______________", W-15, y4, { align:"right" });
+  
 }
 
 // ─── TEMPLATE 6: ROYAL (navy + gold, executive) ──────────────────
@@ -851,22 +797,10 @@ function generateRoyal(pdf: jsPDF, d: ResumeData) {
     pdf.text(splitComma(d.languages).join("   ·   "), W/2, y5, { align:"center" }); y5 += 8;
   }
 
-  // Declaration
-  if (y5 + 24 > 272) { pdf.addPage(); pdf.setFillColor(250,249,246); pdf.rect(0,0,W,297,"F"); y5 = 18; }
-  y5 += 14;
-  pdf.setDrawColor(161,130,60); pdf.setLineWidth(0.4);
-  pdf.line(15, y5, W-15, y5); y5 += 8;
-  pdf.setFontSize(8); pdf.setFont("helvetica","normal"); pdf.setTextColor(107,114,128);
-  pdf.text("I hereby declare that all the above information is correct to the best of my knowledge.", W/2, y5, { align:"center" }); y5 += 8;
-  pdf.setFontSize(9); pdf.setFont("helvetica","bold"); pdf.setTextColor(15,23,42);
-  pdf.text(d.name, 15, y5);
-  pdf.setFont("helvetica","normal"); pdf.setFontSize(8.5); pdf.setTextColor(107,114,128);
-  pdf.text("Date: _______________", W-15, y5, { align:"right" });
 }
 
-
 // ─── MAIN EXPORT ────────────────────────────────────────────────
-export function generateResumePdf(d: ResumeData, templateId: number) {
+export function generateResumePdf(d: ResumeData, templateId: number, includeDeclaration: boolean = false) {
   const pdf = new jsPDF();
   const names = ["", "Sharp", "Ivy", "Slate", "Ember", "Clarity", "Royal"];
   const templateName = names[templateId] || "Sharp";
@@ -887,5 +821,21 @@ export function generateResumePdf(d: ResumeData, templateId: number) {
     default: generateSharp(pdf, d);
   }
 
+  // Declaration
+  if (includeDeclaration) {
+    pdf.addPage();
+    pdf.setFontSize(13);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Declaration", 20, 30);
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(
+      "I hereby declare that all the information provided in this resume is true and correct to the best of my knowledge and belief.",
+      20, 45, { maxWidth: 170 }
+    );
+    pdf.text(`Name: ${d.name}`, 20, 70);
+    pdf.text(`Date: ${new Date().toLocaleDateString("en-IN")}`, 20, 80);
+  }
+  
   pdf.save(`Resume_${templateName}_NextCareerLab.pdf`);
 }

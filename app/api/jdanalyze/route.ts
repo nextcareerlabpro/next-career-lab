@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { resume, jdText } = await req.json();
+    const { resume, jdText, isPro } = await req.json();
     if (!resume?.trim() || !jdText?.trim()) {
       return NextResponse.json({ error: "Missing data" }, { status: 400 });
     }
@@ -61,6 +61,22 @@ ${resume.substring(0, 3000)}`,
     }
     console.log("Raw content:", content);
     console.log("Parsed:", parsed);
+    // Pro Gate — Free users ko limited data
+    if (!isPro) {
+      return NextResponse.json({
+        matchScore: parsed.matchScore,
+        jobTitle: parsed.jobTitle,
+        company: parsed.company,
+        missingKeywords: (parsed.missingKeywords || []).slice(0, 2),
+        presentKeywords: (parsed.presentKeywords || []).slice(0, 2),
+        skillGaps: [],
+        suggestions: (parsed.suggestions || []).slice(0, 1),
+        resumeTweaks: [],
+        sectionFeedback: {},
+        overallVerdict: parsed.overallVerdict,
+        isProLocked: true,
+      });
+    }
     return NextResponse.json(parsed);
   } catch (err) {
     console.error("JD Analyze error:", err);
