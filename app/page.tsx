@@ -1011,6 +1011,7 @@ export default function Page() {
           </div>
         </div>
       </div>
+    <AppFooter />
     </>
   );
 }
@@ -1050,5 +1051,17 @@ function HelpSteps({ title, steps, tip }: any) {
         💡 {tip}
       </div>
     </div>
+  );
+}
+function AppFooter() {
+  return (
+    <footer style={{ textAlign:"center", padding:"20px 16px", borderTop:"1px solid #e5e7eb", background:"#f9fafb", fontSize:"12px", color:"#9ca3af", marginTop:"auto" }}>
+      <div style={{ marginBottom:"8px" }}>
+        <a href="/terms.html" target="_blank" style={{ color:"#059669", textDecoration:"none", margin:"0 10px" }}>Terms & Conditions</a>
+        <a href="/privacy.html" target="_blank" style={{ color:"#059669", textDecoration:"none", margin:"0 10px" }}>Privacy Policy</a>
+        <a href="/refund.html" target="_blank" style={{ color:"#059669", textDecoration:"none", margin:"0 10px" }}>Refund Policy</a>
+      </div>
+      <p>© 2026 Next Career Lab — Ashish Kumar Sharma. All rights reserved.</p>
+    </footer>
   );
 }
