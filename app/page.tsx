@@ -22,7 +22,7 @@ import {
   where,
 } from "firebase/firestore";
 
-type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "billing" | "help";
+type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "jdanalyzer" | "billing" | "help";
 
 export default function Page() {
   const [tab, setTab] = useState<TabType>("ats");
@@ -44,6 +44,9 @@ export default function Page() {
   const [uploadFileName, setUploadFileName] = useState("");
   const [uploadStatus, setUploadStatus] = useState<"idle"|"uploading"|"done">("idle");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [jdText, setJdText] = useState("");
+  const [jdResult, setJdResult] = useState<any>(null);
+  const [jdLoading, setJdLoading] = useState(false);
   async function sendEmail(type: string, extraData?: any) {
     if (!user) return;
     try {
@@ -60,6 +63,22 @@ export default function Page() {
     } catch (err) {
       console.error("Email send failed:", err);
     }
+  }
+  async function analyzeJD() {
+    if (!requireLogin()) return;
+    if (!resume.trim()) { showToast("Please upload your resume in ATS tab first!"); setTab("ats"); return; }
+    if (!jdText.trim()) { showToast("Please paste a job description!"); return; }
+    setJdLoading(true);
+    try {
+      const res = await fetch("/api/jdanalyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resume, jdText }),
+      });
+      const data = await res.json();
+      setJdResult(data);
+    } catch { showToast("Analysis failed. Try again."); }
+    setJdLoading(false);
   }
   const [resume, setResume] = useState("");
   const [job, setJob] = useState("");
@@ -314,7 +333,7 @@ export default function Page() {
             setIsPro(true); setUserPlan(planType);
             sendEmail("payment", {
           plan: planType,
-          amount: `Rs. ${selectedPlan || ""}`,
+          
           orderId: response.razorpay_order_id || "",
         });
         sendEmail("pro_activation", { plan: planType });
@@ -368,7 +387,7 @@ export default function Page() {
       window.location.href = "/templates";
       return;
     }
-    if (!isPro && t !== "ats" && t !== "billing" && t !== "help") {
+    if (!isPro && t !== "ats" && t !== "billing" && t !== "help" && t !== "jdanalyzer") {
       showToast("This feature requires Pro plan!"); setTab("billing"); return;
     }
     setTab(t);
@@ -385,6 +404,7 @@ export default function Page() {
     { id: "cover", label: "📝 Cover Letter", locked: !isPro },
     { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: !isPro },
     { id: "templates", label: "📄 Resume Templates", locked: false },
+    { id: "jdanalyzer", label: "🎯 JD Analyzer", locked: !isPro },
     { id: "billing", label: "💳 Billing & Plans", locked: false },
     { id: "help", label: "❓ Help & Tutorials", locked: false },
   ];
@@ -708,6 +728,128 @@ export default function Page() {
                 </div>
               )}
 
+              {tab === "jdanalyzer" && (
+                <div className="card">
+                  <p className="card-title">🎯 Job Description Analyzer</p>
+                  <p style={{ fontSize:"13px", color:"#6b7280", marginBottom:"20px" }}>
+                    Paste any job description — AI will analyze your resume against it and tell you exactly what to improve.
+                  </p>
+
+                  {!resume.trim() && (
+                    <div style={{ padding:"14px 16px", borderRadius:"12px", background:"#fff7ed", border:"1px solid #fed7aa", marginBottom:"16px" }}>
+                      <p style={{ fontSize:"13px", fontWeight:600, color:"#c2410c", margin:"0 0 6px" }}>⚠️ No resume uploaded</p>
+                      <p style={{ fontSize:"12px", color:"#9ca3af", margin:"0 0 10px" }}>Please upload your resume in ATS Analyzer tab first.</p>
+                      <button onClick={() => setTab("ats")} style={{ padding:"8px 16px", borderRadius:"8px", fontSize:"12px", fontWeight:600, background:"#f97316", color:"#fff", border:"none", cursor:"pointer" }}>
+                        Go to ATS Analyzer →
+                      </button>
+                    </div>
+                  )}
+
+                  <p style={{ fontSize:"11px", fontWeight:600, color:"#6b7280", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:"6px" }}>Job Description</p>
+                  <textarea
+                    rows={8}
+                    value={jdText}
+                    onChange={e => setJdText(e.target.value)}
+                    placeholder="Paste the full job description here — include responsibilities, requirements, and qualifications..."
+                    style={{ background:"#fff", border:"1.5px solid #d1fae5", color:"#111827", borderRadius:"10px", padding:"12px", width:"100%", fontSize:"13px", outline:"none", fontFamily:"inherit", resize:"vertical", boxSizing:"border-box", marginBottom:"16px" }}
+                  />
+
+                  <button
+                    onClick={analyzeJD}
+                    disabled={jdLoading || !resume.trim()}
+                    style={{ padding:"12px 28px", borderRadius:"10px", fontSize:"14px", fontWeight:700, background: resume.trim() ? "#059669" : "#9ca3af", color:"#fff", border:"none", cursor: resume.trim() ? "pointer" : "not-allowed", opacity: jdLoading ? 0.7 : 1, marginBottom:"24px" }}
+                  >
+                    {jdLoading ? "⏳ Analyzing..." : "🎯 Analyze Job Description"}
+                  </button>
+
+                  {jdResult && !jdResult.error && (
+                    <div>
+                      {/* Match Score */}
+                      <div style={{ display:"flex", gap:"16px", marginBottom:"20px", flexWrap:"wrap" }}>
+                        <div style={{ flex:1, minWidth:"140px", padding:"16px", borderRadius:"12px", background:"linear-gradient(135deg,#059669,#34d399)", textAlign:"center" }}>
+                          <p style={{ fontSize:"36px", fontWeight:800, color:"#fff", margin:0 }}>{jdResult.matchScore || 0}%</p>
+                          <p style={{ fontSize:"12px", color:"#d1fae5", margin:"4px 0 0" }}>JD Match Score</p>
+                        </div>
+                        <div style={{ flex:2, minWidth:"200px", padding:"16px", borderRadius:"12px", background:"#f9fafb", border:"1px solid #e5e7eb" }}>
+                          <p style={{ fontSize:"13px", fontWeight:700, color:"#111827", margin:"0 0 4px" }}>{jdResult.jobTitle || "Position"}</p>
+                          {jdResult.company && <p style={{ fontSize:"12px", color:"#6b7280", margin:"0 0 8px" }}>{jdResult.company}</p>}
+                          <p style={{ fontSize:"12px", color:"#374151", margin:0, lineHeight:1.5 }}>{jdResult.overallVerdict}</p>
+                        </div>
+                      </div>
+
+                      {/* Keywords */}
+                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"12px", marginBottom:"16px" }}>
+                        <div style={{ padding:"14px", borderRadius:"12px", background:"#fef2f2", border:"1px solid #fca5a5" }}>
+                          <p style={{ fontSize:"12px", fontWeight:700, color:"#dc2626", margin:"0 0 10px" }}>❌ Missing Keywords ({jdResult.missingKeywords?.length || 0})</p>
+                          <div style={{ display:"flex", flexWrap:"wrap", gap:"6px" }}>
+                            {(jdResult.missingKeywords || []).map((kw: string, i: number) => (
+                              <span key={i} style={{ fontSize:"11px", padding:"3px 8px", borderRadius:"20px", background:"#fee2e2", color:"#dc2626", fontWeight:600 }}>{kw}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <div style={{ padding:"14px", borderRadius:"12px", background:"#f0fdf4", border:"1px solid #86efac" }}>
+                          <p style={{ fontSize:"12px", fontWeight:700, color:"#16a34a", margin:"0 0 10px" }}>✅ Present Keywords ({jdResult.presentKeywords?.length || 0})</p>
+                          <div style={{ display:"flex", flexWrap:"wrap", gap:"6px" }}>
+                            {(jdResult.presentKeywords || []).map((kw: string, i: number) => (
+                              <span key={i} style={{ fontSize:"11px", padding:"3px 8px", borderRadius:"20px", background:"#dcfce7", color:"#16a34a", fontWeight:600 }}>{kw}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Suggestions */}
+                      {jdResult.suggestions?.length > 0 && (
+                        <div style={{ padding:"14px", borderRadius:"12px", background:"#eff6ff", border:"1px solid #bfdbfe", marginBottom:"12px" }}>
+                          <p style={{ fontSize:"12px", fontWeight:700, color:"#1d4ed8", margin:"0 0 10px" }}>💡 AI Suggestions</p>
+                          {jdResult.suggestions.map((s: string, i: number) => (
+                            <p key={i} style={{ fontSize:"12px", color:"#1e40af", margin:"0 0 6px", paddingLeft:"12px", borderLeft:"3px solid #3b82f6" }}>{s}</p>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Resume Tweaks */}
+                      {jdResult.resumeTweaks?.length > 0 && (
+                        <div style={{ padding:"14px", borderRadius:"12px", background:"#fff7ed", border:"1px solid #fed7aa", marginBottom:"12px" }}>
+                          <p style={{ fontSize:"12px", fontWeight:700, color:"#c2410c", margin:"0 0 10px" }}>✏️ Resume Tweaks</p>
+                          {jdResult.resumeTweaks.map((t: string, i: number) => (
+                            <p key={i} style={{ fontSize:"12px", color:"#9a3412", margin:"0 0 6px", paddingLeft:"12px", borderLeft:"3px solid #f97316" }}>{t}</p>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Section Feedback */}
+                      {jdResult.sectionFeedback && (
+                        <div style={{ padding:"14px", borderRadius:"12px", background:"#f5f3ff", border:"1px solid #ddd6fe" }}>
+                          <p style={{ fontSize:"12px", fontWeight:700, color:"#7c3aed", margin:"0 0 10px" }}>📋 Section Feedback</p>
+                          {Object.entries(jdResult.sectionFeedback).map(([section, feedback]: any) => (
+                            <div key={section} style={{ marginBottom:"8px" }}>
+                              <span style={{ fontSize:"11px", fontWeight:700, color:"#7c3aed", textTransform:"capitalize" }}>{section}: </span>
+                              <span style={{ fontSize:"11px", color:"#4c1d95" }}>{feedback}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Skill Gaps */}
+                      {jdResult.skillGaps?.length > 0 && (
+                        <div style={{ padding:"14px", borderRadius:"12px", background:"#fafafa", border:"1px solid #e5e7eb", marginTop:"12px" }}>
+                          <p style={{ fontSize:"12px", fontWeight:700, color:"#374151", margin:"0 0 10px" }}>📚 Skill Gaps to Address</p>
+                          {jdResult.skillGaps.map((g: string, i: number) => (
+                            <p key={i} style={{ fontSize:"12px", color:"#6b7280", margin:"0 0 4px" }}>• {g}</p>
+                          ))}
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => { setJdResult(null); setJdText(""); }}
+                        style={{ marginTop:"16px", padding:"10px 20px", borderRadius:"9px", fontSize:"13px", fontWeight:600, background:"#f3f4f6", color:"#374151", border:"1px solid #e5e7eb", cursor:"pointer" }}
+                      >
+                        🔄 Analyze Another JD
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
               {tab === "billing" && (
                 <div className="card">
                   <p className="card-title">Billing & Plans</p>
