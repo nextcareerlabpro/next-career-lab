@@ -115,11 +115,8 @@ ${resumeText}`
   }
 
   const data = await res.json();
-  if (!data.output || data.output === "No response." || data.output === "AI request failed. Try again.") {
-    throw new Error("AI returned no response — check GROQ_API_KEY in .env.local");
-  }
-  if ((data.output as string).startsWith("GROQ_ERROR:")) {
-    throw new Error(data.output);
+  if (!data.output || data.output === "No response.") {
+    throw new Error("AI returned no response — check GROQ_API_KEY in Vercel env vars");
   }
 
   let parsed: any = {};

@@ -35,17 +35,19 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 8000,
+        max_tokens: 6000,
       }),
     });
     const data = await response.json();
     if (!response.ok) {
       const groqError = data?.error?.message || `Groq error ${response.status}`;
-      return NextResponse.json({ output: `GROQ_ERROR: ${groqError}` }, { status: 502 });
+      console.error("Groq API error:", groqError);
+      return NextResponse.json({ error: groqError }, { status: 502 });
     }
     const output = data?.choices?.[0]?.message?.content || "No response.";
     return NextResponse.json({ output });
-  } catch {
-    return NextResponse.json({ output: "AI request failed. Try again." });
+  } catch (e: any) {
+    console.error("AI route error:", e?.message);
+    return NextResponse.json({ error: "AI request failed. Try again." }, { status: 500 });
   }
 }
