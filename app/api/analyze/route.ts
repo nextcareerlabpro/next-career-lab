@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
 
 function cleanWords(text: string = "") {
   const stopWords = new Set([
@@ -21,6 +22,32 @@ function cleanWords(text: string = "") {
 }
 
 export async function POST(req: Request) {
+  // Verify Firebase auth token
+  const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let uid: string;
+  try {
+    const decoded = await adminAuth.verifyIdToken(token);
+    uid = decoded.uid;
+  } catch {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
+
+  // Check scan limit in Firestore (server-side, cannot be bypassed)
+  const userSnap = await adminDb.collection("users").where("uid", "==", uid).limit(1).get();
+  if (!userSnap.empty) {
+    const userData = userSnap.docs[0].data();
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    if (userData.monthYear !== currentMonth) {
+      await userSnap.docs[0].ref.update({ scansUsed: 0, monthYear: currentMonth });
+    } else if (userData.plan !== "pro" && (userData.scansUsed || 0) >= 3) {
+      return NextResponse.json({ error: "Scan limit reached. Upgrade to Pro." }, { status: 403 });
+    }
+  }
+
   try {
     const body = await req.json();
 
@@ -49,7 +76,7 @@ export async function POST(req: Request) {
         "Improve project impact statements.",
       ],
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({
       score: 0,
       matched: [],

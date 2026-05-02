@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
   export const metadata: Metadata = {
-  title: "Next Career Lab — AI Powered Resume & Career Suite",
+  title: "Upgrade Your Resume — AI Powered Resume & Career Suite",
   description: "ATS Resume Analyzer, AI Resume Writer, Cover Letter Generator, LinkedIn Optimizer and Resume Templates. Powered by AI.",
 };
 export default function RootLayout({

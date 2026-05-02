@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 
+const PLAN_PRICES: Record<string, number> = {
+  monthly: 29900,
+  quarterly: 59700,
+  annual: 178800,
+};
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -8,6 +14,10 @@ export async function POST(req: Request) {
     if (action === "create_order") {
       const keyId = process.env.RAZORPAY_KEY_ID || "";
       const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
+
+      const plan = body.plan as string;
+      const amount = PLAN_PRICES[plan];
+      if (!amount) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
 
       const response = await fetch("https://api.razorpay.com/v1/orders", {
         method: "POST",
@@ -18,7 +28,7 @@ export async function POST(req: Request) {
             Buffer.from(keyId + ":" + keySecret).toString("base64"),
         },
         body: JSON.stringify({
-          amount: body.amount || 29900,
+          amount,
           currency: "INR",
           receipt: `receipt_${Date.now()}`,
         }),
@@ -50,10 +60,6 @@ export async function POST(req: Request) {
       const expectedSign = Array.from(new Uint8Array(signature))
         .map((b) => b.toString(16).padStart(2, "0"))
         .join("");
-
-      console.log("Expected:", expectedSign);
-      console.log("Received:", razorpay_signature);
-      console.log("Match:", expectedSign === razorpay_signature);
 
       if (expectedSign === razorpay_signature) {
         return NextResponse.json({ success: true });

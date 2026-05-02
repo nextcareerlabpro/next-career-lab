@@ -1,8 +1,30 @@
 import { NextResponse } from "next/server";
+import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
 
 export async function POST(req: Request) {
+  const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  let uid: string;
   try {
-    const { resume, jdText, isPro } = await req.json();
+    const decoded = await adminAuth.verifyIdToken(token);
+    uid = decoded.uid;
+  } catch {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
+
+  // Read isPro from Firestore — never trust the client value
+  let isPro = false;
+  const userSnap = await adminDb.collection("users").where("uid", "==", uid).limit(1).get();
+  if (!userSnap.empty) {
+    const userData = userSnap.docs[0].data();
+    isPro =
+      userData.plan === "pro" &&
+      (!userData.proExpiry || new Date(userData.proExpiry) >= new Date());
+  }
+
+  try {
+    const { resume, jdText } = await req.json();
     if (!resume?.trim() || !jdText?.trim()) {
       return NextResponse.json({ error: "Missing data" }, { status: 400 });
     }
@@ -59,9 +81,7 @@ ${resume.substring(0, 3000)}`,
       const match = content.match(/\{[\s\S]*\}/);
       if (match) parsed = JSON.parse(match[0]);
     }
-    console.log("Raw content:", content);
-    console.log("Parsed:", parsed);
-    // Pro Gate — Free users ko limited data
+
     if (!isPro) {
       return NextResponse.json({
         matchScore: parsed.matchScore,

@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
+import { adminAuth } from "@/lib/firebaseAdmin";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -10,7 +11,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const FROM = `"Next Career Lab" <${process.env.GMAIL_USER}>`;
+const FROM = `"Upgrade Your Resume" <${process.env.GMAIL_USER}>`;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://upgradeyourresume.com";
 
 function welcomeEmail(name: string): string {
   return `
@@ -20,7 +22,7 @@ function welcomeEmail(name: string): string {
 <body style="margin:0;padding:0;background:#f0fdf4;font-family:Arial,sans-serif;">
   <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;margin-top:20px;margin-bottom:20px;box-shadow:0 4px 24px rgba(5,150,105,0.10);">
     <div style="background:linear-gradient(135deg,#059669,#34d399);padding:36px 32px;text-align:center;">
-      <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:800;">Next Career Lab</h1>
+      <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:800;">Upgrade Your Resume</h1>
       <p style="color:#d1fae5;margin:8px 0 0;font-size:14px;">AI Powered Career Suite</p>
     </div>
     <div style="padding:36px 32px;">
@@ -29,7 +31,7 @@ function welcomeEmail(name: string): string {
         We're thrilled to have you on board! Your account is ready and you can start using our AI-powered career tools right away.
       </p>
       <div style="background:#f0fdf4;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
-        <p style="color:#059669;font-weight:700;font-size:14px;margin:0 0 12px;">What you can do with Next Career Lab:</p>
+        <p style="color:#059669;font-weight:700;font-size:14px;margin:0 0 12px;">What you can do with Upgrade Your Resume:</p>
         <p style="color:#374151;font-size:14px;margin:6px 0;">🔍 <strong>ATS Analyzer</strong> — Check resume vs job match</p>
         <p style="color:#374151;font-size:14px;margin:6px 0;">✍️ <strong>AI Resume Writer</strong> — AI improves your resume</p>
         <p style="color:#374151;font-size:14px;margin:6px 0;">📝 <strong>Cover Letter</strong> — Tailored cover letters instantly</p>
@@ -41,14 +43,14 @@ function welcomeEmail(name: string): string {
         <p style="color:#9a3412;font-size:13px;margin:6px 0 0;">Upgrade to Pro starting at just <strong>Rs. 149/month</strong> for unlimited access.</p>
       </div>
       <div style="text-align:center;margin-bottom:28px;">
-        <a href="https://y-three-black-14.vercel.app"
+        <a href="${APP_URL}"
            style="background:linear-gradient(135deg,#059669,#34d399);color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:700;display:inline-block;">
-          Start Using Next Career Lab
+          Start Using Upgrade Your Resume
         </a>
       </div>
     </div>
     <div style="background:#f9fafb;padding:20px 32px;text-align:center;border-top:1px solid #e5e7eb;">
-      <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 Next Career Lab · AI Powered Career Suite</p>
+      <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 Upgrade Your Resume · AI Powered Career Suite</p>
     </div>
   </div>
 </body>
@@ -63,7 +65,7 @@ function paymentEmail(name: string, plan: string, amount: string, orderId: strin
 <body style="margin:0;padding:0;background:#f0fdf4;font-family:Arial,sans-serif;">
   <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;margin-top:20px;margin-bottom:20px;box-shadow:0 4px 24px rgba(5,150,105,0.10);">
     <div style="background:linear-gradient(135deg,#059669,#34d399);padding:36px 32px;text-align:center;">
-      <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:800;">Next Career Lab</h1>
+      <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:800;">Upgrade Your Resume</h1>
       <p style="color:#d1fae5;margin:8px 0 0;font-size:14px;">Payment Confirmation</p>
     </div>
     <div style="padding:36px 32px;">
@@ -89,14 +91,14 @@ function paymentEmail(name: string, plan: string, amount: string, orderId: strin
         <p style="color:#374151;font-size:14px;margin:6px 0;">✅ All 6 Resume Templates + PDF download</p>
       </div>
       <div style="text-align:center;">
-        <a href="https://y-three-black-14.vercel.app"
+        <a href="${APP_URL}"
            style="background:linear-gradient(135deg,#059669,#34d399);color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:700;display:inline-block;">
           Start Using Pro Features
         </a>
       </div>
     </div>
     <div style="background:#f9fafb;padding:20px 32px;text-align:center;border-top:1px solid #e5e7eb;">
-      <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 Next Career Lab · Keep this email as your payment receipt.</p>
+      <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 Upgrade Your Resume · Keep this email as your payment receipt.</p>
     </div>
   </div>
 </body>
@@ -112,7 +114,7 @@ function proActivationEmail(name: string, plan: string): string {
   <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;margin-top:20px;margin-bottom:20px;">
     <div style="background:linear-gradient(135deg,#0f172a,#1e3a8a);padding:36px 32px;text-align:center;">
       <h1 style="color:#ffffff;margin:8px 0 4px;font-size:28px;font-weight:800;">You're Now Pro!</h1>
-      <p style="color:#93c5fd;margin:0;font-size:14px;">Next Career Lab — ${plan} Plan Activated</p>
+      <p style="color:#93c5fd;margin:0;font-size:14px;">Upgrade Your Resume — ${plan} Plan Activated</p>
     </div>
     <div style="padding:36px 32px;">
       <h2 style="color:#111827;font-size:20px;margin:0 0 12px;">Congratulations, ${name}!</h2>
@@ -132,14 +134,14 @@ function proActivationEmail(name: string, plan: string): string {
         <p style="color:#374151;font-size:14px;margin:6px 0;">4. Optimize LinkedIn for maximum visibility</p>
       </div>
       <div style="text-align:center;">
-        <a href="https://y-three-black-14.vercel.app"
+        <a href="${APP_URL}"
            style="background:linear-gradient(135deg,#f97316,#fb923c);color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:700;display:inline-block;">
           Explore Pro Features
         </a>
       </div>
     </div>
     <div style="background:#f9fafb;padding:20px 32px;text-align:center;border-top:1px solid #e5e7eb;">
-      <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 Next Career Lab · Thank you for choosing Pro!</p>
+      <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 Upgrade Your Resume · Thank you for choosing Pro!</p>
     </div>
   </div>
 </body>
@@ -147,6 +149,15 @@ function proActivationEmail(name: string, plan: string): string {
 }
 
 export async function POST(req: Request) {
+  const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    await adminAuth.verifyIdToken(token);
+  } catch {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const { type, email, name, plan, amount, orderId } = body;
@@ -159,13 +170,13 @@ export async function POST(req: Request) {
     let html = "";
 
     if (type === "welcome") {
-      subject = `Welcome to Next Career Lab, ${name}!`;
+      subject = `Welcome to Upgrade Your Resume, ${name}!`;
       html = welcomeEmail(name);
     } else if (type === "payment") {
-      subject = `Payment Confirmed — Next Career Lab Pro`;
+      subject = `Payment Confirmed — Upgrade Your Resume Pro`;
       html = paymentEmail(name, plan || "Pro", amount || "", orderId || "");
     } else if (type === "pro_activation") {
-      subject = `Your Pro Plan is Active — Next Career Lab`;
+      subject = `Your Pro Plan is Active — Upgrade Your Resume`;
       html = proActivationEmail(name, plan || "Pro");
     } else {
       return NextResponse.json({ error: "Invalid type" }, { status: 400 });
