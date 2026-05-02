@@ -103,11 +103,14 @@ export async function POST(req: Request) {
   if (snap.empty) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   if (action === "grant_pro") {
+    const plan = (body.plan as string) || "monthly";
     const expiry = new Date();
-    expiry.setFullYear(expiry.getFullYear() + 1);
+    if (plan === "annual") expiry.setFullYear(expiry.getFullYear() + 1);
+    else if (plan === "quarterly") expiry.setMonth(expiry.getMonth() + 3);
+    else expiry.setMonth(expiry.getMonth() + 1);
     await snap.docs[0].ref.update({
       plan: "pro",
-      proPlan: "annual",
+      proPlan: plan,
       proSince: new Date().toISOString(),
       proExpiry: expiry.toISOString(),
     });

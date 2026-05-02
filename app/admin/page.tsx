@@ -47,6 +47,7 @@ export default function AdminPage() {
   const [filter, setFilter] = useState<"all" | "pro" | "free">("all");
   const [actionLoading, setActionLoading] = useState("");
   const [toast, setToast] = useState("");
+  const [grantPlan, setGrantPlan] = useState<Record<string, string>>({});
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(""), 3000); }
 
@@ -78,15 +79,17 @@ export default function AdminPage() {
   }, []);
 
   async function grantPro(targetUid: string) {
+    const plan = grantPlan[targetUid] || "monthly";
     setActionLoading(targetUid + "_grant");
     try {
       const token = await user.getIdToken();
       const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ action: "grant_pro", targetUid }),
+        body: JSON.stringify({ action: "grant_pro", targetUid, plan }),
       });
-      if (res.ok) { showToast("✅ Pro granted (1 year)"); setStats(await loadStats(token)); }
+      const label = plan === "annual" ? "Annual" : plan === "quarterly" ? "Quarterly" : "Monthly";
+      if (res.ok) { showToast(`✅ Pro ${label} granted`); setStats(await loadStats(token)); }
       else showToast("❌ Failed");
     } catch { showToast("❌ Error"); }
     setActionLoading("");
@@ -311,15 +314,26 @@ export default function AdminPage() {
                         {u.plan === "pro" ? fmt(u.proExpiry) : "—"}
                       </td>
                       <td>
-                        <div style={{ display: "flex", gap: "6px" }}>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                           {u.plan !== "pro" || expired ? (
-                            <button
-                              className="action-btn btn-grant"
-                              disabled={actionLoading === u.uid + "_grant"}
-                              onClick={() => grantPro(u.uid)}
-                            >
-                              {actionLoading === u.uid + "_grant" ? "..." : "Grant Pro"}
-                            </button>
+                            <>
+                              <select
+                                value={grantPlan[u.uid] || "monthly"}
+                                onChange={e => setGrantPlan(prev => ({ ...prev, [u.uid]: e.target.value }))}
+                                style={{ padding: "4px 6px", borderRadius: "6px", border: "1px solid #d1fae5", fontSize: "11px", color: "#059669", fontWeight: 600, cursor: "pointer", outline: "none" }}
+                              >
+                                <option value="monthly">Monthly</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="annual">Annual</option>
+                              </select>
+                              <button
+                                className="action-btn btn-grant"
+                                disabled={actionLoading === u.uid + "_grant"}
+                                onClick={() => grantPro(u.uid)}
+                              >
+                                {actionLoading === u.uid + "_grant" ? "..." : "Grant"}
+                              </button>
+                            </>
                           ) : (
                             <button
                               className="action-btn btn-revoke"
