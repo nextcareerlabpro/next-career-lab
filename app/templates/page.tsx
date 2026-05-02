@@ -257,10 +257,14 @@ export default function TemplatesPage() {
     try {
       const token = await user.getIdToken();
       const parsed = await parseAndEnhanceResume(resumeText, token);
+      if (!parsed.name && !parsed.email && !parsed.role) {
+        showToast("⚠️ AI couldn't read resume data. Please fill the form manually.");
+      } else {
+        showToast("✨ Resume enhanced! Review and edit before downloading.");
+      }
       setData(parsed);
-      showToast("✨ Resume enhanced! Review and edit before downloading.");
-    } catch {
-      showToast("Parse failed. You can fill the form manually.");
+    } catch (e: any) {
+      showToast(`❌ ${e?.message || "Parse failed"}. Fill the form manually.`);
       setData(emptyResumeData);
     }
     setParsing(false);
@@ -468,10 +472,9 @@ export default function TemplatesPage() {
                 )}
 
                 {/* Jobs notice */}
-                {data.totalJobsFound > 3 && (
+                {data.totalJobsFound > 0 && (
                   <div className="jobs-notice">
-                    <strong>🤖 AI Job Selection:</strong> Found {data.totalJobsFound} jobs in your resume. Top 3 selected for main display: <strong>{data.selectedJobs}</strong>.
-                    {data.additionalExp && <span> Earlier experience summarized below.</span>}
+                    <strong>🤖 AI Job Detection:</strong> Found {data.totalJobsFound} jobs in your resume — all included below with no content removed.
                   </div>
                 )}
 
@@ -515,10 +518,51 @@ export default function TemplatesPage() {
                 </div>
                 <Field label="Key Achievements (separate with | character)" value={data.exp3Points} onChange={upd("exp3Points")} placeholder="Maintained legacy system | Onboarded 5 new clients" multiline />
 
-                {data.additionalExp && (
+                {data.exp4Title && (
                   <>
-                    <SectionTitle>📋 Earlier Experience (summarized)</SectionTitle>
-                    <Field label="Additional Experience" value={data.additionalExp} onChange={upd("additionalExp")} placeholder="Company A (Role, Year) | Company B (Role, Year)" multiline />
+                    <SectionTitle>🏢 Experience — Job 4</SectionTitle>
+                    <div className="form-grid-3" style={{ marginBottom: "10px" }}>
+                      <Field label="Job Title" value={data.exp4Title} onChange={upd("exp4Title")} placeholder="" />
+                      <Field label="Company" value={data.exp4Company} onChange={upd("exp4Company")} placeholder="" />
+                      <Field label="Duration" value={data.exp4Duration} onChange={upd("exp4Duration")} placeholder="" />
+                    </div>
+                    <Field label="Key Achievements (separate with | character)" value={data.exp4Points} onChange={upd("exp4Points")} placeholder="" multiline />
+                  </>
+                )}
+
+                {data.exp5Title && (
+                  <>
+                    <SectionTitle>🏢 Experience — Job 5</SectionTitle>
+                    <div className="form-grid-3" style={{ marginBottom: "10px" }}>
+                      <Field label="Job Title" value={data.exp5Title} onChange={upd("exp5Title")} placeholder="" />
+                      <Field label="Company" value={data.exp5Company} onChange={upd("exp5Company")} placeholder="" />
+                      <Field label="Duration" value={data.exp5Duration} onChange={upd("exp5Duration")} placeholder="" />
+                    </div>
+                    <Field label="Key Achievements (separate with | character)" value={data.exp5Points} onChange={upd("exp5Points")} placeholder="" multiline />
+                  </>
+                )}
+
+                {data.exp6Title && (
+                  <>
+                    <SectionTitle>🏢 Experience — Job 6</SectionTitle>
+                    <div className="form-grid-3" style={{ marginBottom: "10px" }}>
+                      <Field label="Job Title" value={data.exp6Title} onChange={upd("exp6Title")} placeholder="" />
+                      <Field label="Company" value={data.exp6Company} onChange={upd("exp6Company")} placeholder="" />
+                      <Field label="Duration" value={data.exp6Duration} onChange={upd("exp6Duration")} placeholder="" />
+                    </div>
+                    <Field label="Key Achievements (separate with | character)" value={data.exp6Points} onChange={upd("exp6Points")} placeholder="" multiline />
+                  </>
+                )}
+
+                {data.exp7Title && (
+                  <>
+                    <SectionTitle>🏢 Experience — Job 7</SectionTitle>
+                    <div className="form-grid-3" style={{ marginBottom: "10px" }}>
+                      <Field label="Job Title" value={data.exp7Title} onChange={upd("exp7Title")} placeholder="" />
+                      <Field label="Company" value={data.exp7Company} onChange={upd("exp7Company")} placeholder="" />
+                      <Field label="Duration" value={data.exp7Duration} onChange={upd("exp7Duration")} placeholder="" />
+                    </div>
+                    <Field label="Key Achievements (separate with | character)" value={data.exp7Points} onChange={upd("exp7Points")} placeholder="" multiline />
                   </>
                 )}
 

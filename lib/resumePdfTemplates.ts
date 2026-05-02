@@ -243,6 +243,10 @@ function generateSharp(pdf: jsPDF, d: ResumeData) {
     [d.exp1Title, d.exp1Company, d.exp1Duration, d.exp1Points],
     [d.exp2Title, d.exp2Company, d.exp2Duration, d.exp2Points],
     [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points],
+    [d.exp4Title, d.exp4Company, d.exp4Duration, d.exp4Points],
+    [d.exp5Title, d.exp5Company, d.exp5Duration, d.exp5Points],
+    [d.exp6Title, d.exp6Company, d.exp6Duration, d.exp6Points],
+    [d.exp7Title, d.exp7Company, d.exp7Duration, d.exp7Points],
   ];
   let expHeaderDone = false;
   jobs.forEach(([title, co, dur, pts]) => {
@@ -266,22 +270,8 @@ function generateSharp(pdf: jsPDF, d: ResumeData) {
     ry += 4;
   });
 
-  // Additional Experience
-  if (d.additionalExp) {
-    if (ry + 12 > 272) rightNewPage();
-    pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(107, 114, 128);
-    pdf.text("Additional Experience:", rX, ry); ry += 5;
-    pdf.setFont("helvetica", "normal"); pdf.setFontSize(8);
-    const al = pdf.splitTextToSize(d.additionalExp.split("|").join("  -  "), rW);
-    al.forEach((line: string) => {
-      if (ry + 5 > 272) rightNewPage();
-      pdf.text(line, rX, ry); ry += 5;
-    });
-    ry += 3;
-  }
-
 }
-  
+
 
 // ─── TEMPLATE 2: IVY (elegant single column) ─────────────────────
 function generateIvy(pdf: jsPDF, d: ResumeData) {
@@ -319,7 +309,11 @@ function generateIvy(pdf: jsPDF, d: ResumeData) {
 
   [[d.exp1Title, d.exp1Company, d.exp1Duration, d.exp1Points],
   [d.exp2Title, d.exp2Company, d.exp2Duration, d.exp2Points],
-  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points]].forEach(([title, co, dur, pts], idx) => {
+  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points],
+  [d.exp4Title, d.exp4Company, d.exp4Duration, d.exp4Points],
+  [d.exp5Title, d.exp5Company, d.exp5Duration, d.exp5Points],
+  [d.exp6Title, d.exp6Company, d.exp6Duration, d.exp6Points],
+  [d.exp7Title, d.exp7Company, d.exp7Duration, d.exp7Points]].forEach(([title, co, dur, pts], idx) => {
     if (!title) return;
     if (idx === 0) ivySection("EXPERIENCE");
     y = checkY(pdf, y, 14);
@@ -330,17 +324,12 @@ function generateIvy(pdf: jsPDF, d: ResumeData) {
     splitPts(pts).forEach(pt => {
       y = checkY(pdf, y, 8);
       pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 45, 30); pdf.setFontSize(8.5);
-      const ls = pdf.splitTextToSize(`-  ${pt}`, W - 34); pdf.text(ls, 20, y); y += ls.length * 5 + 1;
+      const ls = pdf.splitTextToSize(`-  ${pt}`, W - 34);
+      ls.forEach((line: string) => { y = checkY(pdf, y, 5); pdf.text(line, 20, y); y += 5; });
+      y += 1;
     });
     y += 5;
   });
-
-  if (d.additionalExp) {
-    y = checkY(pdf, y, 12);
-    pdf.setFontSize(8.5); pdf.setFont("helvetica", "italic"); pdf.setTextColor(107, 89, 60);
-    const al = pdf.splitTextToSize(d.additionalExp.split("|").join("  ·  "), W - 30);
-    pdf.text(al, 15, y); y += al.length * 5 + 6;
-  }
 
   const skills = splitComma(d.skills);
   if (skills.length) {
@@ -465,6 +454,15 @@ function generateSlate(pdf: jsPDF, d: ResumeData) {
     pdf.setDrawColor(153, 246, 228); pdf.setLineWidth(0.5); pdf.line(rX2, ry2 + 2, rX2 + rW2, ry2 + 2); ry2 += 9;
   }
 
+  function slateCheckY(needed: number) {
+    if (ry2 + needed > 272) {
+      pdf.addPage();
+      pdf.setFillColor(15, 118, 110); pdf.rect(0, 0, sideW, 297, "F");
+      pdf.setFillColor(247, 254, 254); pdf.rect(sideW, 0, W - sideW, 297, "F");
+      ry2 = 14;
+    }
+  }
+
   if (d.summary) {
     slateRight("ABOUT ME");
     pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
@@ -473,28 +471,27 @@ function generateSlate(pdf: jsPDF, d: ResumeData) {
 
   [[d.exp1Title, d.exp1Company, d.exp1Duration, d.exp1Points],
   [d.exp2Title, d.exp2Company, d.exp2Duration, d.exp2Points],
-  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points]].forEach(([title, co, dur, pts], idx) => {
+  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points],
+  [d.exp4Title, d.exp4Company, d.exp4Duration, d.exp4Points],
+  [d.exp5Title, d.exp5Company, d.exp5Duration, d.exp5Points],
+  [d.exp6Title, d.exp6Company, d.exp6Duration, d.exp6Points],
+  [d.exp7Title, d.exp7Company, d.exp7Duration, d.exp7Points]].forEach(([title, co, dur, pts], idx) => {
     if (!title) return;
     if (idx === 0) slateRight("EXPERIENCE");
-    ry2 = checkY(pdf, ry2, 14);
+    slateCheckY(14);
     pdf.setFontSize(10); pdf.setFont("helvetica", "bold"); pdf.setTextColor(17, 24, 39);
     pdf.text(title, rX2, ry2);
     pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(15, 118, 110);
     pdf.text(`${co}  ·  ${dur}`, rX2, ry2 + 5); ry2 += 11;
     splitPts(pts).forEach(pt => {
-      ry2 = checkY(pdf, ry2, 8);
+      slateCheckY(8);
       pdf.setTextColor(55, 65, 81); pdf.setFontSize(8.5);
-      const ls = pdf.splitTextToSize(`-  ${pt}`, rW2); pdf.text(ls, rX2 + 2, ry2); ry2 += ls.length * 4.5 + 1;
+      const ls = pdf.splitTextToSize(`-  ${pt}`, rW2);
+      ls.forEach((line: string) => { slateCheckY(5); pdf.text(line, rX2 + 2, ry2); ry2 += 4.5; });
+      ry2 += 1;
     });
     ry2 += 4;
   });
-
-  if (d.additionalExp) {
-    ry2 = checkY(pdf, ry2, 12);
-    pdf.setFontSize(8.5); pdf.setFont("helvetica", "italic"); pdf.setTextColor(107, 114, 128);
-    const al = pdf.splitTextToSize(d.additionalExp.split("|").join("  ·  "), rW2);
-    pdf.text(al, rX2, ry2); ry2 += al.length * 4.5 + 4;
-  }
   
 }
 
@@ -545,7 +542,11 @@ function generateEmber(pdf: jsPDF, d: ResumeData) {
 
   [[d.exp1Title, d.exp1Company, d.exp1Duration, d.exp1Points],
   [d.exp2Title, d.exp2Company, d.exp2Duration, d.exp2Points],
-  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points]].forEach(([title, co, dur, pts], idx) => {
+  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points],
+  [d.exp4Title, d.exp4Company, d.exp4Duration, d.exp4Points],
+  [d.exp5Title, d.exp5Company, d.exp5Duration, d.exp5Points],
+  [d.exp6Title, d.exp6Company, d.exp6Duration, d.exp6Points],
+  [d.exp7Title, d.exp7Company, d.exp7Duration, d.exp7Points]].forEach(([title, co, dur, pts], idx) => {
     if (!title) return;
     if (idx === 0) emberSection("EXPERIENCE");
     y3 = checkY(pdf, y3, 14);
@@ -556,17 +557,12 @@ function generateEmber(pdf: jsPDF, d: ResumeData) {
     splitPts(pts).forEach(pt => {
       y3 = checkY(pdf, y3, 8);
       pdf.setTextColor(55, 65, 81); pdf.setFontSize(8.5);
-      const ls = pdf.splitTextToSize(`• ${pt}`, W - 32); pdf.text(ls, 18, y3); y3 += ls.length * 4.5 + 1;
+      const ls = pdf.splitTextToSize(`• ${pt}`, W - 32);
+      ls.forEach((line: string) => { y3 = checkY(pdf, y3, 5); pdf.text(line, 18, y3); y3 += 4.5; });
+      y3 += 1;
     });
     y3 += 4;
   });
-
-  if (d.additionalExp) {
-    y3 = checkY(pdf, y3, 12);
-    pdf.setFontSize(8.5); pdf.setFont("helvetica", "italic"); pdf.setTextColor(107, 114, 128);
-    const al = pdf.splitTextToSize(`${d.additionalExp.split("|").join("  ·  ")}`, W - 30);
-    pdf.text(al, 15, y3); y3 += al.length * 5 + 5;
-  }
 
   if (d.edu1Degree) {
     emberSection("EDUCATION");
@@ -620,6 +616,15 @@ function generateClarity(pdf: jsPDF, d: ResumeData) {
     pdf.setDrawColor(243, 244, 246); pdf.setLineWidth(0.2); pdf.line(22, y4 + 2, W - 15, y4 + 2); y4 += 8;
   }
 
+  function clarityCheckY(needed: number) {
+    if (y4 + needed > 272) {
+      pdf.addPage();
+      pdf.setFillColor(255, 255, 255); pdf.rect(0, 0, W, 297, "F");
+      pdf.setDrawColor(17, 24, 39); pdf.setLineWidth(2); pdf.line(15, 0, 15, 297);
+      y4 = 14;
+    }
+  }
+
   if (d.summary) {
     claritySection("Profile");
     pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
@@ -628,28 +633,27 @@ function generateClarity(pdf: jsPDF, d: ResumeData) {
 
   [[d.exp1Title, d.exp1Company, d.exp1Duration, d.exp1Points],
   [d.exp2Title, d.exp2Company, d.exp2Duration, d.exp2Points],
-  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points]].forEach(([title, co, dur, pts], idx) => {
+  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points],
+  [d.exp4Title, d.exp4Company, d.exp4Duration, d.exp4Points],
+  [d.exp5Title, d.exp5Company, d.exp5Duration, d.exp5Points],
+  [d.exp6Title, d.exp6Company, d.exp6Duration, d.exp6Points],
+  [d.exp7Title, d.exp7Company, d.exp7Duration, d.exp7Points]].forEach(([title, co, dur, pts], idx) => {
     if (!title) return;
     if (idx === 0) claritySection("Experience");
-    y4 = checkY(pdf, y4, 14);
+    clarityCheckY(14);
     pdf.setFontSize(10); pdf.setFont("helvetica", "bold"); pdf.setTextColor(17, 24, 39);
     pdf.text(title, 22, y4);
     pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(107, 114, 128);
     pdf.text(`${co}   ${dur}`, 22, y4 + 5); y4 += 11;
     splitPts(pts).forEach(pt => {
-      y4 = checkY(pdf, y4, 8);
+      clarityCheckY(8);
       pdf.setTextColor(75, 85, 99); pdf.setFontSize(8.5);
-      const ls = pdf.splitTextToSize(`-  ${pt}`, W - 40); pdf.text(ls, 25, y4); y4 += ls.length * 5 + 1;
+      const ls = pdf.splitTextToSize(`-  ${pt}`, W - 40);
+      ls.forEach((line: string) => { clarityCheckY(5); pdf.text(line, 25, y4); y4 += 5; });
+      y4 += 1;
     });
     y4 += 5;
   });
-
-  if (d.additionalExp) {
-    y4 = checkY(pdf, y4, 10);
-    pdf.setFontSize(8.5); pdf.setFont("helvetica", "italic"); pdf.setTextColor(107, 114, 128);
-    const al = pdf.splitTextToSize(`${d.additionalExp.split("|").join("  ·  ")}`, W - 37);
-    pdf.text(al, 22, y4); y4 += al.length * 5 + 6;
-  }
 
   const skills4 = splitComma(d.skills);
   if (skills4.length) {
@@ -738,7 +742,11 @@ function generateRoyal(pdf: jsPDF, d: ResumeData) {
 
   [[d.exp1Title, d.exp1Company, d.exp1Duration, d.exp1Points],
   [d.exp2Title, d.exp2Company, d.exp2Duration, d.exp2Points],
-  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points]].forEach(([title, co, dur, pts], idx) => {
+  [d.exp3Title, d.exp3Company, d.exp3Duration, d.exp3Points],
+  [d.exp4Title, d.exp4Company, d.exp4Duration, d.exp4Points],
+  [d.exp5Title, d.exp5Company, d.exp5Duration, d.exp5Points],
+  [d.exp6Title, d.exp6Company, d.exp6Duration, d.exp6Points],
+  [d.exp7Title, d.exp7Company, d.exp7Duration, d.exp7Points]].forEach(([title, co, dur, pts], idx) => {
     if (!title) return;
     if (idx === 0) royalSection("PROFESSIONAL EXPERIENCE");
     y5 = checkY(pdf, y5, 14);
@@ -749,17 +757,12 @@ function generateRoyal(pdf: jsPDF, d: ResumeData) {
     splitPts(pts).forEach(pt => {
       y5 = checkY(pdf, y5, 8);
       pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81); pdf.setFontSize(8.5);
-      const ls = pdf.splitTextToSize(`-  ${pt}`, W - 36); pdf.text(ls, 18, y5); y5 += ls.length * 4.5 + 1;
+      const ls = pdf.splitTextToSize(`-  ${pt}`, W - 36);
+      ls.forEach((line: string) => { y5 = checkY(pdf, y5, 5); pdf.text(line, 18, y5); y5 += 4.5; });
+      y5 += 1;
     });
     y5 += 4;
   });
-
-  if (d.additionalExp) {
-    y5 = checkY(pdf, y5, 12);
-    pdf.setFontSize(8.5); pdf.setFont("helvetica", "italic"); pdf.setTextColor(107, 114, 128);
-    const al = pdf.splitTextToSize(d.additionalExp.split("|").join("  ·  "), W - 30);
-    pdf.text(al, 15, y5); y5 += al.length * 5 + 5;
-  }
 
   if (d.edu1Degree) {
     royalSection("EDUCATION");
