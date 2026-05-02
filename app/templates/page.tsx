@@ -246,14 +246,16 @@ export default function TemplatesPage() {
         alert("Please open this page in Chrome or Safari to sign in with Google.");
         return;
       }
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(ua);
-      if (isMobile) {
-        await signInWithRedirect(auth, provider);
-      } else {
-        try { await signInWithPopup(auth, provider); }
-        catch { await signInWithRedirect(auth, provider); }
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e: any) {
+        if (e?.code === "auth/popup-blocked") {
+          await signInWithRedirect(auth, provider);
+        } else if (e?.code !== "auth/popup-closed-by-user") {
+          throw e;
+        }
       }
-    } catch { alert("Login failed. Please open the site in Chrome or Safari."); }
+    } catch { alert("Login failed. Please try again."); }
   }
 
   async function handleUseTemplate(id: number) {
