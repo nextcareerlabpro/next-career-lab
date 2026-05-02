@@ -586,9 +586,9 @@ export default function Page() {
           <header className="header">
             <div>
               <div className="logo">
-                <span className="logo-n">Next </span>
-                <span className="logo-c">Career </span>
-                <span className="logo-l">Lab</span>
+                <span className="logo-n">Upgrade </span>
+                <span className="logo-c">Your </span>
+                <span className="logo-l">Resume</span>
               </div>
               <div className="logo-sub">AI Powered Career Suite</div>
             </div>
