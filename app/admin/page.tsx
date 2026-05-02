@@ -153,37 +153,71 @@ export default function AdminPage() {
         body { font-family: 'Inter', -apple-system, sans-serif; background: #f8fafc; }
         .admin-wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
 
+        /* Header */
+        .admin-header { background: #fff; borderBottom: 1px solid #e5e7eb; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; gap: 8px; flex-wrap: wrap; }
+        .admin-header-email { font-size: 13px; color: #6b7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+
+        /* Stats */
         .stat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 24px; }
         .stat-card { background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; padding: 16px 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
         .stat-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
         .stat-value { font-size: 26px; font-weight: 800; color: #111827; line-height: 1; }
         .stat-sub { font-size: 11px; color: #9ca3af; margin-top: 4px; }
 
+        /* Cards */
         .section-card { background: #fff; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 1px 6px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 24px; }
-        .section-header { padding: 16px 20px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .section-header { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
         .section-title { font-size: 15px; font-weight: 700; color: #111827; }
 
-        .search-input { padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; width: 220px; }
-        .filter-btns { display: flex; gap: 6px; }
+        /* Search & filter */
+        .search-input { padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; width: 100%; }
+        .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
         .filter-btn { padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid #e5e7eb; background: #fff; color: #6b7280; transition: all 0.15s; }
         .filter-btn.active { border-color: #059669; background: #f0fdf4; color: #059669; }
 
-        table { width: 100%; border-collapse: collapse; }
-        th { padding: 10px 14px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; text-align: left; background: #f9fafb; border-bottom: 1px solid #f3f4f6; }
-        td { padding: 12px 14px; font-size: 13px; color: #374151; border-bottom: 1px solid #f9fafb; vertical-align: middle; }
+        /* Table — desktop */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 640px; }
+        th { padding: 10px 12px; font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; text-align: left; background: #f9fafb; border-bottom: 1px solid #f3f4f6; white-space: nowrap; }
+        td { padding: 11px 12px; font-size: 13px; color: #374151; border-bottom: 1px solid #f9fafb; vertical-align: middle; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #fafafa; }
 
+        /* User card — mobile only */
+        .user-card { display: none; padding: 14px 16px; border-bottom: 1px solid #f3f4f6; }
+        .user-card:last-child { border-bottom: none; }
+        .user-card-email { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 6px; word-break: break-all; }
+        .user-card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12px; color: #6b7280; }
+        .user-card-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+
         .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-        .action-btn { padding: 5px 11px; border-radius: 7px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; transition: opacity 0.15s; }
+        .action-btn { padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; transition: opacity 0.15s; }
         .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-grant { background: #059669; color: #fff; }
         .btn-revoke { background: #fee2e2; color: #dc2626; }
 
-        .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 999; padding: 10px 22px; border-radius: 12px; font-size: 13px; font-weight: 600; background: #fff; border: 1.5px solid #059669; color: #059669; box-shadow: 0 4px 20px rgba(5,150,105,0.15); white-space: nowrap; }
+        .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 999; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; background: #fff; border: 1.5px solid #059669; color: #059669; box-shadow: 0 4px 20px rgba(5,150,105,0.15); white-space: nowrap; max-width: 90vw; text-align: center; }
 
-        @media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(3,1fr); } }
-        @media (max-width: 600px) { .stat-grid { grid-template-columns: repeat(2,1fr); } }
+        /* Plan breakdown mobile */
+        .plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+
+        @media (max-width: 900px) {
+          .stat-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 600px) {
+          .admin-wrap { padding: 12px 12px; }
+          .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+          .stat-card { padding: 12px 14px; border-radius: 12px; }
+          .stat-value { font-size: 22px; }
+          .plan-grid { grid-template-columns: 1fr; }
+          .plan-grid > div { border-right: none !important; border-bottom: 1px solid #f3f4f6; }
+          .plan-grid > div:last-child { border-bottom: none; }
+          .section-header { flex-direction: column; align-items: flex-start; }
+          .search-input { width: 100%; }
+          .desktop-table { display: none; }
+          .user-card { display: block; }
+          .admin-header-email { display: none; }
+        }
       `}</style>
 
       {toast && <div className="toast">{toast}</div>}
@@ -241,7 +275,7 @@ export default function AdminPage() {
           <div className="section-header">
             <span className="section-title">📦 Plan Breakdown</span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0" }}>
+          <div className="plan-grid" style={{ gap: "0" }}>
             {[
               { label: "Monthly", key: "monthly", color: "#059669", bg: "#f0fdf4", price: "₹299/mo" },
               { label: "Quarterly", key: "quarterly", color: "#06b6d4", bg: "#ecfeff", price: "₹597/qtr" },
@@ -279,7 +313,8 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
+          {/* Desktop table */}
+          <div className="table-wrap desktop-table">
             <table>
               <thead>
                 <tr>
@@ -351,6 +386,67 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile cards */}
+          {filtered.length === 0 && (
+            <div style={{ textAlign: "center", color: "#9ca3af", padding: "32px", display: "none" }} className="user-card">No users found</div>
+          )}
+          {filtered.map(u => {
+            const pc = planColor(u.plan, u.proPlan);
+            const expired = u.plan === "pro" && isExpired(u.proExpiry);
+            return (
+              <div key={u.uid + "_card"} className="user-card">
+                <div className="user-card-email">{u.email || "—"}</div>
+                <div className="user-card-row">
+                  <span className="badge" style={{ background: expired ? "#fee2e2" : pc.bg, color: expired ? "#dc2626" : pc.color }}>
+                    {expired ? "⚠ Expired" : pc.label}
+                  </span>
+                  <span style={{ fontSize: "11px", color: "#9ca3af" }}>Joined: {fmt(u.createdAt)}</span>
+                </div>
+                <div className="user-card-row">
+                  <span>Scans: <strong>{u.scansUsed ?? 0}</strong></span>
+                  <span>Reports: <strong>{u.reportCount}</strong></span>
+                </div>
+                {u.plan === "pro" && (
+                  <div className="user-card-row">
+                    <span style={{ color: expired ? "#dc2626" : "#9ca3af", fontSize: "11px" }}>
+                      {expired ? "⚠ Expired" : `Valid till: ${fmt(u.proExpiry)}`}
+                    </span>
+                  </div>
+                )}
+                <div className="user-card-actions">
+                  {u.plan !== "pro" || expired ? (
+                    <>
+                      <select
+                        value={grantPlan[u.uid] || "monthly"}
+                        onChange={e => setGrantPlan(prev => ({ ...prev, [u.uid]: e.target.value }))}
+                        style={{ padding: "5px 8px", borderRadius: "6px", border: "1px solid #d1fae5", fontSize: "12px", color: "#059669", fontWeight: 600, outline: "none", flex: 1 }}
+                      >
+                        <option value="monthly">Monthly ₹299</option>
+                        <option value="quarterly">Quarterly ₹597</option>
+                        <option value="annual">Annual ₹1788</option>
+                      </select>
+                      <button
+                        className="action-btn btn-grant"
+                        disabled={actionLoading === u.uid + "_grant"}
+                        onClick={() => grantPro(u.uid)}
+                      >
+                        {actionLoading === u.uid + "_grant" ? "..." : "Grant"}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className="action-btn btn-revoke"
+                      disabled={actionLoading === u.uid + "_revoke"}
+                      onClick={() => revokePro(u.uid)}
+                    >
+                      {actionLoading === u.uid + "_revoke" ? "..." : "Revoke Pro"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
       </div>
