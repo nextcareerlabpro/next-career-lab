@@ -219,7 +219,9 @@ export default function TemplatesPage() {
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(""), 3500); }
 
   useEffect(() => {
-    getRedirectResult(auth).catch(console.error);
+    getRedirectResult(auth)
+      .then((result) => { if (result?.user) setUser(result.user); })
+      .catch((err) => { if (err?.code !== "auth/no-current-user") showToast("Sign-in failed. Open in Chrome or Safari and try again."); });
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
@@ -238,9 +240,20 @@ export default function TemplatesPage() {
 
   async function login() {
     try {
-      try { await signInWithPopup(auth, provider); }
-      catch { await signInWithRedirect(auth, provider); }
-    } catch { alert("Login failed."); }
+      const ua = navigator.userAgent;
+      const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|Twitter|TikTok|MicroMessenger/i.test(ua);
+      if (isInApp) {
+        alert("Please open this page in Chrome or Safari to sign in with Google.");
+        return;
+      }
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(ua);
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        try { await signInWithPopup(auth, provider); }
+        catch { await signInWithRedirect(auth, provider); }
+      }
+    } catch { alert("Login failed. Please open the site in Chrome or Safari."); }
   }
 
   async function handleUseTemplate(id: number) {

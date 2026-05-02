@@ -160,7 +160,9 @@ export default function Page() {
   }
 
   useEffect(() => {
-    getRedirectResult(auth).catch(console.error);
+    getRedirectResult(auth)
+      .then((result) => { if (result?.user) setUser(result.user); })
+      .catch((err) => { if (err?.code !== "auth/no-current-user") showToast("Sign-in failed. Open the site in Chrome or Safari and try again."); });
     const unsub = onAuthStateChanged(auth, (u) => { setUser(u); setBooting(false); });
     return () => unsub();
   }, []);
@@ -221,14 +223,20 @@ export default function Page() {
 
   async function login() {
   try {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const ua = navigator.userAgent;
+    const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|Twitter|TikTok|MicroMessenger/i.test(ua);
+    if (isInApp) {
+      alert("Please open this page in Chrome or Safari to sign in with Google.");
+      return;
+    }
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(ua);
     if (isMobile) {
       await signInWithRedirect(auth, provider);
     } else {
       try { await signInWithPopup(auth, provider); }
       catch { await signInWithRedirect(auth, provider); }
     }
-  } catch { alert("Login failed. Please try again."); }
+  } catch { alert("Login failed. Please open the site in Chrome or Safari."); }
 }
 
   async function logout() {
