@@ -35,6 +35,7 @@ export default function Page() {
   const [scanLimit] = useState(3);
   const [isPro, setIsPro] = useState(false);
   const [proSince, setProSince] = useState<string>("");
+  const [proValidTill, setProValidTill] = useState<string>("");
   const [userPlan, setUserPlan] = useState<string>("monthly");
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("monthly");
@@ -213,6 +214,7 @@ export default function Page() {
       }
       setUserPlan(data.proPlan || "monthly");
       if (data.proSince) setProSince(new Date(data.proSince).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
+      if (data.proExpiry) setProValidTill(new Date(data.proExpiry).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
     }
   }
 
@@ -671,7 +673,7 @@ export default function Page() {
                 <div>
                   {user && isPro && (
                     <div className="status-strip" style={{ background: "rgba(255,255,255,0.9)", border: "1px solid #a7f3d0" }}>
-                      <span style={{ color: "#059669" }}>✅ Pro {userPlan === "quarterly" ? "Quarterly" : userPlan === "annual" ? "Annual" : "Monthly"}{proSince ? ` · ${proSince}` : ""}</span>
+                      <span style={{ color: "#059669" }}>✅ Pro {userPlan === "quarterly" ? "Quarterly" : userPlan === "annual" ? "Annual" : "Monthly"}{proValidTill ? ` · Valid till ${proValidTill}` : ""}</span>
                       <span style={{ color: "#f97316", fontWeight: 600 }}>{scansUsed} scans</span>
                     </div>
                   )}
@@ -1050,7 +1052,7 @@ export default function Page() {
 
                   {isPro && (
                     <div style={{ marginTop:"14px", padding:"12px 16px", borderRadius:"10px", background:"#f0fdf4", border:"1px solid #bbf7d0", color:"#059669", fontSize:"13px", fontWeight:500 }}>
-                      ✅ Pro {userPlan==="quarterly"?"Quarterly":userPlan==="annual"?"Annual":"Monthly"} Plan active{proSince ? ` since ${proSince}` : ""}
+                      ✅ Pro {userPlan==="quarterly"?"Quarterly":userPlan==="annual"?"Annual":"Monthly"} Plan active{proValidTill ? ` · Valid till ${proValidTill}` : ""}
                     </div>
                   )}
                 </div>
