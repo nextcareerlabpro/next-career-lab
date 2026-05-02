@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebaseAdmin";
+
+async function verifyFirebaseToken(idToken: string): Promise<boolean> {
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    const res = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken }) }
+    );
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data?.users?.[0]?.localId;
+  } catch { return false; }
+}
 
 export async function POST(req: Request) {
   const token = req.headers.get("Authorization")?.replace("Bearer ", "");
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  try {
-    await adminAuth.verifyIdToken(token);
-  } catch {
-    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-  }
+  const valid = await verifyFirebaseToken(token);
+  if (!valid) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
   try {
     const body = await req.json();

@@ -57,22 +57,15 @@ function addValueSummaryPage(pdf: jsPDF, d: ResumeData, templateName: string) {
 
   y += 4;
 
-  // Jobs selected box
-  if (d.totalJobsFound > 3) {
-    y = checkY(pdf, y, 30);
+  if (d.totalJobsFound > 0) {
+    y = checkY(pdf, y, 20);
     pdf.setFillColor(239, 246, 255);
-    pdf.roundedRect(15, y, W - 30, 28, 3, 3, "F");
+    pdf.roundedRect(15, y, W - 30, 16, 3, 3, "F");
     pdf.setDrawColor(147, 197, 253); pdf.setLineWidth(0.5);
-    pdf.roundedRect(15, y, W - 30, 28, 3, 3, "S");
+    pdf.roundedRect(15, y, W - 30, 16, 3, 3, "S");
     pdf.setTextColor(30, 58, 138); pdf.setFontSize(10); pdf.setFont("helvetica", "bold");
-    pdf.text(`Job Selection: ${d.totalJobsFound} jobs found, Top 3 selected for resume`, 22, y + 9);
-    pdf.setTextColor(55, 65, 81); pdf.setFontSize(9); pdf.setFont("helvetica", "normal");
-    pdf.text(`Selected: ${d.selectedJobs}`, 22, y + 18);
-    if (d.additionalExp) {
-      const addLines = pdf.splitTextToSize(`Earlier experience summarized: ${d.additionalExp}`, W - 44);
-      pdf.text(addLines[0], 22, y + 24);
-    }
-    y += 36;
+    pdf.text(`All ${d.totalJobsFound} jobs included — no experience removed`, 22, y + 10);
+    y += 24;
   }
 
   y += 4;
@@ -92,8 +85,8 @@ function addValueSummaryPage(pdf: jsPDF, d: ResumeData, templateName: string) {
   pdf.setTextColor(75, 85, 99); pdf.setFont("helvetica", "normal"); pdf.setFontSize(8);
   pdf.text("• Responsibility-focused bullets", 20, y + 16);
   pdf.text("• Generic summary paragraph", 20, y + 23);
-  pdf.text(`• ${d.totalJobsFound > 3 ? d.totalJobsFound + " jobs, unfiltered" : "Basic formatting"}`, 20, y + 30);
-  pdf.text("• Skills not optimized", 20, y + 37);
+  pdf.text("• Skills not highlighted for ATS", 20, y + 30);
+  pdf.text("• Content not ATS-optimized", 20, y + 37);
 
   // After column
   const col2X = 15 + (W - 34) / 2 + 4;
@@ -104,8 +97,8 @@ function addValueSummaryPage(pdf: jsPDF, d: ResumeData, templateName: string) {
   pdf.setTextColor(75, 85, 99); pdf.setFont("helvetica", "normal"); pdf.setFontSize(8);
   pdf.text("• Achievement bullets with metrics", col2X + 5, y + 16);
   pdf.text("• Recruiter-optimized summary", col2X + 5, y + 23);
-  pdf.text("• Top 3 most relevant jobs", col2X + 5, y + 30);
-  pdf.text("• ATS-friendly skills added", col2X + 5, y + 37);
+  pdf.text("• All jobs & bullets preserved", col2X + 5, y + 30);
+  pdf.text("• ATS-friendly skills & language", col2X + 5, y + 37);
 
   y += 50;
 

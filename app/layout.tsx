@@ -13,10 +13,35 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-  export const metadata: Metadata = {
-  title: "Upgrade Your Resume — AI Powered Resume & Career Suite",
-  description: "ATS Resume Analyzer, AI Resume Writer, Cover Letter Generator, LinkedIn Optimizer and Resume Templates. Powered by AI.",
+export const metadata: Metadata = {
+  metadataBase: new URL("https://upgradeyourresume.com"),
+  title: "Upgrade Your Resume — Free ATS Resume Analyzer & AI Career Tools",
+  description: "Check your ATS score for free. AI Resume Writer, Cover Letter Generator, LinkedIn Optimizer and Job Description Analyzer. Get hired faster with AI-powered career tools.",
+  keywords: "ATS resume analyzer, resume score checker, AI resume writer, cover letter generator, LinkedIn optimizer, job description analyzer, free resume checker, ATS score",
+  authors: [{ name: "Upgrade Your Resume" }],
+  openGraph: {
+    title: "Upgrade Your Resume — Free ATS Resume Analyzer & AI Career Tools",
+    description: "Check your ATS score for free. AI Resume Writer, Cover Letter Generator, LinkedIn Optimizer. Get hired faster.",
+    url: "https://upgradeyourresume.com",
+    siteName: "Upgrade Your Resume",
+    type: "website",
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Upgrade Your Resume — Free ATS Resume Analyzer & AI Career Tools",
+    description: "Check your ATS score for free. AI Resume Writer, Cover Letter Generator, LinkedIn Optimizer. Get hired faster.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  alternates: {
+    canonical: "https://upgradeyourresume.com",
+  },
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{

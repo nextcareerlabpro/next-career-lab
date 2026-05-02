@@ -9,30 +9,19 @@ export interface ResumeData {
   role: string;
   summary: string;
   skills: string;
-  exp1Title: string;
-  exp1Company: string;
-  exp1Duration: string;
-  exp1Points: string;
-  exp2Title: string;
-  exp2Company: string;
-  exp2Duration: string;
-  exp2Points: string;
-  exp3Title: string;
-  exp3Company: string;
-  exp3Duration: string;
-  exp3Points: string;
-  additionalExp: string;
-  edu1Degree: string;
-  edu1School: string;
-  edu1Year: string;
-  edu2Degree: string;
-  edu2School: string;
-  edu2Year: string;
+  exp1Title: string; exp1Company: string; exp1Duration: string; exp1Points: string;
+  exp2Title: string; exp2Company: string; exp2Duration: string; exp2Points: string;
+  exp3Title: string; exp3Company: string; exp3Duration: string; exp3Points: string;
+  exp4Title: string; exp4Company: string; exp4Duration: string; exp4Points: string;
+  exp5Title: string; exp5Company: string; exp5Duration: string; exp5Points: string;
+  exp6Title: string; exp6Company: string; exp6Duration: string; exp6Points: string;
+  exp7Title: string; exp7Company: string; exp7Duration: string; exp7Points: string;
+  edu1Degree: string; edu1School: string; edu1Year: string;
+  edu2Degree: string; edu2School: string; edu2Year: string;
   certifications: string;
   languages: string;
   aiImprovements: string;
   totalJobsFound: number;
-  selectedJobs: string;
 }
 
 export const emptyResumeData: ResumeData = {
@@ -41,78 +30,99 @@ export const emptyResumeData: ResumeData = {
   exp1Title: "", exp1Company: "", exp1Duration: "", exp1Points: "",
   exp2Title: "", exp2Company: "", exp2Duration: "", exp2Points: "",
   exp3Title: "", exp3Company: "", exp3Duration: "", exp3Points: "",
-  additionalExp: "",
+  exp4Title: "", exp4Company: "", exp4Duration: "", exp4Points: "",
+  exp5Title: "", exp5Company: "", exp5Duration: "", exp5Points: "",
+  exp6Title: "", exp6Company: "", exp6Duration: "", exp6Points: "",
+  exp7Title: "", exp7Company: "", exp7Duration: "", exp7Points: "",
   edu1Degree: "", edu1School: "", edu1Year: "",
   edu2Degree: "", edu2School: "", edu2Year: "",
   certifications: "", languages: "",
-  aiImprovements: "", totalJobsFound: 0, selectedJobs: "",
+  aiImprovements: "", totalJobsFound: 0,
 };
 
-export async function parseAndEnhanceResume(resumeText: string): Promise<ResumeData> {
+export async function parseAndEnhanceResume(resumeText: string, token: string): Promise<ResumeData> {
   const res = await fetch("/api/ai", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({
-      prompt: `You are a professional resume writer and career coach with 20 years of experience. 
-Analyze this resume carefully and return ONLY a valid JSON object.
+      prompt: `You are a professional resume writer and ATS expert with 20 years of experience.
+Analyze this resume and return ONLY a valid JSON object.
 
-Your tasks:
-1. EXTRACT all data accurately
-2. ENHANCE content professionally:
-   - Summary: Write powerful 2-3 sentence recruiter-optimized summary with strong action words
-   - Bullet points: Convert responsibilities to achievement-focused bullets with metrics/numbers where possible
-   - Skills: Clean up, capitalize properly, add relevant technical keywords from their experience
-3. SELECT top 3 most recent AND relevant jobs for main display
-4. SUMMARIZE remaining jobs in additionalExp as one line each
-5. Note exactly what you improved in aiImprovements field
+RULES — follow strictly:
+1. Include EVERY job from the resume. Do not skip, merge, or summarize any position.
+2. Include ALL bullet points from each job — rewrite each one to be achievement-focused with metrics/numbers where the original data supports it. Do NOT reduce the count.
+3. Do NOT invent data. Only improve phrasing. Dates, companies, degrees must stay exactly as in the original.
+4. Extract ALL skills mentioned anywhere in the resume.
+5. Summary: write a strong 3-4 sentence ATS-optimized professional summary.
 
-Return ONLY this JSON, no explanation, no markdown, no backticks:
+Return ONLY this JSON (no markdown, no backticks, no explanation):
 {
   "name": "full name",
-  "email": "email address",
-  "phone": "phone number",
+  "email": "email",
+  "phone": "phone",
   "location": "city, country",
-  "role": "most recent job title, properly formatted",
-  "summary": "powerful 2-3 sentence professional summary, recruiter-optimized with keywords",
-  "skills": "top 14 skills, comma separated, properly capitalized",
+  "role": "most recent job title",
+  "summary": "3-4 sentence ATS-optimized professional summary",
+  "skills": "ALL skills from resume, comma separated, properly capitalized",
   "exp1Title": "most recent job title",
-  "exp1Company": "most recent company",
-  "exp1Duration": "e.g. Jan 2022 – Present",
-  "exp1Points": "3 strong achievement bullets separated by | with metrics",
-  "exp2Title": "2nd most recent job title",
-  "exp2Company": "2nd company",
-  "exp2Duration": "duration",
-  "exp2Points": "3 achievement bullets separated by |",
-  "exp3Title": "3rd most recent job title",
-  "exp3Company": "3rd company",
-  "exp3Duration": "duration",
-  "exp3Points": "2-3 achievement bullets separated by |",
-  "additionalExp": "Earlier: CompanyA (Role, Year) | CompanyB (Role, Year) — format for any remaining jobs",
+  "exp1Company": "company name",
+  "exp1Duration": "e.g. Oct 2014 – Present",
+  "exp1Points": "ALL bullet points from this job, each rewritten for ATS, separated by |",
+  "exp2Title": "2nd job title or empty",
+  "exp2Company": "company or empty",
+  "exp2Duration": "duration or empty",
+  "exp2Points": "ALL bullet points from this job separated by | or empty",
+  "exp3Title": "3rd job title or empty",
+  "exp3Company": "company or empty",
+  "exp3Duration": "duration or empty",
+  "exp3Points": "ALL bullet points from this job separated by | or empty",
+  "exp4Title": "4th job title or empty",
+  "exp4Company": "company or empty",
+  "exp4Duration": "duration or empty",
+  "exp4Points": "ALL bullet points from this job separated by | or empty",
+  "exp5Title": "5th job title or empty",
+  "exp5Company": "company or empty",
+  "exp5Duration": "duration or empty",
+  "exp5Points": "ALL bullet points from this job separated by | or empty",
+  "exp6Title": "6th job title or empty",
+  "exp6Company": "company or empty",
+  "exp6Duration": "duration or empty",
+  "exp6Points": "ALL bullet points from this job separated by | or empty",
+  "exp7Title": "7th job title or empty",
+  "exp7Company": "company or empty",
+  "exp7Duration": "duration or empty",
+  "exp7Points": "ALL bullet points from this job separated by | or empty",
   "edu1Degree": "highest degree",
   "edu1School": "university/college",
   "edu1Year": "year",
   "edu2Degree": "second degree if any, else empty",
-  "edu2School": "school name or empty",
+  "edu2School": "school or empty",
   "edu2Year": "year or empty",
-  "certifications": "comma separated certifications, or empty",
-  "languages": "comma separated languages known, or empty",
-  "aiImprovements": "Brief note: what AI improved e.g. Summary rewritten | Skills expanded from 11 to 17 | Bullets converted to achievements with metrics | Top 3 of 6 jobs selected",
-  "totalJobsFound": 6,
-  "selectedJobs": "CIK Telecom, Navigant Technologies, Mahindra Satyam"
+  "certifications": "comma separated certifications or empty",
+  "languages": "comma separated languages or empty",
+  "aiImprovements": "one line: what was improved e.g. Summary rewritten | Bullets made achievement-focused | Skills expanded",
+  "totalJobsFound": 0
 }
 
 Resume text:
-${resumeText.substring(0, 12000)}`
+${resumeText}`
     }),
   });
 
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `API error ${res.status}`);
+  }
+
   const data = await res.json();
+  if (!data.output) throw new Error("No output from AI");
+
   let parsed: any = {};
 
   try {
     parsed = JSON.parse(data.output);
   } catch {
-    const match = data.output.match(/\{[\s\S]*\}/);
+    const match = (data.output as string).match(/\{[\s\S]*\}/);
     if (match) {
       try { parsed = JSON.parse(match[0]); } catch { parsed = {}; }
     }
@@ -126,29 +136,18 @@ ${resumeText.substring(0, 12000)}`
     role: parsed.role || "",
     summary: parsed.summary || "",
     skills: parsed.skills || "",
-    exp1Title: parsed.exp1Title || "",
-    exp1Company: parsed.exp1Company || "",
-    exp1Duration: parsed.exp1Duration || "",
-    exp1Points: parsed.exp1Points || "",
-    exp2Title: parsed.exp2Title || "",
-    exp2Company: parsed.exp2Company || "",
-    exp2Duration: parsed.exp2Duration || "",
-    exp2Points: parsed.exp2Points || "",
-    exp3Title: parsed.exp3Title || "",
-    exp3Company: parsed.exp3Company || "",
-    exp3Duration: parsed.exp3Duration || "",
-    exp3Points: parsed.exp3Points || "",
-    additionalExp: parsed.additionalExp || "",
-    edu1Degree: parsed.edu1Degree || "",
-    edu1School: parsed.edu1School || "",
-    edu1Year: parsed.edu1Year || "",
-    edu2Degree: parsed.edu2Degree || "",
-    edu2School: parsed.edu2School || "",
-    edu2Year: parsed.edu2Year || "",
+    exp1Title: parsed.exp1Title || "", exp1Company: parsed.exp1Company || "", exp1Duration: parsed.exp1Duration || "", exp1Points: parsed.exp1Points || "",
+    exp2Title: parsed.exp2Title || "", exp2Company: parsed.exp2Company || "", exp2Duration: parsed.exp2Duration || "", exp2Points: parsed.exp2Points || "",
+    exp3Title: parsed.exp3Title || "", exp3Company: parsed.exp3Company || "", exp3Duration: parsed.exp3Duration || "", exp3Points: parsed.exp3Points || "",
+    exp4Title: parsed.exp4Title || "", exp4Company: parsed.exp4Company || "", exp4Duration: parsed.exp4Duration || "", exp4Points: parsed.exp4Points || "",
+    exp5Title: parsed.exp5Title || "", exp5Company: parsed.exp5Company || "", exp5Duration: parsed.exp5Duration || "", exp5Points: parsed.exp5Points || "",
+    exp6Title: parsed.exp6Title || "", exp6Company: parsed.exp6Company || "", exp6Duration: parsed.exp6Duration || "", exp6Points: parsed.exp6Points || "",
+    exp7Title: parsed.exp7Title || "", exp7Company: parsed.exp7Company || "", exp7Duration: parsed.exp7Duration || "", exp7Points: parsed.exp7Points || "",
+    edu1Degree: parsed.edu1Degree || "", edu1School: parsed.edu1School || "", edu1Year: parsed.edu1Year || "",
+    edu2Degree: parsed.edu2Degree || "", edu2School: parsed.edu2School || "", edu2Year: parsed.edu2Year || "",
     certifications: parsed.certifications || "",
     languages: parsed.languages || "",
     aiImprovements: parsed.aiImprovements || "",
     totalJobsFound: Number(parsed.totalJobsFound) || 0,
-    selectedJobs: parsed.selectedJobs || "",
   };
 }

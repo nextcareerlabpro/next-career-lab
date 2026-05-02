@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
+import LandingPage from "./LandingPage";
 import { auth, db, provider } from "./firebase";
 import {
   signInWithPopup,
@@ -455,6 +456,7 @@ export default function Page() {
   }
 
   if (booting) return null;
+  if (!user) return <LandingPage onLogin={login} />;
 
   const inp: any = { background: "#fff", border: "1.5px solid #d1fae5", color: "#111827", borderRadius: "10px", padding: "12px 14px", width: "100%", fontSize: "14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
 
@@ -463,8 +465,8 @@ export default function Page() {
     { id: "resume", label: "✍️ AI Resume Writer", locked: !isPro },
     { id: "cover", label: "📝 Cover Letter", locked: !isPro },
     { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: !isPro },
-    { id: "templates", label: "📄 Resume Templates — Coming Soon", locked: true },
-    { id: "jdanalyzer", label: "🎯 JD Analyzer", locked: !isPro },
+    { id: "templates", label: "📄 Resume Templates", locked: !isPro },
+    { id: "jdanalyzer", label: "🎯 JD Analyzer", locked: false },
     { id: "billing", label: "💳 Billing & Plans", locked: false },
     { id: "help", label: "❓ Help & Tutorials", locked: false },
   ];
@@ -799,7 +801,7 @@ export default function Page() {
                       </button>
                     </div>
                   )}
-                  {isPro && (<div>
+                  <div>
                   <p className="card-title">🎯 Job Description Analyzer</p>
                   <p style={{ fontSize:"13px", color:"#6b7280", marginBottom:"20px" }}>
                     Paste any job description — AI will analyze your resume against it and tell you exactly what to improve.
@@ -877,40 +879,67 @@ export default function Page() {
                         </div>
                       )}
 
-                      {/* Resume Tweaks */}
-                      {jdResult.resumeTweaks?.length > 0 && (
-                        <div style={{ padding:"14px", borderRadius:"12px", background:"#fff7ed", border:"1px solid #fed7aa", marginBottom:"12px" }}>
-                          <p style={{ fontSize:"12px", fontWeight:700, color:"#c2410c", margin:"0 0 10px" }}>✏️ Resume Tweaks</p>
-                          {jdResult.resumeTweaks.map((t: string, i: number) => (
-                            <p key={i} style={{ fontSize:"12px", color:"#9a3412", margin:"0 0 6px", paddingLeft:"12px", borderLeft:"3px solid #f97316" }}>{t}</p>
-                          ))}
+                      {/* Resume Tweaks + Section Feedback + Skill Gaps — blurred for free users */}
+                      <div style={{ position:"relative", marginTop:"4px" }}>
+                        <div style={{ filter: jdResult.isProLocked ? "blur(4px)" : "none", pointerEvents: jdResult.isProLocked ? "none" : "auto" }}>
+                          {/* Resume Tweaks */}
+                          <div style={{ padding:"14px", borderRadius:"12px", background:"#fff7ed", border:"1px solid #fed7aa", marginBottom:"12px" }}>
+                            <p style={{ fontSize:"12px", fontWeight:700, color:"#c2410c", margin:"0 0 10px" }}>✏️ Resume Tweaks</p>
+                            {jdResult.isProLocked ? (
+                              <>
+                                <p style={{ fontSize:"12px", color:"#9a3412", margin:"0 0 6px", paddingLeft:"12px", borderLeft:"3px solid #f97316" }}>Add quantifiable metrics to your experience bullets</p>
+                                <p style={{ fontSize:"12px", color:"#9a3412", margin:"0 0 6px", paddingLeft:"12px", borderLeft:"3px solid #f97316" }}>Tailor your summary to match the job requirements</p>
+                              </>
+                            ) : jdResult.resumeTweaks?.map((t: string, i: number) => (
+                              <p key={i} style={{ fontSize:"12px", color:"#9a3412", margin:"0 0 6px", paddingLeft:"12px", borderLeft:"3px solid #f97316" }}>{t}</p>
+                            ))}
+                          </div>
+                          {/* Section Feedback */}
+                          <div style={{ padding:"14px", borderRadius:"12px", background:"#f5f3ff", border:"1px solid #ddd6fe", marginBottom:"12px" }}>
+                            <p style={{ fontSize:"12px", fontWeight:700, color:"#7c3aed", margin:"0 0 10px" }}>📋 Section Feedback</p>
+                            {jdResult.isProLocked ? (
+                              <>
+                                <div style={{ marginBottom:"8px" }}><span style={{ fontSize:"11px", fontWeight:700, color:"#7c3aed" }}>Summary: </span><span style={{ fontSize:"11px", color:"#4c1d95" }}>Needs more alignment with the target role</span></div>
+                                <div style={{ marginBottom:"8px" }}><span style={{ fontSize:"11px", fontWeight:700, color:"#7c3aed" }}>Experience: </span><span style={{ fontSize:"11px", color:"#4c1d95" }}>Add impact metrics to strengthen credibility</span></div>
+                                <div><span style={{ fontSize:"11px", fontWeight:700, color:"#7c3aed" }}>Skills: </span><span style={{ fontSize:"11px", color:"#4c1d95" }}>Include more role-specific technical skills</span></div>
+                              </>
+                            ) : Object.entries(jdResult.sectionFeedback || {}).map(([section, feedback]: any) => (
+                              <div key={section} style={{ marginBottom:"8px" }}>
+                                <span style={{ fontSize:"11px", fontWeight:700, color:"#7c3aed", textTransform:"capitalize" }}>{section}: </span>
+                                <span style={{ fontSize:"11px", color:"#4c1d95" }}>{feedback}</span>
+                              </div>
+                            ))}
+                          </div>
+                          {/* Skill Gaps */}
+                          <div style={{ padding:"14px", borderRadius:"12px", background:"#fafafa", border:"1px solid #e5e7eb" }}>
+                            <p style={{ fontSize:"12px", fontWeight:700, color:"#374151", margin:"0 0 10px" }}>📚 Skill Gaps to Address</p>
+                            {jdResult.isProLocked ? (
+                              <>
+                                <p style={{ fontSize:"12px", color:"#6b7280", margin:"0 0 4px" }}>• Advanced cloud infrastructure skills</p>
+                                <p style={{ fontSize:"12px", color:"#6b7280", margin:"0 0 4px" }}>• System design and architecture knowledge</p>
+                              </>
+                            ) : jdResult.skillGaps?.map((g: string, i: number) => (
+                              <p key={i} style={{ fontSize:"12px", color:"#6b7280", margin:"0 0 4px" }}>• {g}</p>
+                            ))}
+                          </div>
                         </div>
-                      )}
 
-                      {/* Section Feedback */}
-                      {jdResult.sectionFeedback && (
-                        <div style={{ padding:"14px", borderRadius:"12px", background:"#f5f3ff", border:"1px solid #ddd6fe" }}>
-                          <p style={{ fontSize:"12px", fontWeight:700, color:"#7c3aed", margin:"0 0 10px" }}>📋 Section Feedback</p>
-                          {Object.entries(jdResult.sectionFeedback).map(([section, feedback]: any) => (
-                            <div key={section} style={{ marginBottom:"8px" }}>
-                              <span style={{ fontSize:"11px", fontWeight:700, color:"#7c3aed", textTransform:"capitalize" }}>{section}: </span>
-                              <span style={{ fontSize:"11px", color:"#4c1d95" }}>{feedback}</span>
+                        {/* Upgrade overlay for free users */}
+                        {jdResult.isProLocked && (
+                          <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,0.7)", borderRadius:"12px", gap:"12px" }}>
+                            <div style={{ background:"linear-gradient(135deg,#f97316,#fb923c)", borderRadius:"12px", padding:"20px 28px", textAlign:"center", boxShadow:"0 4px 20px rgba(249,115,22,0.3)" }}>
+                              <p style={{ fontSize:"18px", margin:"0 0 6px" }}>🔒</p>
+                              <p style={{ fontSize:"14px", fontWeight:700, color:"#fff", margin:"0 0 4px" }}>Pro Feature</p>
+                              <p style={{ fontSize:"12px", color:"#fed7aa", margin:"0 0 14px" }}>Resume Tweaks, Section Feedback & Skill Gaps</p>
+                              <button onClick={() => setTab("billing")} style={{ padding:"9px 22px", borderRadius:"8px", fontSize:"13px", fontWeight:700, background:"#fff", color:"#f97316", border:"none", cursor:"pointer" }}>
+                                Upgrade to Pro →
+                              </button>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          </div>
+                        )}
+                      </div>
 
-                      {/* Skill Gaps */}
-                      {jdResult.skillGaps?.length > 0 && (
-                        <div style={{ padding:"14px", borderRadius:"12px", background:"#fafafa", border:"1px solid #e5e7eb", marginTop:"12px" }}>
-                          <p style={{ fontSize:"12px", fontWeight:700, color:"#374151", margin:"0 0 10px" }}>📚 Skill Gaps to Address</p>
-                          {jdResult.skillGaps.map((g: string, i: number) => (
-                            <p key={i} style={{ fontSize:"12px", color:"#6b7280", margin:"0 0 4px" }}>• {g}</p>
-                          ))}
-                        </div>
-                      )}
-
-                      {isPro && (
+                      {!jdResult.isProLocked && (
                         <div
                           onClick={downloadJDPdf}
                           style={{ marginTop:"16px", marginRight:"10px", padding:"10px 20px", borderRadius:"9px", fontSize:"13px", fontWeight:600, background:"#059669", color:"#fff", cursor:"pointer", display:"inline-block" }}
@@ -926,7 +955,7 @@ export default function Page() {
                       </button>
                     </div>
                   )}
-                  </div>)}
+                  </div>
                 </div>
               )}
               {tab === "billing" && (
@@ -1077,7 +1106,7 @@ function AppFooter() {
         <a href="/privacy.html" target="_blank" style={{ color:"#059669", textDecoration:"none", margin:"0 10px" }}>Privacy Policy</a>
         <a href="/refund.html" target="_blank" style={{ color:"#059669", textDecoration:"none", margin:"0 10px" }}>Refund Policy</a>
       </div>
-      <p>© 2026 Upgrade Your Resume — Ashish Kumar Sharma. All rights reserved.</p>
+      <p>© 2026 Upgrade Your Resume. All rights reserved.</p>
     </footer>
   );
 }

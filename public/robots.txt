@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://upgradeyourresume.com/sitemap.xml

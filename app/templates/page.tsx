@@ -214,6 +214,7 @@ export default function TemplatesPage() {
   const [resumeText, setResumeText] = useState("");
   const [data, setData] = useState<ResumeData>(emptyResumeData);
   const [includeDeclaration, setIncludeDeclaration] = useState(false);
+  const [noResumeWarning, setNoResumeWarning] = useState(false);
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(""), 3500); }
 
@@ -224,7 +225,8 @@ export default function TemplatesPage() {
       if (u) {
         // Load resume text from sessionStorage (passed from main page)
         const stored = sessionStorage.getItem("ncl_resume_text");
-        if (stored) setResumeText(stored);
+        if (stored) { setResumeText(stored); }
+        else { setNoResumeWarning(true); }
         // Load pro status
         const snap = await getDocs(query(collection(db, "users"), where("uid", "==", u.uid)));
         if (!snap.empty) setIsPro(snap.docs[0].data().plan === "pro");
@@ -244,22 +246,22 @@ export default function TemplatesPage() {
   async function handleUseTemplate(id: number) {
     setSelectedId(id);
     if (!user) { alert("Please login first."); return; }
+    if (!resumeText.trim()) {
+      showToast("⚠️ Please upload your resume in ATS Analyzer first.");
+      setNoResumeWarning(true);
+      return;
+    }
     setParsing(true);
+    setNoResumeWarning(false);
     showToast("⏳ AI is enhancing your resume...");
     try {
-      if (resumeText.trim()) {
-        const parsed = await parseAndEnhanceResume(resumeText);
-        setData(parsed);
-        showToast("✨ Resume enhanced! Review and download.");
-      } else {
-        setData(emptyResumeData);
-        setStep("form");
-        showToast("⚠️ No resume uploaded. Please fill fields manually or go back to ATS tab and upload first.");
-        setParsing(false);
-        return;
-      }
+      const token = await user.getIdToken();
+      const parsed = await parseAndEnhanceResume(resumeText, token);
+      setData(parsed);
+      showToast("✨ Resume enhanced! Review and edit before downloading.");
     } catch {
-      showToast("Parse failed. Fill fields manually.");
+      showToast("Parse failed. You can fill the form manually.");
+      setData(emptyResumeData);
     }
     setParsing(false);
     setStep("form");
@@ -353,9 +355,9 @@ export default function TemplatesPage() {
           {/* Header */}
           <header className="tmpl-header">
             <a href="/" className="tmpl-logo">
-              <span style={{ color: "#059669" }}>Next </span>
-              <span style={{ color: "#111827" }}>Career </span>
-              <span style={{ color: "#f97316" }}>Lab</span>
+              <span style={{ color: "#059669" }}>Upgrade </span>
+              <span style={{ color: "#f97316" }}>Your </span>
+              <span style={{ color: "#059669" }}>Resume</span>
             </a>
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               {user ? (
@@ -381,7 +383,26 @@ export default function TemplatesPage() {
             {step === "gallery" && (
               <>
                 <p className="tmpl-card-title">📄 Resume Templates</p>
-                <p className="tmpl-subtitle">Choose a template — preview how your resume will look, then let AI fill it from your uploaded resume.</p>
+                <p className="tmpl-subtitle">Choose a template — AI will fill it from your uploaded resume. All fields are editable before downloading.</p>
+
+                {noResumeWarning && (
+                  <div style={{ background: "#fef2f2", border: "1.5px solid #fca5a5", borderRadius: "12px", padding: "16px 20px", marginBottom: "20px", display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "22px" }}>⚠️</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: "14px", fontWeight: 700, color: "#b91c1c", margin: "0 0 4px" }}>No resume uploaded</p>
+                      <p style={{ fontSize: "13px", color: "#6b7280", margin: 0 }}>Please go back to the ATS Analyzer tab, upload your resume, then come back here.</p>
+                    </div>
+                    <a href="/" style={{ padding: "9px 18px", borderRadius: "9px", fontSize: "13px", fontWeight: 700, background: "#059669", color: "#fff", textDecoration: "none", whiteSpace: "nowrap" }}>
+                      ← Go Upload Resume
+                    </a>
+                  </div>
+                )}
+
+                {!noResumeWarning && resumeText.trim() && (
+                  <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "10px", padding: "10px 16px", marginBottom: "18px", fontSize: "13px", color: "#059669", fontWeight: 600 }}>
+                    ✅ Resume detected — AI will auto-fill the form when you click "Use This →"
+                  </div>
+                )}
 
                 <div className="gallery-grid">
                   {TEMPLATES.map(t => (
