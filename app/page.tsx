@@ -455,7 +455,19 @@ export default function Page() {
     setSidebarOpen(false);
   }
 
-  if (booting) return null;
+  if (booting) return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #e6faf5 0%, #fef9f0 60%, #fde8e8 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "Inter, -apple-system, sans-serif", gap: "20px" }}>
+      <div style={{ position: "relative", width: "52px", height: "52px" }}>
+        <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "4px solid #d1fae5" }} />
+        <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "4px solid transparent", borderTopColor: "#059669", animation: "spin 0.8s linear infinite" }} />
+      </div>
+      <div style={{ textAlign: "center" }}>
+        <p style={{ fontSize: "16px", fontWeight: 700, color: "#059669", margin: "0 0 4px" }}>Upgrade Your Resume</p>
+        <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>Loading your dashboard...</p>
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
   if (!user) return <LandingPage onLogin={login} />;
 
   const inp: any = { background: "#fff", border: "1.5px solid #d1fae5", color: "#111827", borderRadius: "10px", padding: "12px 14px", width: "100%", fontSize: "14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
