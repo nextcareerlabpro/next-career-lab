@@ -23,7 +23,7 @@ import {
   where,
 } from "firebase/firestore";
 
-type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "jdanalyzer" | "billing" | "help";
+type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "jdanalyzer" | "billing" | "help" | "dashboard";
 
 export default function Page() {
   const [tab, setTab] = useState<TabType>("ats");
@@ -34,9 +34,12 @@ export default function Page() {
   const [toast, setToast] = useState("");
   const [scansUsed, setScansUsed] = useState(0);
   const [scanLimit] = useState(3);
+  const [jdAnalysesUsed, setJdAnalysesUsed] = useState(0);
+  const [memberSince, setMemberSince] = useState<string>("");
   const [isPro, setIsPro] = useState(false);
   const [proSince, setProSince] = useState<string>("");
   const [proValidTill, setProValidTill] = useState<string>("");
+  const [proExpiryDate, setProExpiryDate] = useState<string>("");
   const [userPlan, setUserPlan] = useState<string>("monthly");
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("monthly");
@@ -305,7 +308,7 @@ export default function Page() {
 
   useEffect(() => {
     const saved = sessionStorage.getItem("ncl_tab") as TabType;
-    const valid: TabType[] = ["ats","resume","cover","linkedin","jdanalyzer","billing","help"];
+    const valid: TabType[] = ["ats","resume","cover","linkedin","jdanalyzer","billing","help","dashboard"];
     if (saved && valid.includes(saved)) setTab(saved);
     getRedirectResult(auth)
       .then((result) => { if (result?.user) setUser(result.user); })
@@ -359,8 +362,13 @@ export default function Page() {
         setIsPro(data.plan === "pro");
       }
       setUserPlan(data.proPlan || "monthly");
+      setJdAnalysesUsed(data.jdAnalysesUsed || 0);
       if (data.proSince) setProSince(new Date(data.proSince).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
-      if (data.proExpiry) setProValidTill(new Date(data.proExpiry).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
+      if (data.proExpiry) {
+        setProValidTill(new Date(data.proExpiry).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
+        setProExpiryDate(data.proExpiry);
+      }
+      if (data.createdAt?.toDate) setMemberSince(data.createdAt.toDate().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
     }
   }
 
@@ -639,7 +647,7 @@ export default function Page() {
       window.location.href = "/templates";
       return;
     }
-    if (!isPro && t !== "ats" && t !== "billing" && t !== "help") {
+    if (!isPro && t !== "ats" && t !== "billing" && t !== "help" && t !== "dashboard") {
       showToast("This feature requires Pro plan!"); switchTab("billing"); return;
     }
     switchTab(t);
@@ -669,6 +677,7 @@ export default function Page() {
   const inp: any = { background: "#fff", border: "1.5px solid #d1fae5", color: "#111827", borderRadius: "10px", padding: "12px 14px", width: "100%", fontSize: "14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
 
   const navItems = [
+    { id: "dashboard", label: "👤 My Dashboard", locked: false },
     { id: "ats", label: "🔍 ATS Analyzer", locked: false },
     { id: "resume", label: "✍️ AI Resume Writer", locked: !isPro },
     { id: "cover", label: "📝 Cover Letter", locked: !isPro },
@@ -1261,6 +1270,111 @@ export default function Page() {
                   {helpTab==="linkedin" && <HelpSteps title="LinkedIn Optimizer" steps={["Enter your target job title","Click Generate","Copy headline to LinkedIn profile","Copy About section to summary","Update and wait for recruiters","Refresh every 3 months"]} tip="Use keywords that recruiters in your industry search for." />}
                 </div>
               )}
+
+              {tab === "dashboard" && (() => {
+                const planLabel: Record<string, string> = { monthly: "Pro Monthly", quarterly: "Pro Quarterly", annual: "Pro Annual" };
+                const planColor2: Record<string, string> = { monthly: "#059669", quarterly: "#06b6d4", annual: "#f97316" };
+                const daysLeft = proExpiryDate ? Math.max(0, Math.ceil((new Date(proExpiryDate).getTime() - Date.now()) / 86400000)) : 0;
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    {/* Welcome card */}
+                    <div style={{ background: "linear-gradient(135deg, #059669 0%, #047857 100%)", borderRadius: "16px", padding: "24px", color: "#fff", display: "flex", alignItems: "center", gap: "16px" }}>
+                      {user?.photoURL
+                        ? <img src={user.photoURL} alt="avatar" style={{ width: "56px", height: "56px", borderRadius: "50%", border: "3px solid rgba(255,255,255,0.4)" }} />
+                        : <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", fontWeight: 700 }}>{(user?.displayName || user?.email || "U")[0].toUpperCase()}</div>
+                      }
+                      <div>
+                        <p style={{ margin: 0, fontSize: "20px", fontWeight: 700 }}>{user?.displayName || "Welcome!"}</p>
+                        <p style={{ margin: "2px 0 0", fontSize: "13px", opacity: 0.85 }}>{user?.email}</p>
+                        {memberSince && <p style={{ margin: "4px 0 0", fontSize: "11px", opacity: 0.7 }}>Member since {memberSince}</p>}
+                      </div>
+                    </div>
+
+                    {/* Plan status */}
+                    <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #d1fae5", padding: "20px" }}>
+                      <p style={{ margin: "0 0 14px", fontSize: "13px", fontWeight: 700, color: "#111827" }}>Plan Status</p>
+                      {isPro ? (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
+                          <span style={{ background: planColor2[userPlan] || "#059669", color: "#fff", borderRadius: "20px", padding: "5px 14px", fontSize: "12px", fontWeight: 700 }}>
+                            ✨ {planLabel[userPlan] || "Pro"}
+                          </span>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                            {proSince && <span style={{ fontSize: "11px", color: "#6b7280" }}>Active since: <strong style={{ color: "#111827" }}>{proSince}</strong></span>}
+                            {proValidTill && <span style={{ fontSize: "11px", color: daysLeft <= 7 ? "#dc2626" : "#6b7280" }}>Expires: <strong style={{ color: daysLeft <= 7 ? "#dc2626" : "#111827" }}>{proValidTill}</strong> ({daysLeft} days left)</span>}
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                          <span style={{ background: "#f3f4f6", color: "#374151", borderRadius: "20px", padding: "5px 14px", fontSize: "12px", fontWeight: 700 }}>Free Plan</span>
+                          <button onClick={() => switchTab("billing")} style={{ background: "#f97316", color: "#fff", border: "none", borderRadius: "8px", padding: "7px 16px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>Upgrade to Pro →</button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Usage stats */}
+                    <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #d1fae5", padding: "20px" }}>
+                      <p style={{ margin: "0 0 14px", fontSize: "13px", fontWeight: 700, color: "#111827" }}>Usage This Month</p>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                        {/* ATS scans */}
+                        <div style={{ background: "#f0fdf4", borderRadius: "10px", padding: "14px" }}>
+                          <p style={{ margin: "0 0 4px", fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>ATS SCANS</p>
+                          <p style={{ margin: "0 0 8px", fontSize: "28px", fontWeight: 800, color: "#059669" }}>{scansUsed}<span style={{ fontSize: "13px", fontWeight: 500, color: "#9ca3af" }}>{isPro ? "" : `/${scanLimit}`}</span></p>
+                          {!isPro && (
+                            <div style={{ background: "#d1fae5", borderRadius: "4px", height: "6px", overflow: "hidden" }}>
+                              <div style={{ background: scansUsed >= scanLimit ? "#dc2626" : "#059669", height: "100%", width: `${Math.min(100, (scansUsed / scanLimit) * 100)}%`, borderRadius: "4px", transition: "width 0.3s" }} />
+                            </div>
+                          )}
+                          {isPro && <p style={{ margin: 0, fontSize: "10px", color: "#059669" }}>Unlimited</p>}
+                        </div>
+                        {/* JD analyses */}
+                        <div style={{ background: "#f0fdf4", borderRadius: "10px", padding: "14px" }}>
+                          <p style={{ margin: "0 0 4px", fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>JD ANALYSES</p>
+                          <p style={{ margin: "0 0 4px", fontSize: "28px", fontWeight: 800, color: "#059669" }}>{jdAnalysesUsed}</p>
+                          <p style={{ margin: 0, fontSize: "10px", color: "#6b7280" }}>Total all time</p>
+                        </div>
+                      </div>
+                      {/* Reports count */}
+                      <div style={{ marginTop: "12px", background: "#f0fdf4", borderRadius: "10px", padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div>
+                          <p style={{ margin: "0 0 2px", fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>ATS REPORTS SAVED</p>
+                          <p style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#059669" }}>{history.length}</p>
+                        </div>
+                        <button onClick={() => switchTab("ats")} style={{ background: "#059669", color: "#fff", border: "none", borderRadius: "8px", padding: "7px 14px", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}>Run New Scan →</button>
+                      </div>
+                    </div>
+
+                    {/* Recent reports */}
+                    {history.length > 0 && (
+                      <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #d1fae5", padding: "20px" }}>
+                        <p style={{ margin: "0 0 14px", fontSize: "13px", fontWeight: 700, color: "#111827" }}>Recent ATS Reports</p>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                          {history.slice(0, 5).map((h: any) => {
+                            const s = Number(h.score || 0);
+                            const c = s >= 70 ? "#059669" : s >= 40 ? "#f97316" : "#dc2626";
+                            const bg = s >= 70 ? "#f0fdf4" : s >= 40 ? "#fff7ed" : "#fff1f2";
+                            const date = h.createdAt?.seconds ? new Date(h.createdAt.seconds * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
+                            return (
+                              <div key={h.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 12px", background: bg, borderRadius: "8px" }}>
+                                <div style={{ minWidth: "40px", height: "40px", borderRadius: "50%", background: c, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 800 }}>{s}%</div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p style={{ margin: 0, fontSize: "12px", fontWeight: 600, color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{h.job?.slice(0, 60) || "ATS Scan"}</p>
+                                  {date && <p style={{ margin: "2px 0 0", fontSize: "10px", color: "#9ca3af" }}>{date}</p>}
+                                </div>
+                                <button onClick={() => switchTab("ats")} style={{ background: "none", border: `1px solid ${c}`, color: c, borderRadius: "6px", padding: "4px 10px", fontSize: "10px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>View</button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {history.length > 5 && (
+                          <button onClick={() => switchTab("ats")} style={{ marginTop: "10px", width: "100%", background: "none", border: "1px solid #d1fae5", borderRadius: "8px", padding: "8px", fontSize: "12px", color: "#059669", fontWeight: 600, cursor: "pointer" }}>
+                            View all {history.length} reports →
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
             </section>
           </div>
