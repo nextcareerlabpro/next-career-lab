@@ -322,7 +322,7 @@ export default function Page() {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
     if (ref) {
-      sessionStorage.setItem("ref_code", ref.toUpperCase());
+      localStorage.setItem("ref_code", ref.toUpperCase());
       // Clean URL without reload
       const clean = window.location.pathname;
       window.history.replaceState({}, "", clean);
@@ -352,8 +352,8 @@ export default function Page() {
     const snap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
     if (snap.empty) {
       const newCode = generateReferralCode(user.uid);
-      const refBy = sessionStorage.getItem("ref_code") || "";
-      sessionStorage.removeItem("ref_code");
+      const refBy = localStorage.getItem("ref_code") || "";
+      localStorage.removeItem("ref_code");
       await addDoc(collection(db, "users"), {
         uid: user.uid, email: user.email, plan: "free",
         scansUsed: 0, scansLimit: 3,
