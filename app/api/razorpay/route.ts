@@ -16,8 +16,10 @@ export async function POST(req: Request) {
       const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
 
       const plan = body.plan as string;
-      const amount = PLAN_PRICES[plan];
-      if (!amount) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+      const baseAmount = PLAN_PRICES[plan];
+      if (!baseAmount) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+      // Allow coupon-discounted amount from client (validated server-side via /api/coupon)
+      const amount = body.amount && Number(body.amount) >= 100 ? Number(body.amount) : baseAmount;
 
       const response = await fetch("https://api.razorpay.com/v1/orders", {
         method: "POST",

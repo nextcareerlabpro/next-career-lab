@@ -18,6 +18,18 @@ interface UserRow {
   reportCount: number;
 }
 
+interface Coupon {
+  id: string;
+  code: string;
+  type: "percent" | "fixed";
+  value: number;
+  validTill: string | null;
+  usageLimit: number;
+  usedCount: number;
+  active: boolean;
+  createdAt: string;
+}
+
 interface Stats {
   totalUsers: number;
   proUsers: number;
@@ -49,6 +61,9 @@ export default function AdminPage() {
   const [actionLoading, setActionLoading] = useState("");
   const [toast, setToast] = useState("");
   const [grantPlan, setGrantPlan] = useState<Record<string, string>>({});
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [newCoupon, setNewCoupon] = useState({ code: "", type: "percent", value: "", validTill: "", usageLimit: "" });
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(""), 3000); }
 
@@ -66,8 +81,10 @@ export default function AdminPage() {
       if (u) {
         try {
           const token = await u.getIdToken();
-          const data = await loadStats(token);
+          const [data] = await Promise.all([loadStats(token)]);
           setStats(data);
+          const cRes = await fetch("/api/admin?action=coupons", { headers: { Authorization: `Bearer ${token}` } });
+          if (cRes.ok) { const cd = await cRes.json(); setCoupons(cd.coupons || []); }
         } catch (e: any) {
           setError(e.message || "Access denied. Admin only.");
         }
@@ -110,6 +127,52 @@ export default function AdminPage() {
       else showToast("❌ Failed");
     } catch { showToast("❌ Error"); }
     setActionLoading("");
+  }
+
+  async function loadCoupons() {
+    if (!user) return;
+    const token = await user.getIdToken();
+    const res = await fetch("/api/admin?action=coupons", { headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) { const d = await res.json(); setCoupons(d.coupons || []); }
+  }
+
+  async function createCoupon() {
+    if (!newCoupon.code || !newCoupon.value) { showToast("Fill code and value"); return; }
+    setCouponLoading(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "create_coupon", ...newCoupon }),
+      });
+      const d = await res.json();
+      if (res.ok) { showToast("✅ Coupon created"); setNewCoupon({ code: "", type: "percent", value: "", validTill: "", usageLimit: "" }); await loadCoupons(); }
+      else showToast("❌ " + (d.error || "Failed"));
+    } catch { showToast("❌ Error"); }
+    setCouponLoading(false);
+  }
+
+  async function deleteCoupon(id: string, code: string) {
+    if (!confirm(`Delete coupon "${code}"?`)) return;
+    const token = await user.getIdToken();
+    const res = await fetch("/api/admin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ action: "delete_coupon", couponId: id }),
+    });
+    if (res.ok) { showToast("✅ Deleted"); await loadCoupons(); }
+    else showToast("❌ Failed");
+  }
+
+  async function toggleCoupon(id: string, active: boolean) {
+    const token = await user.getIdToken();
+    await fetch("/api/admin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ action: "toggle_coupon", couponId: id, active }),
+    });
+    await loadCoupons();
   }
 
   const filtered = (stats?.users || []).filter(u => {
@@ -454,6 +517,102 @@ export default function AdminPage() {
         </div>
 
       </div>
+
+      {/* Coupon Management */}
+      <div style={{ maxWidth: "960px", margin: "24px auto 0", padding: "0 16px 48px" }}>
+        <div style={{ background: "#fff", borderRadius: "16px", border: "1px solid #d1fae5", padding: "24px" }}>
+          <p style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700, color: "#111827" }}>🎟️ Coupon Management</p>
+
+          {/* Create coupon form */}
+          <div style={{ background: "#f0fdf4", borderRadius: "12px", padding: "16px", marginBottom: "24px" }}>
+            <p style={{ margin: "0 0 12px", fontSize: "13px", fontWeight: 600, color: "#059669" }}>Create New Coupon</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px", marginBottom: "12px" }}>
+              <div>
+                <label style={{ fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>CODE *</label>
+                <input value={newCoupon.code} onChange={e => setNewCoupon(p => ({ ...p, code: e.target.value.toUpperCase() }))}
+                  placeholder="e.g. SAVE20" style={{ width: "100%", marginTop: "4px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #d1fae5", fontSize: "13px", fontWeight: 700, letterSpacing: "0.05em", boxSizing: "border-box" }} />
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>TYPE *</label>
+                <select value={newCoupon.type} onChange={e => setNewCoupon(p => ({ ...p, type: e.target.value }))}
+                  style={{ width: "100%", marginTop: "4px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #d1fae5", fontSize: "13px", boxSizing: "border-box" }}>
+                  <option value="percent">Percent (%)</option>
+                  <option value="fixed">Fixed (₹)</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>VALUE * {newCoupon.type === "percent" ? "(%)" : "(₹)"}</label>
+                <input type="number" value={newCoupon.value} onChange={e => setNewCoupon(p => ({ ...p, value: e.target.value }))}
+                  placeholder={newCoupon.type === "percent" ? "e.g. 20" : "e.g. 100"} style={{ width: "100%", marginTop: "4px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #d1fae5", fontSize: "13px", boxSizing: "border-box" }} />
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>VALID TILL</label>
+                <input type="date" value={newCoupon.validTill} onChange={e => setNewCoupon(p => ({ ...p, validTill: e.target.value }))}
+                  style={{ width: "100%", marginTop: "4px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #d1fae5", fontSize: "13px", boxSizing: "border-box" }} />
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>USAGE LIMIT (0=∞)</label>
+                <input type="number" value={newCoupon.usageLimit} onChange={e => setNewCoupon(p => ({ ...p, usageLimit: e.target.value }))}
+                  placeholder="0" style={{ width: "100%", marginTop: "4px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #d1fae5", fontSize: "13px", boxSizing: "border-box" }} />
+              </div>
+            </div>
+            <button onClick={createCoupon} disabled={couponLoading}
+              style={{ padding: "9px 20px", borderRadius: "8px", background: "#059669", color: "#fff", border: "none", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
+              {couponLoading ? "Creating..." : "+ Create Coupon"}
+            </button>
+          </div>
+
+          {/* Coupon list */}
+          {coupons.length === 0 ? (
+            <p style={{ color: "#9ca3af", fontSize: "13px", textAlign: "center", padding: "20px 0" }}>No coupons yet. Create one above.</p>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                <thead>
+                  <tr style={{ background: "#f0fdf4" }}>
+                    {["Code", "Type", "Value", "Used / Limit", "Valid Till", "Status", "Actions"].map(h => (
+                      <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 700, color: "#374151", fontSize: "11px", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {coupons.map(c => {
+                    const expired = c.validTill ? new Date(c.validTill) < new Date() : false;
+                    const limitHit = c.usageLimit > 0 && c.usedCount >= c.usageLimit;
+                    return (
+                      <tr key={c.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                        <td style={{ padding: "10px 12px", fontWeight: 700, letterSpacing: "0.05em", color: "#059669" }}>{c.code}</td>
+                        <td style={{ padding: "10px 12px", color: "#6b7280" }}>{c.type === "percent" ? "%" : "₹"}</td>
+                        <td style={{ padding: "10px 12px", fontWeight: 600 }}>{c.type === "percent" ? `${c.value}%` : `₹${c.value}`}</td>
+                        <td style={{ padding: "10px 12px", color: limitHit ? "#dc2626" : "#374151" }}>{c.usedCount} / {c.usageLimit === 0 ? "∞" : c.usageLimit}</td>
+                        <td style={{ padding: "10px 12px", color: expired ? "#dc2626" : "#6b7280", whiteSpace: "nowrap" }}>{c.validTill ? fmt(c.validTill) : "No expiry"}</td>
+                        <td style={{ padding: "10px 12px" }}>
+                          <span style={{ background: c.active && !expired && !limitHit ? "#d1fae5" : "#fee2e2", color: c.active && !expired && !limitHit ? "#059669" : "#dc2626", borderRadius: "20px", padding: "3px 10px", fontSize: "11px", fontWeight: 700 }}>
+                            {!c.active ? "Inactive" : expired ? "Expired" : limitHit ? "Limit hit" : "Active"}
+                          </span>
+                        </td>
+                        <td style={{ padding: "10px 12px" }}>
+                          <div style={{ display: "flex", gap: "6px" }}>
+                            <button onClick={() => toggleCoupon(c.id, !c.active)}
+                              style={{ padding: "4px 10px", borderRadius: "6px", border: "1px solid #d1fae5", background: "#fff", fontSize: "11px", fontWeight: 600, cursor: "pointer", color: c.active ? "#f97316" : "#059669" }}>
+                              {c.active ? "Disable" : "Enable"}
+                            </button>
+                            <button onClick={() => deleteCoupon(c.id, c.code)}
+                              style={{ padding: "4px 10px", borderRadius: "6px", border: "1px solid #fca5a5", background: "#fff", fontSize: "11px", fontWeight: 600, cursor: "pointer", color: "#dc2626" }}>
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
     </>
   );
 }

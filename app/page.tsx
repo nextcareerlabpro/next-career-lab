@@ -43,6 +43,9 @@ export default function Page() {
   const [userPlan, setUserPlan] = useState<string>("monthly");
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("monthly");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponResult, setCouponResult] = useState<any>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string>("");
   const [helpTab, setHelpTab] = useState("ats");
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -563,18 +566,42 @@ export default function Page() {
     pdf.save("ATS_Report_UpgradeYourResume.pdf");
   }
 
+  async function applyCoupon(plan: string) {
+    if (!couponCode.trim()) { showToast("Enter a coupon code"); return; }
+    setCouponLoading(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ code: couponCode.trim(), plan }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCouponResult({ ...data, plan });
+        showToast(`✅ Coupon applied! ${data.type === "percent" ? data.value + "% off" : "₹" + data.value + " off"}`);
+      } else {
+        setCouponResult(null);
+        showToast("❌ " + (data.error || "Invalid coupon"));
+      }
+    } catch { showToast("Failed to apply coupon"); }
+    setCouponLoading(false);
+  }
+
   async function handlePayment(planType: string, amount: number) {
     if (!requireLogin()) return;
     setPaymentLoading(true);
     setSelectedPlan(planType);
+    const activeCoupon = couponResult?.plan === planType ? couponResult : null;
+    const finalAmount = activeCoupon ? activeCoupon.finalAmount : amount;
     try {
-      const res = await fetch("/api/razorpay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_order", plan: planType, uid: user.uid }) });
+      const res = await fetch("/api/razorpay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_order", plan: planType, uid: user.uid, amount: finalAmount }) });
       const { order } = await res.json();
       const planLabels: any = { monthly: "Pro Monthly", quarterly: "Pro Quarterly", annual: "Pro Annual" };
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: order.amount, currency: order.currency,
-        name: "Upgrade Your Resume", description: planLabels[planType],
+        name: "Upgrade Your Resume", description: planLabels[planType] + (activeCoupon ? ` (Coupon: ${couponCode})` : ""),
         order_id: order.id,
         handler: async function (response: any) {
           const verifyRes = await fetch("/api/razorpay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "verify_payment", ...response }) });
@@ -588,12 +615,12 @@ export default function Page() {
             const snap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
             if (!snap.empty) await updateDoc(snap.docs[0].ref, { plan: "pro", proPlan: planType, proSince: now.toISOString(), proExpiry: expiry.toISOString() });
             setIsPro(true); setUserPlan(planType);
-            sendEmail("payment", {
-          plan: planType,
-          
-          orderId: response.razorpay_order_id || "",
-        });
-        sendEmail("pro_activation", { plan: planType });
+            if (activeCoupon?.couponId) {
+              await fetch("/api/coupon/use", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ couponId: activeCoupon.couponId }) });
+            }
+            setCouponCode(""); setCouponResult(null);
+            sendEmail("payment", { plan: planType, orderId: response.razorpay_order_id || "" });
+            sendEmail("pro_activation", { plan: planType });
             setProSince(now.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
             showToast(`Payment successful! ${planLabels[planType]} activated!`);
           } else { showToast("Verification failed. Contact support."); }
@@ -1178,6 +1205,36 @@ export default function Page() {
               {tab === "billing" && (
                 <div className="card">
                   <p className="card-title">Billing & Plans</p>
+
+                  {!isPro && (
+                    <div style={{ marginBottom: "16px", padding: "12px 14px", background: "#f0fdf4", borderRadius: "10px", border: "1px solid #d1fae5" }}>
+                      <p style={{ margin: "0 0 8px", fontSize: "12px", fontWeight: 700, color: "#374151" }}>🎟️ Have a coupon code?</p>
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                        <input
+                          value={couponCode}
+                          onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponResult(null); }}
+                          placeholder="Enter coupon code"
+                          style={{ flex: 1, minWidth: "160px", padding: "8px 12px", borderRadius: "8px", border: "1px solid #d1fae5", fontSize: "13px", fontWeight: 600, letterSpacing: "0.05em", outline: "none" }}
+                        />
+                        <button onClick={() => applyCoupon(selectedPlan)} disabled={couponLoading}
+                          style={{ padding: "8px 16px", borderRadius: "8px", background: "#059669", color: "#fff", border: "none", fontSize: "12px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                          {couponLoading ? "Checking..." : "Apply"}
+                        </button>
+                      </div>
+                      {couponResult?.valid && (
+                        <div style={{ marginTop: "8px", padding: "8px 12px", background: "#dcfce7", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: "12px", color: "#059669", fontWeight: 600 }}>
+                            ✅ {couponResult.type === "percent" ? couponResult.value + "% off" : "₹" + couponResult.value + " off"} applied
+                            {couponResult.plan && ` on ${couponResult.plan} plan`}
+                          </span>
+                          <button onClick={() => { setCouponResult(null); setCouponCode(""); }}
+                            style={{ background: "none", border: "none", color: "#6b7280", fontSize: "11px", cursor: "pointer", fontWeight: 600 }}>Remove</button>
+                        </div>
+                      )}
+                      <p style={{ margin: "6px 0 0", fontSize: "11px", color: "#9ca3af" }}>Select your plan below, then apply the coupon — the discount will reflect at checkout.</p>
+                    </div>
+                  )}
+
                   <div className="billing-grid">
                     <div className="plan-card" style={{ border: !isPro ? "2px solid #059669" : "1px solid #e5e7eb" }}>
                       <p style={{ fontSize: "13px", fontWeight: 600, color: "#6b7280", margin: "0 0 6px" }}>Free</p>
@@ -1203,7 +1260,7 @@ export default function Page() {
                       </ul>
                       {!isPro ? (
                         <button onClick={() => handlePayment("monthly",29900)} disabled={paymentLoading} style={{ width:"100%", padding:"9px", borderRadius:"8px", fontSize:"13px", fontWeight:600, background:"#059669", color:"#fff", border:"none", cursor:"pointer" }}>
-                          {paymentLoading&&selectedPlan==="monthly" ? "Processing..." : "Get Monthly"}
+                          {paymentLoading&&selectedPlan==="monthly" ? "Processing..." : couponResult?.valid&&couponResult?.plan==="monthly" ? `Get Monthly — ₹${Math.round(couponResult.finalAmount/100)}` : "Get Monthly"}
                         </button>
                       ) : <div style={{ padding:"8px", borderRadius:"8px", background:"#f0fdf4", textAlign:"center", fontSize:"12px", color:"#059669", fontWeight:600 }}>{userPlan==="monthly"?"Active ✅":"Not Active"}</div>}
                     </div>
@@ -1220,7 +1277,7 @@ export default function Page() {
                       </ul>
                       {!isPro ? (
                         <button onClick={() => handlePayment("quarterly",59700)} disabled={paymentLoading} style={{ width:"100%", padding:"9px", borderRadius:"8px", fontSize:"13px", fontWeight:600, background:"#06b6d4", color:"#fff", border:"none", cursor:"pointer" }}>
-                          {paymentLoading&&selectedPlan==="quarterly" ? "Processing..." : "Get Quarterly — ₹597"}
+                          {paymentLoading&&selectedPlan==="quarterly" ? "Processing..." : couponResult?.valid&&couponResult?.plan==="quarterly" ? `Get Quarterly — ₹${Math.round(couponResult.finalAmount/100)}` : "Get Quarterly — ₹597"}
                         </button>
                       ) : <div style={{ padding:"8px", borderRadius:"8px", background:"#ecfeff", textAlign:"center", fontSize:"12px", color:"#06b6d4", fontWeight:600 }}>{userPlan==="quarterly"?"Active ✅":"Not Active"}</div>}
                     </div>
@@ -1237,7 +1294,7 @@ export default function Page() {
                       </ul>
                       {!isPro ? (
                         <button onClick={() => handlePayment("annual",178800)} disabled={paymentLoading} style={{ width:"100%", padding:"9px", borderRadius:"8px", fontSize:"13px", fontWeight:600, background:"#f97316", color:"#fff", border:"none", cursor:"pointer" }}>
-                          {paymentLoading&&selectedPlan==="annual" ? "Processing..." : "Get Annual — ₹1,788/yr"}
+                          {paymentLoading&&selectedPlan==="annual" ? "Processing..." : couponResult?.valid&&couponResult?.plan==="annual" ? `Get Annual — ₹${Math.round(couponResult.finalAmount/100)}/yr` : "Get Annual — ₹1,788/yr"}
                         </button>
                       ) : <div style={{ padding:"8px", borderRadius:"8px", background:"#fff7ed", textAlign:"center", fontSize:"12px", color:"#f97316", fontWeight:600 }}>{userPlan==="annual"?"Active ✅":"Not Active"}</div>}
                     </div>

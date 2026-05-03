@@ -61,20 +61,17 @@ export async function GET(req: Request) {
       mrr += PLAN_MRR[p] || 299;
     });
 
-    // reports per user
     const reportCounts: Record<string, number> = {};
     reportsSnap.docs.forEach(doc => {
       const uid = doc.data().uid;
       if (uid) reportCounts[uid] = (reportCounts[uid] || 0) + 1;
     });
 
-    // attach report counts to users
     const usersWithReports = users.map(u => ({
       ...u,
       reportCount: reportCounts[u.uid] || 0,
     }));
 
-    // this month signups
     const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const newThisMonth = users.filter(u => u.createdAt?.startsWith(thisMonth)).length;
 
@@ -90,6 +87,16 @@ export async function GET(req: Request) {
     });
   }
 
+  if (action === "coupons") {
+    const snap = await adminDb.collection("coupons").orderBy("createdAt", "desc").get();
+    const coupons = snap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || "",
+    }));
+    return NextResponse.json({ coupons });
+  }
+
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 }
 
@@ -98,8 +105,44 @@ export async function POST(req: Request) {
   if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { action, targetUid } = body;
+  const { action } = body;
 
+  // --- Coupon actions ---
+  if (action === "create_coupon") {
+    const { code, type, value, validTill, usageLimit } = body;
+    if (!code || !type || !value) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    const upper = code.toUpperCase().trim();
+    const existing = await adminDb.collection("coupons").where("code", "==", upper).limit(1).get();
+    if (!existing.empty) return NextResponse.json({ error: "Coupon code already exists" }, { status: 409 });
+    await adminDb.collection("coupons").add({
+      code: upper,
+      type,
+      value: Number(value),
+      validTill: validTill || null,
+      usageLimit: Number(usageLimit) || 0,
+      usedCount: 0,
+      active: true,
+      createdAt: new Date(),
+    });
+    return NextResponse.json({ success: true });
+  }
+
+  if (action === "delete_coupon") {
+    const { couponId } = body;
+    if (!couponId) return NextResponse.json({ error: "Missing couponId" }, { status: 400 });
+    await adminDb.collection("coupons").doc(couponId).delete();
+    return NextResponse.json({ success: true });
+  }
+
+  if (action === "toggle_coupon") {
+    const { couponId, active } = body;
+    if (!couponId) return NextResponse.json({ error: "Missing couponId" }, { status: 400 });
+    await adminDb.collection("coupons").doc(couponId).update({ active: !!active });
+    return NextResponse.json({ success: true });
+  }
+
+  // --- User actions ---
+  const { targetUid } = body;
   const snap = await adminDb.collection("users").where("uid", "==", targetUid).limit(1).get();
   if (snap.empty) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
