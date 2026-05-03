@@ -383,8 +383,8 @@ export default function Page() {
 }
 
   async function logout() {
+    showToast("✅ Logged out successfully!");
     await signOut(auth);
-    showToast("Successfully logged out!");
   }
 
   async function analyze() {
@@ -619,7 +619,12 @@ export default function Page() {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
-  if (!user) return <LandingPage onLogin={login} />;
+  if (!user) return (
+    <>
+      {toast && <div style={{ position:"fixed", top:"16px", left:"50%", transform:"translateX(-50%)", zIndex:9999, padding:"10px 20px", borderRadius:"12px", fontSize:"13px", fontWeight:600, background:"#fff", border:"1.5px solid #059669", color:"#059669", boxShadow:"0 4px 20px rgba(5,150,105,0.15)", whiteSpace:"nowrap", maxWidth:"90vw", textAlign:"center" }}>{toast}</div>}
+      <LandingPage onLogin={login} />
+    </>
+  );
 
   const inp: any = { background: "#fff", border: "1.5px solid #d1fae5", color: "#111827", borderRadius: "10px", padding: "12px 14px", width: "100%", fontSize: "14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
 
