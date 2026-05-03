@@ -373,6 +373,8 @@ export default function Page() {
         const refSnap = await getDocs(query(collection(db, "users"), where("referralCode", "==", refBy)));
         if (!refSnap.empty) await updateDoc(refSnap.docs[0].ref, { referralCount: (refSnap.docs[0].data().referralCount || 0) + 1 });
       }
+      // Send welcome email for new signups
+      sendEmail("welcome");
       setScansUsed(0); setIsPro(false);
       
     } else {
