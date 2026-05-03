@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import jsPDF from "jspdf";
 import LandingPage from "./LandingPage";
 import { auth, db, provider } from "./firebase";
 import {
@@ -23,7 +22,7 @@ import {
   where,
 } from "firebase/firestore";
 
-type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "jdanalyzer" | "billing" | "help" | "dashboard";
+type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "jdanalyzer" | "billing" | "help" | "dashboard" | "interview";
 
 export default function Page() {
   const [tab, setTab] = useState<TabType>("ats");
@@ -103,8 +102,9 @@ export default function Page() {
     } catch { showToast("Analysis failed. Try again."); }
     setJdLoading(false);
   }
-  const downloadJDPdf = () => {
+  const downloadJDPdf = async () => {
     if (!jdResult) return;
+    const { default: jsPDF } = await import("jspdf");
     const pdf = new jsPDF();
     const W = 210;
     let y = 46;
@@ -292,6 +292,14 @@ export default function Page() {
   const [coverOutput, setCoverOutput] = useState("");
   const [linkedinRole, setLinkedinRole] = useState("");
   const [linkedinOutput, setLinkedinOutput] = useState("");
+  const [linkedinExportOutput, setLinkedinExportOutput] = useState("");
+  const [linkedinExportLoading, setLinkedinExportLoading] = useState(false);
+  const [savedResumes, setSavedResumes] = useState<any[]>([]);
+  const [saveResumeName, setSaveResumeName] = useState("");
+  const [savingResume, setSavingResume] = useState(false);
+  const [interviewJD, setInterviewJD] = useState("");
+  const [interviewResult, setInterviewResult] = useState<any>(null);
+  const [interviewLoading, setInterviewLoading] = useState(false);
 
   // ── Template states ──────────────────────────────────────────
    
@@ -316,7 +324,7 @@ export default function Page() {
 
   useEffect(() => {
     const saved = sessionStorage.getItem("ncl_tab") as TabType;
-    const valid: TabType[] = ["ats","resume","cover","linkedin","jdanalyzer","billing","help","dashboard"];
+    const valid: TabType[] = ["ats","resume","cover","linkedin","jdanalyzer","billing","help","dashboard","interview"];
     if (saved && valid.includes(saved)) setTab(saved);
     // Capture referral code from URL and persist it
     const params = new URLSearchParams(window.location.search);
@@ -335,8 +343,8 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (user) { loadHistory(); loadUserPlan(); }
-    else { setHistory([]); setScansUsed(0); setIsPro(false); }
+    if (user) { loadHistory(); loadUserPlan(); loadSavedResumes(); }
+    else { setHistory([]); setScansUsed(0); setIsPro(false); setSavedResumes([]); }
   }, [user]);
 
   async function loadHistory() {
@@ -570,9 +578,10 @@ export default function Page() {
     setActionLoading("");
   }
 
-  function exportPdf(data?: any) {
+  async function exportPdf(data?: any) {
     const d = normalize(data || result);
     if (!d.score) { alert("Please analyze first."); return; }
+    const { default: jsPDF } = await import("jspdf");
     const pdf = new jsPDF();
     const W = 210;
     pdf.setFillColor(230, 250, 245); pdf.rect(0, 0, W, 100, "F");
@@ -721,6 +730,80 @@ export default function Page() {
     } catch { setLinkedinOutput("Failed."); }
   }
 
+  async function generateLinkedInExport() {
+    if (!resume.trim()) { showToast("Upload your resume in the ATS tab first!"); return; }
+    const role = linkedinRole.trim() || "Professional";
+    setLinkedinExportLoading(true);
+    setLinkedinExportOutput("");
+    try {
+      const token = await user.getIdToken();
+      const prompt = `Based on this resume, generate a complete LinkedIn profile export for the role of "${role}". Structure your response EXACTLY with these section headers:
+
+HEADLINE:
+[One powerful line, max 220 chars: Role | Top Skill | Key Metric | Industry]
+
+ABOUT:
+[3-4 paragraph professional summary. First person. Keyword-rich. End with: Open to opportunities in ${role}.]
+
+EXPERIENCE BULLETS:
+[For EACH job in the resume, list: Job Title at Company → then 3 achievement bullet points with numbers]
+
+SKILLS:
+[Comma-separated list of 35-40 skills from this resume relevant to the role]
+
+Resume:
+${resume.slice(0, 4000)}`;
+      const res = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ prompt }) });
+      const data = await res.json();
+      setLinkedinExportOutput(data.output || "Generation failed.");
+    } catch { setLinkedinExportOutput("Failed. Try again."); }
+    setLinkedinExportLoading(false);
+  }
+
+  async function loadSavedResumes() {
+    if (!user) return;
+    const snap = await getDocs(query(collection(db, "resumes_saved"), where("uid", "==", user.uid)));
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    setSavedResumes(docs);
+  }
+
+  async function saveCurrentResume() {
+    if (!resume.trim()) { showToast("No resume text to save. Upload a resume first."); return; }
+    if (!isPro && savedResumes.length >= 3) { showToast("Free plan: max 3 saved profiles. Upgrade to Pro for unlimited."); switchTab("billing"); return; }
+    const name = saveResumeName.trim() || `Resume ${new Date().toLocaleDateString("en-IN")}`;
+    setSavingResume(true);
+    await addDoc(collection(db, "resumes_saved"), { uid: user.uid, name, content: resume, createdAt: serverTimestamp() });
+    setSaveResumeName("");
+    await loadSavedResumes();
+    showToast(`"${name}" saved!`);
+    setSavingResume(false);
+  }
+
+  async function deleteSavedResume(id: string) {
+    await deleteDoc(doc(db, "resumes_saved", id));
+    setSavedResumes(prev => prev.filter((r: any) => r.id !== id));
+    showToast("Profile deleted.");
+  }
+
+  async function generateInterviewQuestions() {
+    const jd = interviewJD.trim() || jdText.trim();
+    if (!jd) { showToast("Paste a job description to generate questions."); return; }
+    setInterviewLoading(true);
+    setInterviewResult(null);
+    try {
+      const token = await user.getIdToken();
+      const resumeCtx = resume.trim() ? `\n\nCandidate resume:\n${resume.slice(0, 2000)}` : "";
+      const prompt = `Generate an interview prep guide for this job description.${resumeCtx}\n\nJob Description:\n${jd.slice(0, 2000)}\n\nRespond in valid JSON only:\n{"role":"job title","company":"company or empty","technical":[{"question":"...","tip":"..."}],"behavioral":[{"question":"...","tip":"STAR format hint"}],"companyQ":[{"question":"...","tip":"..."}]}\n\nGenerate: 5 technical, 5 behavioral, 3 company questions. Make them specific to this role.`;
+      const res = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ prompt }) });
+      const data = await res.json();
+      try {
+        const cleaned = (data.output || "").replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        setInterviewResult(JSON.parse(cleaned));
+      } catch { setInterviewResult({ raw: data.output }); }
+    } catch { showToast("Generation failed. Try again."); }
+    setInterviewLoading(false);
+  }
+
   const score = Number(result.score || 0);
   const angle = score * 3.6;
   const ring = score < 40 ? "#dc2626" : score < 70 ? "#f97316" : "#059669";
@@ -731,7 +814,7 @@ export default function Page() {
       window.location.href = "/templates";
       return;
     }
-    if (!isPro && t !== "ats" && t !== "billing" && t !== "help" && t !== "dashboard") {
+    if (!isPro && t !== "ats" && t !== "billing" && t !== "help" && t !== "dashboard" && t !== "interview") {
       showToast("This feature requires Pro plan!"); switchTab("billing"); return;
     }
     switchTab(t);
@@ -768,6 +851,7 @@ export default function Page() {
     { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: !isPro },
     { id: "templates", label: "📄 Resume Templates", locked: !isPro },
     { id: "jdanalyzer", label: "🎯 JD Analyzer", locked: false },
+    { id: "interview", label: "🎤 Interview Prep", locked: false },
     { id: "billing", label: "💳 Billing & Plans", locked: false },
     { id: "help", label: "❓ Help & Tutorials", locked: false },
   ];
@@ -1085,12 +1169,49 @@ export default function Page() {
               )}
 
               {tab === "linkedin" && isPro && (
-                <div className="card">
-                  <p className="card-title">LinkedIn Optimizer</p>
-                  <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Target Role</p>
-                  <input value={linkedinRole} onChange={(e) => setLinkedinRole(e.target.value)} placeholder="e.g. Frontend Developer" style={{ ...inp, marginBottom: "12px" }} />
-                  <button className="btn-primary" onClick={generateLinkedin} style={{ marginBottom: "12px" }}>Generate LinkedIn Profile</button>
-                  <textarea rows={10} value={linkedinOutput} readOnly style={{ ...inp, background: "#f9fafb", resize: "vertical" }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {/* Quick Optimizer */}
+                  <div className="card">
+                    <p className="card-title">LinkedIn Optimizer</p>
+                    <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Target Role</p>
+                    <input value={linkedinRole} onChange={(e) => setLinkedinRole(e.target.value)} placeholder="e.g. Frontend Developer" style={{ ...inp, marginBottom: "12px" }} />
+                    <button className="btn-primary" onClick={generateLinkedin} style={{ marginBottom: "12px" }}>Generate Headline & About</button>
+                    {linkedinOutput && <textarea rows={10} value={linkedinOutput} readOnly style={{ ...inp, background: "#f9fafb", resize: "vertical", marginBottom: "8px" }} />}
+                    {linkedinOutput && <button onClick={() => { navigator.clipboard.writeText(linkedinOutput); showToast("Copied!"); }} style={{ fontSize: "12px", fontWeight: 600, color: "#059669", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px", padding: "7px 14px", cursor: "pointer" }}>📋 Copy All</button>}
+                  </div>
+
+                  {/* Full Profile Export */}
+                  <div className="card">
+                    <p className="card-title">Full Profile Export</p>
+                    <p style={{ fontSize: "13px", color: "#6b7280", marginBottom: "16px" }}>Generate all LinkedIn sections from your resume — headline, about, experience bullets, and skills list. Copy-paste each section directly into LinkedIn.</p>
+                    {!resume.trim() && (
+                      <div style={{ padding: "12px 14px", borderRadius: "10px", background: "#fff7ed", border: "1px solid #fed7aa", marginBottom: "14px" }}>
+                        <p style={{ fontSize: "13px", fontWeight: 600, color: "#c2410c", margin: 0 }}>⚠️ Upload your resume in the ATS tab first</p>
+                      </div>
+                    )}
+                    <button className="btn-primary" onClick={generateLinkedInExport} disabled={linkedinExportLoading || !resume.trim()} style={{ marginBottom: "16px", opacity: !resume.trim() ? 0.5 : 1 }}>
+                      {linkedinExportLoading ? "Generating..." : "🚀 Generate Full LinkedIn Profile"}
+                    </button>
+                    {linkedinExportOutput && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        {linkedinExportOutput.split(/\n(?=HEADLINE:|ABOUT:|EXPERIENCE BULLETS:|SKILLS:)/).map((section, i) => {
+                          const lines = section.trim().split("\n");
+                          const header = lines[0];
+                          const body = lines.slice(1).join("\n").trim();
+                          if (!body) return null;
+                          return (
+                            <div key={i} style={{ background: "#f9fafb", borderRadius: "10px", border: "1px solid #e5e7eb", overflow: "hidden" }}>
+                              <div style={{ background: "#059669", padding: "8px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>{header}</span>
+                                <button onClick={() => { navigator.clipboard.writeText(body); showToast("Copied!"); }} style={{ fontSize: "11px", fontWeight: 600, color: "#d1fae5", background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "6px", padding: "4px 10px", cursor: "pointer" }}>📋 Copy</button>
+                              </div>
+                              <pre style={{ margin: 0, padding: "12px 14px", fontSize: "12px", color: "#374151", whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: "1.6" }}>{body}</pre>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -1262,6 +1383,68 @@ export default function Page() {
                   </div>
                 </div>
               )}
+              {tab === "interview" && (
+                <div className="card">
+                  <p className="card-title">🎤 Interview Prep</p>
+                  <p style={{ fontSize: "13px", color: "#6b7280", marginBottom: "16px" }}>
+                    Paste a job description and get AI-generated technical, behavioral, and company-specific interview questions with answer tips.
+                  </p>
+                  {jdText.trim() && !interviewJD && (
+                    <div style={{ padding: "10px 14px", borderRadius: "10px", background: "#f0fdf4", border: "1px solid #bbf7d0", marginBottom: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "12px", color: "#059669", fontWeight: 600 }}>JD from Analyzer available</span>
+                      <button onClick={() => setInterviewJD(jdText)} style={{ fontSize: "11px", fontWeight: 700, color: "#fff", background: "#059669", border: "none", borderRadius: "6px", padding: "5px 10px", cursor: "pointer" }}>Use it →</button>
+                    </div>
+                  )}
+                  <textarea
+                    rows={5}
+                    value={interviewJD}
+                    onChange={(e) => setInterviewJD(e.target.value)}
+                    placeholder="Paste the job description here..."
+                    style={{ ...inp, marginBottom: "12px", resize: "vertical" }}
+                  />
+                  <button className="btn-primary" onClick={generateInterviewQuestions} disabled={interviewLoading} style={{ marginBottom: "20px" }}>
+                    {interviewLoading ? "Generating questions..." : "Generate Interview Questions"}
+                  </button>
+
+                  {interviewResult && !interviewResult.raw && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                      {interviewResult.role && (
+                        <div style={{ background: "linear-gradient(135deg, #059669, #047857)", borderRadius: "12px", padding: "14px 18px", color: "#fff" }}>
+                          <p style={{ margin: 0, fontSize: "15px", fontWeight: 700 }}>{interviewResult.role}{interviewResult.company ? ` — ${interviewResult.company}` : ""}</p>
+                          <p style={{ margin: "4px 0 0", fontSize: "12px", opacity: 0.8 }}>Interview Preparation Guide</p>
+                        </div>
+                      )}
+
+                      {[
+                        { key: "technical", label: "⚙️ Technical Questions", color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+                        { key: "behavioral", label: "💡 Behavioral Questions (STAR)", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe" },
+                        { key: "companyQ", label: "🏢 Company-Specific Questions", color: "#b45309", bg: "#fffbeb", border: "#fde68a" },
+                      ].map(({ key, label, color, bg, border }) => {
+                        const questions: any[] = interviewResult[key] || [];
+                        if (!questions.length) return null;
+                        return (
+                          <div key={key} style={{ background: bg, borderRadius: "12px", border: `1px solid ${border}`, overflow: "hidden" }}>
+                            <p style={{ margin: 0, padding: "10px 16px", fontSize: "13px", fontWeight: 700, color, borderBottom: `1px solid ${border}` }}>{label}</p>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+                              {questions.map((q: any, i: number) => (
+                                <div key={i} style={{ padding: "12px 16px", borderBottom: i < questions.length - 1 ? `1px solid ${border}` : "none" }}>
+                                  <p style={{ margin: "0 0 6px", fontSize: "13px", fontWeight: 600, color: "#111827" }}>Q{i + 1}. {q.question}</p>
+                                  {q.tip && <p style={{ margin: 0, fontSize: "12px", color: "#6b7280", fontStyle: "italic" }}>💬 {q.tip}</p>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {interviewResult?.raw && (
+                    <pre style={{ background: "#f9fafb", borderRadius: "10px", padding: "14px", fontSize: "12px", color: "#374151", whiteSpace: "pre-wrap", fontFamily: "inherit" }}>{interviewResult.raw}</pre>
+                  )}
+                </div>
+              )}
+
               {tab === "billing" && (
                 <div className="card">
                   <p className="card-title">Billing & Plans</p>
@@ -1499,6 +1682,45 @@ export default function Page() {
                         )}
                       </div>
                     )}
+                    {/* Saved Resume Profiles */}
+                    <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #d1fae5", padding: "20px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                        <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: "#111827" }}>📂 Saved Resume Profiles</p>
+                        <span style={{ fontSize: "11px", color: "#9ca3af" }}>{isPro ? "Unlimited" : `${savedResumes.length}/3 free`}</span>
+                      </div>
+                      <p style={{ margin: "0 0 14px", fontSize: "12px", color: "#6b7280" }}>Save different versions of your resume and switch between them without re-uploading.</p>
+                      {resume.trim() && (
+                        <div style={{ display: "flex", gap: "8px", marginBottom: "14px" }}>
+                          <input value={saveResumeName} onChange={e => setSaveResumeName(e.target.value)} placeholder="Profile name (e.g. Marketing Role)" style={{ ...inp, flex: 1, padding: "9px 12px", fontSize: "13px" }} />
+                          <button onClick={saveCurrentResume} disabled={savingResume} style={{ background: "#059669", color: "#fff", border: "none", borderRadius: "8px", padding: "9px 16px", fontSize: "12px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                            {savingResume ? "Saving…" : "Save Current"}
+                          </button>
+                        </div>
+                      )}
+                      {!resume.trim() && (
+                        <div style={{ padding: "10px 14px", borderRadius: "8px", background: "#f9fafb", border: "1px dashed #e5e7eb", marginBottom: "14px", textAlign: "center" }}>
+                          <p style={{ margin: 0, fontSize: "12px", color: "#9ca3af" }}>Upload a resume in the ATS tab to save it here</p>
+                        </div>
+                      )}
+                      {savedResumes.length > 0 ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                          {savedResumes.map((r: any) => (
+                            <div key={r.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", background: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+                              <span style={{ fontSize: "18px" }}>📄</span>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.name}</p>
+                                <p style={{ margin: "2px 0 0", fontSize: "10px", color: "#9ca3af" }}>{r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : ""}</p>
+                              </div>
+                              <button onClick={() => { setResume(r.content); sessionStorage.setItem("ncl_resume_text", r.content); switchTab("ats"); showToast(`"${r.name}" loaded!`); }} style={{ background: "#059669", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}>Load</button>
+                              <button onClick={() => deleteSavedResume(r.id)} style={{ background: "none", border: "1px solid #fecaca", color: "#dc2626", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}>✕</button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ margin: 0, fontSize: "12px", color: "#9ca3af", textAlign: "center" }}>No saved profiles yet</p>
+                      )}
+                    </div>
+
                     {/* Referral card */}
                     {referralCode && (
                       <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #d1fae5", padding: "20px" }}>
