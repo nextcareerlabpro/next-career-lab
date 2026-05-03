@@ -20,6 +20,8 @@ export interface ResumeData {
   edu2Degree: string; edu2School: string; edu2Year: string;
   certifications: string;
   languages: string;
+  projects: string;
+  achievements: string;
   aiImprovements: string;
   totalJobsFound: number;
 }
@@ -37,6 +39,7 @@ export const emptyResumeData: ResumeData = {
   edu1Degree: "", edu1School: "", edu1Year: "",
   edu2Degree: "", edu2School: "", edu2Year: "",
   certifications: "", languages: "",
+  projects: "", achievements: "",
   aiImprovements: "", totalJobsFound: 0,
 };
 
@@ -100,6 +103,8 @@ Return ONLY this JSON (no markdown, no backticks, no explanation):
   "edu2Year": "year or empty",
   "certifications": "comma separated certifications or empty",
   "languages": "comma separated languages or empty",
+  "projects": "key projects separated by | or empty",
+  "achievements": "achievements and awards each separated by | or empty",
   "aiImprovements": "one line: what was improved e.g. Summary rewritten | Bullets made achievement-focused | Skills expanded",
   "totalJobsFound": 0
 }
@@ -149,6 +154,8 @@ ${resumeText}`
     edu2Degree: parsed.edu2Degree || "", edu2School: parsed.edu2School || "", edu2Year: parsed.edu2Year || "",
     certifications: parsed.certifications || "",
     languages: parsed.languages || "",
+    projects: parsed.projects || "",
+    achievements: parsed.achievements || "",
     aiImprovements: parsed.aiImprovements || "",
     totalJobsFound: Number(parsed.totalJobsFound) || 0,
   };

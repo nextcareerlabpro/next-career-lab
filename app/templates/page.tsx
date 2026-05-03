@@ -611,6 +611,12 @@ export default function TemplatesPage() {
                   <Field label="Languages (comma separated)" value={data.languages} onChange={upd("languages")} placeholder="Hindi, English, Marathi" />
                 </div>
 
+                <SectionTitle>📁 Key Projects</SectionTitle>
+                <Field label="Key Projects (separate each with |)" value={data.projects} onChange={upd("projects")} placeholder="Service Desk Automation using Python APIs | Cloud Migration Support for enterprise clients" multiline />
+
+                <SectionTitle>🥇 Achievements & Awards</SectionTitle>
+                <Field label="Achievements (separate each with |)" value={data.achievements} onChange={upd("achievements")} placeholder="Best Team Leader Award 2022 | Recognized for Excellence in Customer Support" multiline />
+
                 {/* AI note */}
                 <div style={{ marginTop: "20px", padding: "12px 16px", borderRadius: "10px", background: "#f0fdf4", border: "1px solid #bbf7d0", fontSize: "12px", color: "#059669" }}>
                   ✨ <strong>AI Enhanced:</strong> Content professionally improved. Review all fields — you can edit anything before downloading.

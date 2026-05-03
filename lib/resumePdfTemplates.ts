@@ -270,6 +270,30 @@ function generateSharp(pdf: jsPDF, d: ResumeData) {
     ry += 4;
   });
 
+  if (d.projects) {
+    rightSection("KEY PROJECTS");
+    splitPts(d.projects).forEach(p => {
+      if (ry + 8 > 272) rightNewPage();
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`-  ${p}`, rW);
+      ls.forEach((line: string) => { if (ry + 5 > 272) rightNewPage(); pdf.text(line, rX + 2, ry); ry += 5; });
+      ry += 1;
+    });
+    ry += 4;
+  }
+
+  if (d.achievements) {
+    rightSection("ACHIEVEMENTS & AWARDS");
+    splitPts(d.achievements).forEach(a => {
+      if (ry + 8 > 272) rightNewPage();
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`-  ${a}`, rW);
+      ls.forEach((line: string) => { if (ry + 5 > 272) rightNewPage(); pdf.text(line, rX + 2, ry); ry += 5; });
+      ry += 1;
+    });
+    ry += 4;
+  }
+
 }
 
 
@@ -358,6 +382,24 @@ function generateIvy(pdf: jsPDF, d: ResumeData) {
     ivySection("CERTIFICATIONS");
     pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 45, 30);
     pdf.text(splitComma(d.certifications).join("   ·   "), W / 2, y, { align: "center" }); y += 8;
+  }
+  if (d.achievements) {
+    ivySection("ACHIEVEMENTS & AWARDS");
+    splitPts(d.achievements).forEach(a => {
+      y = checkY(pdf, y, 6);
+      pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 45, 30);
+      const ls = pdf.splitTextToSize(`-  ${a}`, W - 30); pdf.text(ls, 15, y); y += ls.length * 5.5 + 1;
+    });
+    y += 4;
+  }
+  if (d.projects) {
+    ivySection("KEY PROJECTS");
+    splitPts(d.projects).forEach(p => {
+      y = checkY(pdf, y, 6);
+      pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 45, 30);
+      const ls = pdf.splitTextToSize(`-  ${p}`, W - 30); pdf.text(ls, 15, y); y += ls.length * 5.5 + 1;
+    });
+    y += 4;
   }
   if (d.languages) {
     ivySection("LANGUAGES");
@@ -492,7 +534,29 @@ function generateSlate(pdf: jsPDF, d: ResumeData) {
     });
     ry2 += 4;
   });
-  
+
+  if (d.achievements) {
+    slateRight("ACHIEVEMENTS & AWARDS");
+    splitPts(d.achievements).forEach(a => {
+      slateCheckY(6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`-  ${a}`, rW2);
+      ls.forEach((line: string) => { slateCheckY(5); pdf.text(line, rX2 + 2, ry2); ry2 += 4.5; }); ry2 += 1;
+    });
+    ry2 += 4;
+  }
+
+  if (d.projects) {
+    slateRight("KEY PROJECTS");
+    splitPts(d.projects).forEach(p => {
+      slateCheckY(6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`-  ${p}`, rW2);
+      ls.forEach((line: string) => { slateCheckY(5); pdf.text(line, rX2 + 2, ry2); ry2 += 4.5; }); ry2 += 1;
+    });
+    ry2 += 4;
+  }
+
 }
 
 // ─── TEMPLATE 4: EMBER (warm tones, creative) ────────────────────
@@ -583,14 +647,31 @@ function generateEmber(pdf: jsPDF, d: ResumeData) {
     pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
     pdf.text(splitComma(d.certifications).join("   ·   "), 15, y3); y3 += 8;
   }
-  // Languages
+  if (d.achievements) {
+    emberSection("ACHIEVEMENTS & AWARDS");
+    splitPts(d.achievements).forEach(a => {
+      y3 = checkY(pdf, y3, 6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`• ${a}`, W - 32); ls.forEach((line: string) => { y3 = checkY(pdf, y3, 5); pdf.text(line, 18, y3); y3 += 4.5; }); y3 += 1;
+    });
+    y3 += 4;
+  }
+  if (d.projects) {
+    emberSection("KEY PROJECTS");
+    splitPts(d.projects).forEach(p => {
+      y3 = checkY(pdf, y3, 6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`• ${p}`, W - 32); ls.forEach((line: string) => { y3 = checkY(pdf, y3, 5); pdf.text(line, 18, y3); y3 += 4.5; }); y3 += 1;
+    });
+    y3 += 4;
+  }
   if (d.languages) {
     emberSection("LANGUAGES");
     pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
     pdf.text(splitComma(d.languages).join("   ·   "), 15, y3); y3 += 8;
   }
 
-  
+
 }
 
 // ─── TEMPLATE 5: CLARITY (ultra minimal) ────────────────────────
@@ -681,14 +762,31 @@ function generateClarity(pdf: jsPDF, d: ResumeData) {
     pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
     pdf.text(splitComma(d.certifications).join("   ·   "), 22, y4); y4 += 8;
   }
-  // Languages
+  if (d.achievements) {
+    claritySection("Achievements & Awards");
+    splitPts(d.achievements).forEach(a => {
+      clarityCheckY(6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(75, 85, 99);
+      const ls = pdf.splitTextToSize(`-  ${a}`, W - 40); ls.forEach((line: string) => { clarityCheckY(5); pdf.text(line, 25, y4); y4 += 5; }); y4 += 1;
+    });
+    y4 += 4;
+  }
+  if (d.projects) {
+    claritySection("Key Projects");
+    splitPts(d.projects).forEach(p => {
+      clarityCheckY(6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(75, 85, 99);
+      const ls = pdf.splitTextToSize(`-  ${p}`, W - 40); ls.forEach((line: string) => { clarityCheckY(5); pdf.text(line, 25, y4); y4 += 5; }); y4 += 1;
+    });
+    y4 += 4;
+  }
   if (d.languages) {
     claritySection("Languages");
     pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
     pdf.text(splitComma(d.languages).join("   ·   "), 22, y4); y4 += 8;
   }
 
-  
+
 }
 
 // ─── TEMPLATE 6: ROYAL (navy + gold, executive) ──────────────────
@@ -779,18 +877,43 @@ function generateRoyal(pdf: jsPDF, d: ResumeData) {
   }
 
   if (d.certifications) {
-    royalSection("CERTIFICATIONS & ACHIEVEMENTS");
-    pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
-    pdf.text(splitComma(d.certifications).join("   ·   "), W / 2, y5, { align: "center" }); y5 += 8;
+    royalSection("CERTIFICATIONS");
+    pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+    splitComma(d.certifications).forEach(c => {
+      y5 = checkY(pdf, y5, 6);
+      pdf.text(`·  ${c}`, W / 2, y5, { align: "center" }); y5 += 5.5;
+    });
+    y5 += 4;
   }
 
-  // Royal footer
-  
-  // Languages
+  if (d.achievements) {
+    royalSection("ACHIEVEMENTS & AWARDS");
+    splitPts(d.achievements).forEach(a => {
+      y5 = checkY(pdf, y5, 6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`-  ${a}`, W - 36);
+      ls.forEach((line: string) => { y5 = checkY(pdf, y5, 5); pdf.text(line, 18, y5); y5 += 4.5; });
+      y5 += 1;
+    });
+    y5 += 4;
+  }
+
+  if (d.projects) {
+    royalSection("KEY PROJECTS");
+    splitPts(d.projects).forEach(p => {
+      y5 = checkY(pdf, y5, 6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`-  ${p}`, W - 36);
+      ls.forEach((line: string) => { y5 = checkY(pdf, y5, 5); pdf.text(line, 18, y5); y5 += 4.5; });
+      y5 += 1;
+    });
+    y5 += 4;
+  }
+
   if (d.languages) {
     royalSection("LANGUAGES");
-    pdf.setFontSize(9); pdf.setFont("helvetica","normal"); pdf.setTextColor(55,65,81);
-    pdf.text(splitComma(d.languages).join("   ·   "), W/2, y5, { align:"center" }); y5 += 8;
+    pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+    pdf.text(splitComma(d.languages).join("   ·   "), W / 2, y5, { align: "center" }); y5 += 8;
   }
 
 }
