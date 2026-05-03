@@ -437,8 +437,29 @@ export default function Page() {
         text = result.value;
       } else if (ext === "txt") {
         text = await file.text();
+      } else if (["jpg", "jpeg", "png"].includes(ext || "")) {
+        if (file.size > 10 * 1024 * 1024) {
+          showToast("Image too large. Please use a file under 10MB.");
+          clearInterval(interval); setUploadStatus("idle"); return;
+        }
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string).split(",")[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        const token = await user?.getIdToken();
+        const ocrRes = await fetch("/api/ocr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ base64, mimeType: file.type || "image/jpeg" }),
+        });
+        const ocrData = await ocrRes.json();
+        if (!ocrRes.ok) throw new Error(ocrData.error || "Image OCR failed");
+        text = ocrData.text || "";
+        if (!text.trim()) throw new Error("Could not read text from image. Try a clearer photo.");
       } else {
-        showToast("Unsupported file. Use PDF, DOCX, or TXT.");
+        showToast("Unsupported file. Use PDF, DOCX, TXT, or JPG.");
         clearInterval(interval); setUploadStatus("idle"); return;
       }
       setResume(text);
@@ -835,7 +856,7 @@ export default function Page() {
                   <div className="ats-grid">
                     {/* Input card */}
                     <div className="card">
-                      <input ref={fileRef} hidden type="file" accept=".pdf,.docx,.txt" onChange={(e) => uploadFile(e.target.files?.[0])} />
+                      <input ref={fileRef} hidden type="file" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png" onChange={(e) => uploadFile(e.target.files?.[0])} />
                       <div className="upload-zone" onClick={() => fileRef.current?.click()}>
                         <div style={{ fontSize: "28px", marginBottom: "6px" }}>📄</div>
                         <p style={{ fontSize: "14px", fontWeight: 600, color: "#059669", margin: "0 0 3px" }}>
@@ -845,7 +866,7 @@ export default function Page() {
                           {uploadStatus === "idle" ? "Tap to browse" : uploadStatus === "uploading" ? "Uploading..." : "✅ Done!"}
                         </p>
                         <div style={{ display: "flex", gap: "6px", justifyContent: "center", marginTop: "8px" }}>
-                          {["PDF","DOCX","TXT"].map(ft => <span key={ft} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "5px", background: "#fde8d8", color: "#c2410c", fontWeight: 600 }}>{ft}</span>)}
+                          {["PDF","DOCX","TXT","JPG"].map(ft => <span key={ft} style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "5px", background: "#fde8d8", color: "#c2410c", fontWeight: 600 }}>{ft}</span>)}
                         </div>
                         {uploadSuccess && (
   <div style={{ marginTop: "10px", padding: "10px 14px", borderRadius: "10px", background: "#f0fdf4", border: "1.5px solid #059669", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -1213,7 +1234,7 @@ export default function Page() {
                       </button>
                     ))}
                   </div>
-                  {helpTab==="ats" && <HelpSteps title="ATS Analyzer" steps={["Upload resume (PDF/DOCX/TXT) or paste text","Paste full job description","Click Analyze","Green 70%+ = Strong. Orange = Moderate. Red = Needs work","Add missing keywords to your resume","Download PDF report"]} tip="Tailor your resume for each job by naturally adding missing keywords." />}
+                  {helpTab==="ats" && <HelpSteps title="ATS Analyzer" steps={["Upload resume (PDF/DOCX/TXT/JPG) or paste text","Paste full job description","Click Analyze","Green 70%+ = Strong. Orange = Moderate. Red = Needs work","Add missing keywords to your resume","Download PDF report"]} tip="Tailor your resume for each job by naturally adding missing keywords." />}
                   {helpTab==="jd" && <HelpSteps title="JD Analyzer (Pro)" steps={["First upload your resume in the ATS Analyzer tab","Go to JD Analyzer tab","Paste the full job description of the role you want to apply for","Click Analyze Job Description","See your JD Match Score — how well your resume fits this specific role","Review Missing Keywords and add them naturally to your resume","Read Resume Tweaks and Section Feedback for targeted improvements","Check Skill Gaps to know what to learn or highlight","Download the full PDF report to keep as a reference"]} tip="Run JD Analyzer for every job you apply to — each JD is different and so are the keywords." />}
                   {helpTab==="templates" && <HelpSteps title="Resume Templates (Pro)" steps={["Upload your resume in the ATS Analyzer tab first","Click the Resume Templates tab — your resume is passed over automatically","Click Auto-Fill from Resume to let AI parse and pre-fill all fields","Review and edit each section — name, summary, experience, education, skills","Add or remove jobs as needed (up to 7 jobs supported)","Select a template: Sharp, Ivy, Slate, Ember, Clarity, or Royal","Check the Declaration checkbox if required","Click Download PDF to save your formatted resume"]} tip="The AI pre-fills your resume data but always review and adjust before downloading — especially bullet points and dates." />}
                   {helpTab==="resume" && <HelpSteps title="AI Resume Writer" steps={["Pick a weak bullet point from resume","Paste it in the text box","Click Improve Bullet","AI rewrites with measurable impact","Copy and replace in your resume","Repeat for all weak lines"]} tip="Include numbers and metrics for even better AI suggestions." />}
