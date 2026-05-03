@@ -48,6 +48,7 @@ export async function GET(req: Request) {
         referralCode: d.referralCode || "",
         referralCount: d.referralCount || 0,
         referralConverted: d.referralConverted || 0,
+        dripSent: d.dripSent || {},
         createdAt: d.createdAt?.toDate?.()?.toISOString() || "",
       };
     });

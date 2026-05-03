@@ -17,6 +17,7 @@ interface UserRow {
   referralCode: string;
   referralCount: number;
   referralConverted: number;
+  dripSent: Record<string, boolean>;
   createdAt: string;
   reportCount: number;
 }
@@ -359,6 +360,50 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Email Drip Funnel */}
+        {(() => {
+          const allUsers = stats.users;
+          const total = allUsers.length;
+          const steps = [
+            { key: "d2", label: "Day 2", desc: "Tips for free plan", color: "#059669" },
+            { key: "d5", label: "Day 5", desc: "ATS rejection nudge", color: "#06b6d4" },
+            { key: "d8", label: "Day 8", desc: "Upgrade nudge", color: "#f97316" },
+            { key: "d15", label: "Day 15", desc: "Final conversion", color: "#7c3aed" },
+          ];
+          return (
+            <div className="section-card" style={{ marginBottom: "24px" }}>
+              <div className="section-header">
+                <span className="section-title">📧 Email Drip Funnel</span>
+                <span style={{ fontSize: "11px", color: "#9ca3af" }}>Runs daily at 8:00 AM IST</span>
+              </div>
+              <div style={{ padding: "20px 24px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px", marginBottom: "16px" }}>
+                  {steps.map(s => {
+                    const sent = allUsers.filter(u => u.dripSent?.[s.key]).length;
+                    const pct = total ? Math.round(sent / total * 100) : 0;
+                    return (
+                      <div key={s.key} style={{ background: "#f9fafb", borderRadius: "10px", padding: "14px", border: `1px solid ${s.color}22` }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                          <span style={{ fontSize: "11px", fontWeight: 700, color: s.color }}>{s.label}</span>
+                          <span style={{ fontSize: "10px", color: "#9ca3af" }}>{pct}%</span>
+                        </div>
+                        <div style={{ fontSize: "24px", fontWeight: 800, color: "#111827", lineHeight: 1, marginBottom: "4px" }}>{sent}<span style={{ fontSize: "13px", fontWeight: 500, color: "#9ca3af" }}>/{total}</span></div>
+                        <div style={{ fontSize: "10px", color: "#6b7280", marginBottom: "8px" }}>{s.desc}</div>
+                        <div style={{ background: "#e5e7eb", borderRadius: "4px", height: "5px", overflow: "hidden" }}>
+                          <div style={{ background: s.color, height: "100%", width: `${pct}%`, borderRadius: "4px", transition: "width 0.4s" }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p style={{ margin: 0, fontSize: "11px", color: "#9ca3af" }}>
+                  Welcome email sent on signup · Day 8 &amp; 15 skipped for Pro users · Each email sent exactly once per user
+                </p>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Users table */}
         <div className="section-card">
           <div className="section-header">
@@ -390,6 +435,7 @@ export default function AdminPage() {
                   <th>ATS Scans</th>
                   <th>JD Analyses</th>
                   <th>Referrals</th>
+                  <th>Drip</th>
                   <th>Reports</th>
                   <th>Joined</th>
                   <th>Pro Expiry</th>
@@ -414,6 +460,20 @@ export default function AdminPage() {
                       <td>{u.scansUsed ?? 0}</td>
                       <td>{u.jdAnalysesUsed ?? 0}</td>
                       <td style={{ color: "#059669", fontWeight: 600 }}>{u.referralCount ?? 0} / {u.referralConverted ?? 0}</td>
+                      <td>
+                        <div style={{ display: "flex", gap: "3px", flexWrap: "wrap" }}>
+                          {[
+                            { k: "d2", label: "D2", color: "#059669" },
+                            { k: "d5", label: "D5", color: "#06b6d4" },
+                            { k: "d8", label: "D8", color: "#f97316" },
+                            { k: "d15", label: "D15", color: "#7c3aed" },
+                          ].map(s => (
+                            <span key={s.k} style={{ fontSize: "9px", fontWeight: 700, padding: "2px 5px", borderRadius: "4px", background: u.dripSent?.[s.k] ? s.color : "#f3f4f6", color: u.dripSent?.[s.k] ? "#fff" : "#d1d5db" }}>
+                              {s.label}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
                       <td>{u.reportCount}</td>
                       <td style={{ color: "#9ca3af" }}>{fmt(u.createdAt)}</td>
                       <td style={{ color: expired ? "#dc2626" : "#9ca3af" }}>
@@ -478,6 +538,14 @@ export default function AdminPage() {
                   <span>ATS: <strong>{u.scansUsed ?? 0}</strong></span>
                   <span>JD: <strong>{u.jdAnalysesUsed ?? 0}</strong></span>
                   <span>Reports: <strong>{u.reportCount}</strong></span>
+                </div>
+                <div className="user-card-row">
+                  <span style={{ fontSize: "10px", color: "#9ca3af", fontWeight: 600 }}>DRIP:</span>
+                  <div style={{ display: "flex", gap: "3px" }}>
+                    {[{ k:"d2",label:"D2",color:"#059669"},{k:"d5",label:"D5",color:"#06b6d4"},{k:"d8",label:"D8",color:"#f97316"},{k:"d15",label:"D15",color:"#7c3aed"}].map(s => (
+                      <span key={s.k} style={{ fontSize: "9px", fontWeight: 700, padding: "2px 5px", borderRadius: "4px", background: u.dripSent?.[s.k] ? s.color : "#f3f4f6", color: u.dripSent?.[s.k] ? "#fff" : "#d1d5db" }}>{s.label}</span>
+                    ))}
+                  </div>
                 </div>
                 {u.plan === "pro" && (
                   <div className="user-card-row">
