@@ -40,6 +40,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://upgradeyourresume.com",
   },
+  verification: {
+    google: "c45870402680d6b9",
+  },
 };
 
 export default function RootLayout({
