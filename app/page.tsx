@@ -82,6 +82,13 @@ export default function Page() {
       });
       const data = await res.json();
       setJdResult(data);
+      if (!data.error) {
+        const snap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
+        if (!snap.empty) {
+          const newCount = (snap.docs[0].data().jdAnalysesUsed || 0) + 1;
+          await updateDoc(snap.docs[0].ref, { jdAnalysesUsed: newCount });
+        }
+      }
     } catch { showToast("Analysis failed. Try again."); }
     setJdLoading(false);
   }

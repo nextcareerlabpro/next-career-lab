@@ -44,6 +44,7 @@ export async function GET(req: Request) {
         proSince: d.proSince || "",
         proExpiry: d.proExpiry || "",
         scansUsed: d.scansUsed || 0,
+        jdAnalysesUsed: d.jdAnalysesUsed || 0,
         createdAt: d.createdAt?.toDate?.()?.toISOString() || "",
       };
     });

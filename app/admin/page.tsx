@@ -13,6 +13,7 @@ interface UserRow {
   proSince: string;
   proExpiry: string;
   scansUsed: number;
+  jdAnalysesUsed: number;
   createdAt: string;
   reportCount: number;
 }
@@ -320,7 +321,8 @@ export default function AdminPage() {
                 <tr>
                   <th>Email</th>
                   <th>Plan</th>
-                  <th>Scans Used</th>
+                  <th>ATS Scans</th>
+                  <th>JD Analyses</th>
                   <th>Reports</th>
                   <th>Joined</th>
                   <th>Pro Expiry</th>
@@ -343,6 +345,7 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td>{u.scansUsed ?? 0}</td>
+                      <td>{u.jdAnalysesUsed ?? 0}</td>
                       <td>{u.reportCount}</td>
                       <td style={{ color: "#9ca3af" }}>{fmt(u.createdAt)}</td>
                       <td style={{ color: expired ? "#dc2626" : "#9ca3af" }}>
@@ -404,7 +407,8 @@ export default function AdminPage() {
                   <span style={{ fontSize: "11px", color: "#9ca3af" }}>Joined: {fmt(u.createdAt)}</span>
                 </div>
                 <div className="user-card-row">
-                  <span>Scans: <strong>{u.scansUsed ?? 0}</strong></span>
+                  <span>ATS: <strong>{u.scansUsed ?? 0}</strong></span>
+                  <span>JD: <strong>{u.jdAnalysesUsed ?? 0}</strong></span>
                   <span>Reports: <strong>{u.reportCount}</strong></span>
                 </div>
                 {u.plan === "pro" && (
