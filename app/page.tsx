@@ -560,7 +560,7 @@ export default function Page() {
     setPaymentLoading(true);
     setSelectedPlan(planType);
     try {
-      const res = await fetch("/api/razorpay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_order", plan: planType }) });
+      const res = await fetch("/api/razorpay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_order", plan: planType, uid: user.uid }) });
       const { order } = await res.json();
       const planLabels: any = { monthly: "Pro Monthly", quarterly: "Pro Quarterly", annual: "Pro Annual" };
       const options = {

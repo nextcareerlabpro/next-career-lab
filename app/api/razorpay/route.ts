@@ -31,6 +31,7 @@ export async function POST(req: Request) {
           amount,
           currency: "INR",
           receipt: `receipt_${Date.now()}`,
+          notes: { uid: body.uid || "", plan },
         }),
       });
 
