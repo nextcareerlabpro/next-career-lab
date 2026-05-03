@@ -930,6 +930,9 @@ export default function Page() {
                   {item.locked && <span style={{ fontSize: "11px" }}>🔒</span>}
                 </button>
               ))}
+              <a href="/blog" style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", textAlign: "left", padding: "10px 12px", borderRadius: "10px", border: "none", background: "none", fontSize: "13px", fontWeight: 500, color: "#374151", textDecoration: "none", cursor: "pointer", marginTop: "4px" }}>
+                📰 Blog &amp; Tips
+              </a>
               {user && (
                 <div style={{ marginTop: "16px", padding: "12px", borderRadius: "10px", background: isPro ? "#f0fdf4" : "#fef9f0", border: `1px solid ${isPro ? "#bbf7d0" : "#fed7aa"}` }}>
                   <p style={{ fontSize: "11px", fontWeight: 600, color: isPro ? "#059669" : "#f97316", margin: "0 0 4px" }}>
@@ -1586,6 +1589,7 @@ function AppFooter() {
   return (
     <footer style={{ textAlign:"center", padding:"20px 16px", borderTop:"1px solid #e5e7eb", background:"#f9fafb", fontSize:"12px", color:"#9ca3af", marginTop:"auto" }}>
       <div style={{ marginBottom:"8px" }}>
+        <a href="/blog" style={{ color:"#059669", textDecoration:"none", margin:"0 10px" }}>Blog</a>
         <a href="/terms.html" target="_blank" style={{ color:"#059669", textDecoration:"none", margin:"0 10px" }}>Terms & Conditions</a>
         <a href="/privacy.html" target="_blank" style={{ color:"#059669", textDecoration:"none", margin:"0 10px" }}>Privacy Policy</a>
         <a href="/refund.html" target="_blank" style={{ color:"#059669", textDecoration:"none", margin:"0 10px" }}>Refund Policy</a>
