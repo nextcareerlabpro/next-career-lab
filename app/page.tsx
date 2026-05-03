@@ -413,6 +413,16 @@ export default function Page() {
 
   async function uploadFile(file?: File) {
     if (!file) return;
+
+    // Per-format file size limits
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    const sizeLimits: Record<string, number> = { pdf: 5, docx: 5, txt: 1, jpg: 5, jpeg: 5, png: 5 };
+    const limitMB = sizeLimits[ext || ""] ?? 5;
+    if (file.size > limitMB * 1024 * 1024) {
+      showToast(`File too large. Maximum size for ${ext?.toUpperCase()} is ${limitMB}MB. Please compress or trim your resume.`);
+      return;
+    }
+
     setUploadFileName(file.name);
     setUploadStatus("uploading");
     setUploadProgress(0);
@@ -420,7 +430,6 @@ export default function Page() {
       setUploadProgress(p => { if (p >= 90) { clearInterval(interval); return 90; } return p + 15; });
     }, 200);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase();
       let text = "";
       if (ext === "pdf") {
         const pdfjs = await import("pdfjs-dist");
@@ -438,10 +447,6 @@ export default function Page() {
       } else if (ext === "txt") {
         text = await file.text();
       } else if (["jpg", "jpeg", "png"].includes(ext || "")) {
-        if (file.size > 10 * 1024 * 1024) {
-          showToast("Image too large. Please use a file under 10MB.");
-          clearInterval(interval); setUploadStatus("idle"); return;
-        }
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve((reader.result as string).split(",")[1]);
@@ -461,6 +466,13 @@ export default function Page() {
       } else {
         showToast("Unsupported file. Use PDF, DOCX, TXT, or JPG.");
         clearInterval(interval); setUploadStatus("idle"); return;
+      }
+
+      // Cap extracted text to ~15,000 characters to stay within AI token limits
+      const MAX_CHARS = 15000;
+      if (text.length > MAX_CHARS) {
+        text = text.slice(0, MAX_CHARS);
+        showToast("⚠️ Resume is very long — only the first portion was kept. Consider a 2-page resume.");
       }
       setResume(text);
       sessionStorage.setItem("ncl_resume_text", text);
