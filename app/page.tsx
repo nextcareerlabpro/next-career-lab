@@ -27,6 +27,7 @@ type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "jdanalyz
 
 export default function Page() {
   const [tab, setTab] = useState<TabType>("ats");
+  function switchTab(t: TabType) { setTab(t); sessionStorage.setItem("ncl_tab", t); }
   const [user, setUser] = useState<any>(null);
   const [booting, setBooting] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -69,7 +70,7 @@ export default function Page() {
   }
   async function analyzeJD() {
     if (!requireLogin()) return;
-    if (!resume.trim()) { showToast("Please upload your resume in ATS tab first!"); setTab("ats"); return; }
+    if (!resume.trim()) { showToast("Please upload your resume in ATS tab first!"); switchTab("ats"); return; }
     if (!jdText.trim()) { showToast("Please paste a job description!"); return; }
     setJdLoading(true);
     try {
@@ -296,6 +297,9 @@ export default function Page() {
   }
 
   useEffect(() => {
+    const saved = sessionStorage.getItem("ncl_tab") as TabType;
+    const valid: TabType[] = ["ats","resume","cover","linkedin","jdanalyzer","billing","help"];
+    if (saved && valid.includes(saved)) setTab(saved);
     getRedirectResult(auth)
       .then((result) => { if (result?.user) setUser(result.user); })
       .catch((err) => { if (err?.code !== "auth/no-current-user") showToast("Sign-in failed. Open the site in Chrome or Safari and try again."); });
@@ -386,12 +390,12 @@ export default function Page() {
   async function analyze() {
     if (!requireLogin()) return;
     if (!resume.trim() || !job.trim()) return;
-    if (!isPro && scansUsed >= scanLimit) { showToast("Free limit reached! Upgrade to Pro."); setTab("billing"); return; }
+    if (!isPro && scansUsed >= scanLimit) { showToast("Free limit reached! Upgrade to Pro."); switchTab("billing"); return; }
     setLoading(true);
     try {
       const token = await user.getIdToken();
       const res = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ resume, job }) });
-      if (res.status === 403) { showToast("Free limit reached! Upgrade to Pro."); setTab("billing"); setLoading(false); return; }
+      if (res.status === 403) { showToast("Free limit reached! Upgrade to Pro."); switchTab("billing"); setLoading(false); return; }
       const data = await res.json();
       const finalData = normalize(data);
       setResult(finalData);
@@ -596,9 +600,9 @@ export default function Page() {
       return;
     }
     if (!isPro && t !== "ats" && t !== "billing" && t !== "help") {
-      showToast("This feature requires Pro plan!"); setTab("billing"); return;
+      showToast("This feature requires Pro plan!"); switchTab("billing"); return;
     }
-    setTab(t);
+    switchTab(t);
     setSidebarOpen(false);
   }
 
@@ -818,7 +822,7 @@ export default function Page() {
                         {scansUsed >= scanLimit ? "Free limit reached!" : `Free: ${scansUsed}/${scanLimit} scans used`}
                       </span>
                       {scansUsed >= scanLimit && (
-                        <button onClick={() => setTab("billing")} style={{ fontSize: "12px", fontWeight: 600, color: "#fff", background: "#f97316", border: "none", borderRadius: "6px", padding: "5px 12px", cursor: "pointer" }}>Upgrade →</button>
+                        <button onClick={() => switchTab("billing")} style={{ fontSize: "12px", fontWeight: 600, color: "#fff", background: "#f97316", border: "none", borderRadius: "6px", padding: "5px 12px", cursor: "pointer" }}>Upgrade →</button>
                       )}
                     </div>
                   )}
@@ -955,7 +959,7 @@ export default function Page() {
                     <div style={{ padding:"16px", borderRadius:"12px", background:"#fff7ed", border:"1px solid #fed7aa", marginBottom:"16px", textAlign:"center" }}>
                       <p style={{ fontSize:"15px", fontWeight:700, color:"#c2410c", margin:"0 0 8px" }}>🔒 Pro Feature</p>
                       <p style={{ fontSize:"13px", color:"#9a3412", margin:"0 0 12px" }}>JD Analyzer is available for Pro users only.</p>
-                      <button onClick={() => setTab("billing")} style={{ padding:"10px 24px", borderRadius:"9px", fontSize:"13px", fontWeight:700, background:"#f97316", color:"#fff", border:"none", cursor:"pointer" }}>
+                      <button onClick={() => switchTab("billing")} style={{ padding:"10px 24px", borderRadius:"9px", fontSize:"13px", fontWeight:700, background:"#f97316", color:"#fff", border:"none", cursor:"pointer" }}>
                         Upgrade to Pro →
                       </button>
                     </div>
@@ -970,7 +974,7 @@ export default function Page() {
                     <div style={{ padding:"14px 16px", borderRadius:"12px", background:"#fff7ed", border:"1px solid #fed7aa", marginBottom:"16px" }}>
                       <p style={{ fontSize:"13px", fontWeight:600, color:"#c2410c", margin:"0 0 6px" }}>⚠️ No resume uploaded</p>
                       <p style={{ fontSize:"12px", color:"#9ca3af", margin:"0 0 10px" }}>Please upload your resume in ATS Analyzer tab first.</p>
-                      <button onClick={() => setTab("ats")} style={{ padding:"8px 16px", borderRadius:"8px", fontSize:"12px", fontWeight:600, background:"#f97316", color:"#fff", border:"none", cursor:"pointer" }}>
+                      <button onClick={() => switchTab("ats")} style={{ padding:"8px 16px", borderRadius:"8px", fontSize:"12px", fontWeight:600, background:"#f97316", color:"#fff", border:"none", cursor:"pointer" }}>
                         Go to ATS Analyzer →
                       </button>
                     </div>
@@ -1090,7 +1094,7 @@ export default function Page() {
                               <p style={{ fontSize:"18px", margin:"0 0 6px" }}>🔒</p>
                               <p style={{ fontSize:"14px", fontWeight:700, color:"#fff", margin:"0 0 4px" }}>Pro Feature</p>
                               <p style={{ fontSize:"12px", color:"#fed7aa", margin:"0 0 14px" }}>Resume Tweaks, Section Feedback & Skill Gaps</p>
-                              <button onClick={() => setTab("billing")} style={{ padding:"9px 22px", borderRadius:"8px", fontSize:"13px", fontWeight:700, background:"#fff", color:"#f97316", border:"none", cursor:"pointer" }}>
+                              <button onClick={() => switchTab("billing")} style={{ padding:"9px 22px", borderRadius:"8px", fontSize:"13px", fontWeight:700, background:"#fff", color:"#f97316", border:"none", cursor:"pointer" }}>
                                 Upgrade to Pro →
                               </button>
                             </div>
@@ -1200,7 +1204,7 @@ export default function Page() {
                     {["ats","jd","templates","resume","cover","linkedin"].map((t) => (
                       <button key={t} onClick={() => setHelpTab(t)}
                         style={{ padding:"7px 14px", borderRadius:"8px", fontSize:"12px", fontWeight:600, background:helpTab===t?"#059669":"#fff", color:helpTab===t?"#fff":"#374151", border:`1px solid ${helpTab===t?"#059669":"#e5e7eb"}`, cursor:"pointer" }}>
-                        {t==="ats"?"ATS":t==="jd"?"JD Analyzer":t==="templates"?"Resume Templates":t==="resume"?"Resume Writer":t==="cover"?"Cover Letter":t==="linkedin"?"LinkedIn":""}
+                        {t==="ats"?"ATS":t==="jd"?"JD Analyzer":t==="templates"?"Resume Templates":t==="resume"?"AI Resume Writer":t==="cover"?"Cover Letter":t==="linkedin"?"LinkedIn":""}
                       </button>
                     ))}
                   </div>
