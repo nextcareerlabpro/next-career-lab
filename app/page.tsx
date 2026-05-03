@@ -1201,7 +1201,7 @@ export default function Page() {
                 <div className="card">
                   <p className="card-title">Help & Tutorials</p>
                   <div className="help-tabs">
-                    {["ats","jd","templates","resume","cover","linkedin"].map((t) => (
+                    {["ats","resume","cover","linkedin","templates","jd"].map((t) => (
                       <button key={t} onClick={() => setHelpTab(t)}
                         style={{ padding:"7px 14px", borderRadius:"8px", fontSize:"12px", fontWeight:600, background:helpTab===t?"#059669":"#fff", color:helpTab===t?"#fff":"#374151", border:`1px solid ${helpTab===t?"#059669":"#e5e7eb"}`, cursor:"pointer" }}>
                         {t==="ats"?"ATS":t==="jd"?"JD Analyzer":t==="templates"?"Resume Templates":t==="resume"?"AI Resume Writer":t==="cover"?"Cover Letter":t==="linkedin"?"LinkedIn":""}
