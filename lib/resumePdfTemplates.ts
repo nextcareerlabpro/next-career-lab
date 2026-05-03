@@ -4,7 +4,7 @@
 import jsPDF from "jspdf";
 import { ResumeData } from "./resumeParser";
 
-// ─── Helper ────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────
 function splitPts(pts: string): string[] {
   return pts.split("|").map(s => s.trim()).filter(Boolean);
 }
@@ -14,6 +14,33 @@ function splitComma(s: string): string[] {
 function checkY(pdf: jsPDF, y: number, needed = 20): number {
   if (y + needed > 272) { pdf.addPage(); return 18; }
   return y;
+}
+function parseExtraSections(raw: string): Array<{ title: string; items: string[] }> {
+  if (!raw?.trim()) return [];
+  return raw.split("===").map(block => {
+    const lines = block.trim().split("\n");
+    const title = lines[0]?.trim() || "";
+    const items = lines.slice(1).join("\n").split("|").map(s => s.trim()).filter(Boolean);
+    return { title, items };
+  }).filter(s => s.title && s.items.length > 0);
+}
+
+// Generic extra-sections renderer — called at end of every template
+// sectionFn draws a styled section header and returns new y, bulletFn renders one item
+function renderExtraSections(
+  pdf: jsPDF,
+  raw: string,
+  getY: () => number,
+  setY: (v: number) => void,
+  sectionFn: (title: string) => void,
+  bulletFn: (text: string) => void
+) {
+  const sections = parseExtraSections(raw);
+  sections.forEach(({ title, items }) => {
+    sectionFn(title);
+    items.forEach(item => bulletFn(item));
+    setY(getY() + 4);
+  });
 }
 
 // ─── VALUE SUMMARY PAGE (Page 1 for all templates) ──────────────
@@ -294,6 +321,18 @@ function generateSharp(pdf: jsPDF, d: ResumeData) {
     ry += 4;
   }
 
+  renderExtraSections(pdf, d.extraSections,
+    () => ry, v => { ry = v; },
+    title => { rightSection(title.toUpperCase()); },
+    text => {
+      if (ry + 8 > 272) rightNewPage();
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`-  ${text}`, rW);
+      ls.forEach((line: string) => { if (ry + 5 > 272) rightNewPage(); pdf.text(line, rX + 2, ry); ry += 5; });
+      ry += 1;
+    }
+  );
+
 }
 
 
@@ -406,6 +445,16 @@ function generateIvy(pdf: jsPDF, d: ResumeData) {
     pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 45, 30);
     pdf.text(splitComma(d.languages).join("   ·   "), W / 2, y, { align: "center" }); y += 8;
   }
+
+  renderExtraSections(pdf, d.extraSections,
+    () => y, v => { y = v; },
+    title => { ivySection(title); },
+    text => {
+      y = checkY(pdf, y, 6);
+      pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 45, 30);
+      const ls = pdf.splitTextToSize(`-  ${text}`, W - 30); pdf.text(ls, 15, y); y += ls.length * 5.5 + 1;
+    }
+  );
 
 }
 
@@ -557,6 +606,17 @@ function generateSlate(pdf: jsPDF, d: ResumeData) {
     ry2 += 4;
   }
 
+  renderExtraSections(pdf, d.extraSections,
+    () => ry2, v => { ry2 = v; },
+    title => { slateRight(title.toUpperCase()); },
+    text => {
+      slateCheckY(6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`-  ${text}`, rW2);
+      ls.forEach((line: string) => { slateCheckY(5); pdf.text(line, rX2 + 2, ry2); ry2 += 4.5; }); ry2 += 1;
+    }
+  );
+
 }
 
 // ─── TEMPLATE 4: EMBER (warm tones, creative) ────────────────────
@@ -671,6 +731,16 @@ function generateEmber(pdf: jsPDF, d: ResumeData) {
     pdf.text(splitComma(d.languages).join("   ·   "), 15, y3); y3 += 8;
   }
 
+  renderExtraSections(pdf, d.extraSections,
+    () => y3, v => { y3 = v; },
+    title => { emberSection(title.toUpperCase()); },
+    text => {
+      y3 = checkY(pdf, y3, 6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`• ${text}`, W - 32);
+      ls.forEach((line: string) => { y3 = checkY(pdf, y3, 5); pdf.text(line, 18, y3); y3 += 4.5; }); y3 += 1;
+    }
+  );
 
 }
 
@@ -786,6 +856,16 @@ function generateClarity(pdf: jsPDF, d: ResumeData) {
     pdf.text(splitComma(d.languages).join("   ·   "), 22, y4); y4 += 8;
   }
 
+  renderExtraSections(pdf, d.extraSections,
+    () => y4, v => { y4 = v; },
+    title => { claritySection(title); },
+    text => {
+      clarityCheckY(6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(75, 85, 99);
+      const ls = pdf.splitTextToSize(`-  ${text}`, W - 40);
+      ls.forEach((line: string) => { clarityCheckY(5); pdf.text(line, 25, y4); y4 += 5; }); y4 += 1;
+    }
+  );
 
 }
 
@@ -915,6 +995,17 @@ function generateRoyal(pdf: jsPDF, d: ResumeData) {
     pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
     pdf.text(splitComma(d.languages).join("   ·   "), W / 2, y5, { align: "center" }); y5 += 8;
   }
+
+  renderExtraSections(pdf, d.extraSections,
+    () => y5, v => { y5 = v; },
+    title => { royalSection(title.toUpperCase()); },
+    text => {
+      y5 = checkY(pdf, y5, 6);
+      pdf.setFontSize(8.5); pdf.setFont("helvetica", "normal"); pdf.setTextColor(55, 65, 81);
+      const ls = pdf.splitTextToSize(`-  ${text}`, W - 36);
+      ls.forEach((line: string) => { y5 = checkY(pdf, y5, 5); pdf.text(line, 18, y5); y5 += 4.5; }); y5 += 1;
+    }
+  );
 
 }
 

@@ -617,6 +617,12 @@ export default function TemplatesPage() {
                 <SectionTitle>🥇 Achievements & Awards</SectionTitle>
                 <Field label="Achievements (separate each with |)" value={data.achievements} onChange={upd("achievements")} placeholder="Best Team Leader Award 2022 | Recognized for Excellence in Customer Support" multiline />
 
+                <SectionTitle>➕ Additional Sections</SectionTitle>
+                <p style={{ fontSize: "12px", color: "#6b7280", marginBottom: "8px", marginTop: "-8px" }}>
+                  Any section not listed above — Additional Information, Tools & Technologies, Volunteer Work, Publications, References, etc. Each section separated by <strong>===</strong>. Format: Section Title on first line, items separated by <strong>|</strong> on second line.
+                </p>
+                <Field label="Extra Sections (AI auto-filled from your resume)" value={data.extraSections} onChange={upd("extraSections")} placeholder={"Additional Information\nStrong communicator | Works under pressure | Remote team experience\n===\nTools & Technologies\nServiceNow | Jira | Grafana | Kibana"} multiline />
+
                 {/* AI note */}
                 <div style={{ marginTop: "20px", padding: "12px 16px", borderRadius: "10px", background: "#f0fdf4", border: "1px solid #bbf7d0", fontSize: "12px", color: "#059669" }}>
                   ✨ <strong>AI Enhanced:</strong> Content professionally improved. Review all fields — you can edit anything before downloading.

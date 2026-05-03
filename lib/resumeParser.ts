@@ -22,6 +22,8 @@ export interface ResumeData {
   languages: string;
   projects: string;
   achievements: string;
+  // Catch-all: any section not covered above. Format per section: "Title\nitem1|item2|item3", sections separated by "==="
+  extraSections: string;
   aiImprovements: string;
   totalJobsFound: number;
 }
@@ -40,8 +42,20 @@ export const emptyResumeData: ResumeData = {
   edu2Degree: "", edu2School: "", edu2Year: "",
   certifications: "", languages: "",
   projects: "", achievements: "",
+  extraSections: "",
   aiImprovements: "", totalJobsFound: 0,
 };
+
+// Parse extraSections string into structured array for rendering
+export function parseExtraSections(raw: string): Array<{ title: string; items: string[] }> {
+  if (!raw?.trim()) return [];
+  return raw.split("===").map(block => {
+    const lines = block.trim().split("\n");
+    const title = lines[0]?.trim() || "";
+    const items = lines.slice(1).join("\n").split("|").map(s => s.trim()).filter(Boolean);
+    return { title, items };
+  }).filter(s => s.title && s.items.length > 0);
+}
 
 export async function parseAndEnhanceResume(resumeText: string, token: string): Promise<ResumeData> {
   const res = await fetch("/api/ai", {
@@ -57,6 +71,7 @@ RULES — follow strictly:
 3. Do NOT invent data. Only improve phrasing. Dates, companies, degrees must stay exactly as in the original.
 4. Extract ALL skills mentioned anywhere in the resume.
 5. Summary: write a strong 3-4 sentence ATS-optimized professional summary.
+6. CRITICAL: Every section from the original resume must appear somewhere in the output. Use extraSections for anything not covered by the fixed fields below.
 
 Return ONLY this JSON (no markdown, no backticks, no explanation):
 {
@@ -105,6 +120,7 @@ Return ONLY this JSON (no markdown, no backticks, no explanation):
   "languages": "comma separated languages or empty",
   "projects": "key projects separated by | or empty",
   "achievements": "achievements and awards each separated by | or empty",
+  "extraSections": "EVERY section from the resume not captured above goes here. Examples: Additional Information, Tools and Technologies, Volunteer Work, Publications, References, Hobbies, etc. Format: section title on first line, then all items separated by | on second line, sections separated by ===. Example: Additional Information\\nStrong communicator|Works well under pressure|Remote team experience===Tools and Technologies\\nServiceNow|Jira|Grafana|Kibana. Leave empty string if nothing remains.",
   "aiImprovements": "one line: what was improved e.g. Summary rewritten | Bullets made achievement-focused | Skills expanded",
   "totalJobsFound": 0
 }
@@ -156,6 +172,7 @@ ${resumeText}`
     languages: parsed.languages || "",
     projects: parsed.projects || "",
     achievements: parsed.achievements || "",
+    extraSections: parsed.extraSections || "",
     aiImprovements: parsed.aiImprovements || "",
     totalJobsFound: Number(parsed.totalJobsFound) || 0,
   };
