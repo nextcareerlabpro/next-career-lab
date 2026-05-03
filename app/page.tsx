@@ -46,6 +46,11 @@ export default function Page() {
   const [couponCode, setCouponCode] = useState("");
   const [couponResult, setCouponResult] = useState<any>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
+  const [referralCount, setReferralCount] = useState(0);
+  const [referralConverted, setReferralConverted] = useState(0);
+  const [referralBonus, setReferralBonus] = useState(false);
+  const [referredBy, setReferredBy] = useState("");
   const [actionLoading, setActionLoading] = useState<string>("");
   const [helpTab, setHelpTab] = useState("ats");
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -313,6 +318,15 @@ export default function Page() {
     const saved = sessionStorage.getItem("ncl_tab") as TabType;
     const valid: TabType[] = ["ats","resume","cover","linkedin","jdanalyzer","billing","help","dashboard"];
     if (saved && valid.includes(saved)) setTab(saved);
+    // Capture referral code from URL and persist it
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      sessionStorage.setItem("ref_code", ref.toUpperCase());
+      // Clean URL without reload
+      const clean = window.location.pathname;
+      window.history.replaceState({}, "", clean);
+    }
     getRedirectResult(auth)
       .then((result) => { if (result?.user) setUser(result.user); })
       .catch((err) => { if (err?.code !== "auth/no-current-user") showToast("Sign-in failed. Open the site in Chrome or Safari and try again."); });
@@ -337,12 +351,28 @@ export default function Page() {
     if (!user) return;
     const snap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
     if (snap.empty) {
+      const newCode = generateReferralCode(user.uid);
+      const refBy = sessionStorage.getItem("ref_code") || "";
+      sessionStorage.removeItem("ref_code");
       await addDoc(collection(db, "users"), {
         uid: user.uid, email: user.email, plan: "free",
         scansUsed: 0, scansLimit: 3,
         monthYear: new Date().toISOString().slice(0, 7),
         createdAt: serverTimestamp(),
+        referralCode: newCode,
+        referralCount: 0,
+        referralConverted: 0,
+        referredBy: refBy,
+        referralBonus: !!refBy,
       });
+      setReferralCode(newCode);
+      if (refBy) {
+        setReferralBonus(true);
+        setReferredBy(refBy);
+        // Increment referrer's referralCount
+        const refSnap = await getDocs(query(collection(db, "users"), where("referralCode", "==", refBy)));
+        if (!refSnap.empty) await updateDoc(refSnap.docs[0].ref, { referralCount: (refSnap.docs[0].data().referralCount || 0) + 1 });
+      }
       setScansUsed(0); setIsPro(false);
       
     } else {
@@ -372,7 +402,25 @@ export default function Page() {
         setProExpiryDate(data.proExpiry);
       }
       if (data.createdAt?.toDate) setMemberSince(data.createdAt.toDate().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
+      // Referral fields — generate code if missing (legacy users)
+      if (data.referralCode) {
+        setReferralCode(data.referralCode);
+      } else {
+        const newCode = generateReferralCode(user.uid);
+        await updateDoc(snap.docs[0].ref, { referralCode: newCode, referralCount: 0, referralConverted: 0 });
+        setReferralCode(newCode);
+      }
+      setReferralCount(data.referralCount || 0);
+      setReferralConverted(data.referralConverted || 0);
+      setReferralBonus(!!data.referralBonus);
+      setReferredBy(data.referredBy || "");
     }
+  }
+
+  function generateReferralCode(uid: string): string {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const rand = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    return uid.slice(0, 4).toUpperCase() + rand;
   }
 
   function requireLogin() {
@@ -593,7 +641,9 @@ export default function Page() {
     setPaymentLoading(true);
     setSelectedPlan(planType);
     const activeCoupon = couponResult?.plan === planType ? couponResult : null;
-    const finalAmount = activeCoupon ? activeCoupon.finalAmount : amount;
+    // Referral bonus: 10% off first purchase if user was referred and not yet pro
+    const refDiscount = !isPro && referralBonus && !activeCoupon ? Math.floor(amount * 0.1) : 0;
+    const finalAmount = activeCoupon ? activeCoupon.finalAmount : Math.max(100, amount - refDiscount);
     try {
       const res = await fetch("/api/razorpay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_order", plan: planType, uid: user.uid, amount: finalAmount }) });
       const { order } = await res.json();
@@ -617,6 +667,11 @@ export default function Page() {
             setIsPro(true); setUserPlan(planType);
             if (activeCoupon?.couponId) {
               await fetch("/api/coupon/use", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ couponId: activeCoupon.couponId }) });
+            }
+            if (referredBy) {
+              const tok = await user.getIdToken();
+              await fetch("/api/referral", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${tok}` }, body: JSON.stringify({ referralCode: referredBy }) });
+              setReferralBonus(false);
             }
             setCouponCode(""); setCouponResult(null);
             sendEmail("payment", { plan: planType, orderId: response.razorpay_order_id || "" });
@@ -1235,6 +1290,16 @@ export default function Page() {
                     </div>
                   )}
 
+                  {!isPro && referralBonus && !couponResult?.valid && (
+                    <div style={{ marginBottom: "16px", padding: "12px 14px", background: "linear-gradient(135deg,#f0fdf4,#ecfeff)", borderRadius: "10px", border: "1px solid #a7f3d0", display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span style={{ fontSize: "20px" }}>🎁</span>
+                      <div>
+                        <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: "#059669" }}>You were referred by a friend!</p>
+                        <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#374151" }}>You get <strong>10% off</strong> your first plan — applied automatically at checkout.</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="billing-grid">
                     <div className="plan-card" style={{ border: !isPro ? "2px solid #059669" : "1px solid #e5e7eb" }}>
                       <p style={{ fontSize: "13px", fontWeight: 600, color: "#6b7280", margin: "0 0 6px" }}>Free</p>
@@ -1427,6 +1492,42 @@ export default function Page() {
                             View all {history.length} reports →
                           </button>
                         )}
+                      </div>
+                    )}
+                    {/* Referral card */}
+                    {referralCode && (
+                      <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #d1fae5", padding: "20px" }}>
+                        <p style={{ margin: "0 0 4px", fontSize: "13px", fontWeight: 700, color: "#111827" }}>🔗 Refer & Earn</p>
+                        <p style={{ margin: "0 0 14px", fontSize: "12px", color: "#6b7280" }}>Share your link. When someone signs up and subscribes, you get <strong>30 days free Pro</strong>. They get <strong>10% off</strong> their first plan.</p>
+
+                        {/* Stats */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
+                          <div style={{ background: "#f0fdf4", borderRadius: "10px", padding: "12px", textAlign: "center" }}>
+                            <p style={{ margin: "0 0 2px", fontSize: "22px", fontWeight: 800, color: "#059669" }}>{referralCount}</p>
+                            <p style={{ margin: 0, fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>SIGNED UP</p>
+                          </div>
+                          <div style={{ background: "#f0fdf4", borderRadius: "10px", padding: "12px", textAlign: "center" }}>
+                            <p style={{ margin: "0 0 2px", fontSize: "22px", fontWeight: 800, color: "#059669" }}>{referralConverted}</p>
+                            <p style={{ margin: 0, fontSize: "11px", color: "#6b7280", fontWeight: 600 }}>CONVERTED</p>
+                          </div>
+                        </div>
+
+                        {/* Link + copy */}
+                        <p style={{ margin: "0 0 6px", fontSize: "11px", fontWeight: 700, color: "#374151" }}>YOUR REFERRAL LINK</p>
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                          <div style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "8px 12px", fontSize: "12px", color: "#374151", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {`https://upgradeyourresume.com/?ref=${referralCode}`}
+                          </div>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(`https://upgradeyourresume.com/?ref=${referralCode}`);
+                              showToast("✅ Referral link copied!");
+                            }}
+                            style={{ padding: "8px 14px", borderRadius: "8px", background: "#059669", color: "#fff", border: "none", fontSize: "12px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                            Copy Link
+                          </button>
+                        </div>
+                        <p style={{ margin: "8px 0 0", fontSize: "11px", color: "#9ca3af" }}>Your code: <strong style={{ color: "#059669", letterSpacing: "0.1em" }}>{referralCode}</strong></p>
                       </div>
                     )}
                   </div>

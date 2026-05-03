@@ -14,6 +14,9 @@ interface UserRow {
   proExpiry: string;
   scansUsed: number;
   jdAnalysesUsed: number;
+  referralCode: string;
+  referralCount: number;
+  referralConverted: number;
   createdAt: string;
   reportCount: number;
 }
@@ -386,6 +389,7 @@ export default function AdminPage() {
                   <th>Plan</th>
                   <th>ATS Scans</th>
                   <th>JD Analyses</th>
+                  <th>Referrals</th>
                   <th>Reports</th>
                   <th>Joined</th>
                   <th>Pro Expiry</th>
@@ -409,6 +413,7 @@ export default function AdminPage() {
                       </td>
                       <td>{u.scansUsed ?? 0}</td>
                       <td>{u.jdAnalysesUsed ?? 0}</td>
+                      <td style={{ color: "#059669", fontWeight: 600 }}>{u.referralCount ?? 0} / {u.referralConverted ?? 0}</td>
                       <td>{u.reportCount}</td>
                       <td style={{ color: "#9ca3af" }}>{fmt(u.createdAt)}</td>
                       <td style={{ color: expired ? "#dc2626" : "#9ca3af" }}>

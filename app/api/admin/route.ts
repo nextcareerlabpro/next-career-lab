@@ -45,6 +45,9 @@ export async function GET(req: Request) {
         proExpiry: d.proExpiry || "",
         scansUsed: d.scansUsed || 0,
         jdAnalysesUsed: d.jdAnalysesUsed || 0,
+        referralCode: d.referralCode || "",
+        referralCount: d.referralCount || 0,
+        referralConverted: d.referralConverted || 0,
         createdAt: d.createdAt?.toDate?.()?.toISOString() || "",
       };
     });
