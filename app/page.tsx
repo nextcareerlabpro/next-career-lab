@@ -439,24 +439,31 @@ export default function Page() {
   }
 
   async function login() {
-  try {
-    const ua = navigator.userAgent;
-    const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|Twitter|TikTok|MicroMessenger/i.test(ua);
-    if (isInApp) {
-      alert("Please open this page in Chrome or Safari to sign in with Google.");
-      return;
-    }
     try {
-      await signInWithPopup(auth, provider);
-    } catch (e: any) {
-      if (e?.code === "auth/popup-blocked") {
-        await signInWithRedirect(auth, provider);
-      } else if (e?.code !== "auth/popup-closed-by-user") {
-        throw e;
+      const ua = navigator.userAgent;
+      const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|Twitter|TikTok|MicroMessenger/i.test(ua);
+      if (isInApp) {
+        alert("Please open this page in Chrome or Safari to sign in with Google.");
+        return;
       }
-    }
-  } catch { alert("Login failed. Please try again."); }
-}
+      const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(ua);
+      if (isMobile) {
+        // Mobile browsers kill popups silently — redirect is the only reliable method
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      // Desktop: try popup, fallback to redirect if blocked
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e: any) {
+        if (e?.code === "auth/popup-blocked") {
+          await signInWithRedirect(auth, provider);
+        } else if (e?.code !== "auth/popup-closed-by-user") {
+          throw e;
+        }
+      }
+    } catch { alert("Login failed. Please try again."); }
+  }
 
   async function logout() {
     showToast("✅ Logged out successfully!");
