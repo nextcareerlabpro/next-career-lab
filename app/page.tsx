@@ -439,30 +439,28 @@ export default function Page() {
   }
 
   async function login() {
+    const ua = navigator.userAgent;
+    const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|Twitter|TikTok|MicroMessenger/i.test(ua);
+    if (isInApp) {
+      alert("Please open this page in Chrome or Safari to sign in with Google.");
+      return;
+    }
+    // Try popup first on all browsers — Chrome mobile opens popup as a new tab which works reliably.
+    // Popup must be called before any await to preserve the user-gesture context.
     try {
-      const ua = navigator.userAgent;
-      const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|Twitter|TikTok|MicroMessenger/i.test(ua);
-      if (isInApp) {
-        alert("Please open this page in Chrome or Safari to sign in with Google.");
-        return;
-      }
-      const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(ua);
-      if (isMobile) {
-        // Mobile browsers kill popups silently — redirect is the only reliable method
-        await signInWithRedirect(auth, provider);
-        return;
-      }
-      // Desktop: try popup, fallback to redirect if blocked
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (e: any) {
-        if (e?.code === "auth/popup-blocked") {
+      await signInWithPopup(auth, provider);
+    } catch (e: any) {
+      if (e?.code === "auth/popup-blocked") {
+        // Popup was blocked by browser — fall back to redirect
+        try {
           await signInWithRedirect(auth, provider);
-        } else if (e?.code !== "auth/popup-closed-by-user") {
-          throw e;
-        }
+        } catch { showToast("Login failed. Please try again."); }
+      } else if (e?.code === "auth/popup-closed-by-user" || e?.code === "auth/cancelled-popup-request") {
+        // User closed the popup — do nothing silently
+      } else {
+        showToast("Login failed. Please try again.");
       }
-    } catch { alert("Login failed. Please try again."); }
+    }
   }
 
   async function logout() {
