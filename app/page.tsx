@@ -858,7 +858,6 @@ ${resume.slice(0, 4000)}`;
     { id: "jdanalyzer", label: "🎯 JD Analyzer", locked: false },
     { id: "interview", label: "🎤 Interview Prep", locked: false },
     { id: "billing", label: "💳 Billing & Plans", locked: false },
-    { id: "help", label: "❓ Help & Tutorials", locked: false },
   ];
 
   return (
@@ -1022,6 +1021,11 @@ ${resume.slice(0, 4000)}`;
               <a href="/blog" style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", textAlign: "left", padding: "10px 12px", borderRadius: "10px", border: "none", background: "none", fontSize: "13px", fontWeight: 500, color: "#374151", textDecoration: "none", cursor: "pointer", marginTop: "4px" }}>
                 📰 Blog &amp; Tips
               </a>
+              <button className={`nav-btn ${tab === "help" ? "active" : ""}`}
+                onClick={() => handleLockedTab("help" as TabType)}
+                style={{ marginTop: "4px" }}>
+                <span>❓ Help &amp; Tutorials</span>
+              </button>
               {user && (
                 <div style={{ marginTop: "16px", padding: "12px", borderRadius: "10px", background: isPro ? "#f0fdf4" : "#fef9f0", border: `1px solid ${isPro ? "#bbf7d0" : "#fed7aa"}` }}>
                   <p style={{ fontSize: "11px", fontWeight: 600, color: isPro ? "#059669" : "#f97316", margin: "0 0 4px" }}>
@@ -1570,13 +1574,14 @@ ${resume.slice(0, 4000)}`;
                 <div className="card">
                   <p className="card-title">Help & Tutorials</p>
                   <div className="help-tabs">
-                    {["ats","resume","cover","linkedin","templates","jd"].map((t) => (
+                    {["dashboard","ats","resume","cover","linkedin","templates","jd"].map((t) => (
                       <button key={t} onClick={() => setHelpTab(t)}
                         style={{ padding:"7px 14px", borderRadius:"8px", fontSize:"12px", fontWeight:600, background:helpTab===t?"#059669":"#fff", color:helpTab===t?"#fff":"#374151", border:`1px solid ${helpTab===t?"#059669":"#e5e7eb"}`, cursor:"pointer" }}>
-                        {t==="ats"?"ATS":t==="jd"?"JD Analyzer":t==="templates"?"Resume Templates":t==="resume"?"AI Resume Writer":t==="cover"?"Cover Letter":t==="linkedin"?"LinkedIn":""}
+                        {t==="dashboard"?"My Dashboard":t==="ats"?"ATS":t==="jd"?"JD Analyzer":t==="templates"?"Resume Templates":t==="resume"?"AI Resume Writer":t==="cover"?"Cover Letter":t==="linkedin"?"LinkedIn":""}
                       </button>
                     ))}
                   </div>
+                  {helpTab==="dashboard" && <HelpSteps title="My Dashboard" steps={["View your plan status — Free or Pro, with expiry date","Check your ATS scan usage for the current month","See your full scan history with past scores","Save up to 3 resume profiles on Free plan (unlimited on Pro)","Load a saved resume to quickly re-analyze with a new job description","Access your referral code to invite friends and earn bonus scans","Upgrade to Pro directly from the dashboard"]} tip="Go to My Dashboard tab from the sidebar to manage your account, plan, and saved resumes." />}
                   {helpTab==="ats" && <HelpSteps title="ATS Analyzer" steps={["Upload resume (PDF/DOCX/TXT/JPG) or paste text","Paste full job description","Click Analyze","Green 70%+ = Strong. Orange = Moderate. Red = Needs work","Add missing keywords to your resume","Download PDF report"]} tip="Tailor your resume for each job by naturally adding missing keywords." />}
                   {helpTab==="jd" && <HelpSteps title="JD Analyzer (Pro)" steps={["First upload your resume in the ATS Analyzer tab","Go to JD Analyzer tab","Paste the full job description of the role you want to apply for","Click Analyze Job Description","See your JD Match Score — how well your resume fits this specific role","Review Missing Keywords and add them naturally to your resume","Read Resume Tweaks and Section Feedback for targeted improvements","Check Skill Gaps to know what to learn or highlight","Download the full PDF report to keep as a reference"]} tip="Run JD Analyzer for every job you apply to — each JD is different and so are the keywords." />}
                   {helpTab==="templates" && <HelpSteps title="Resume Templates (Pro)" steps={["Upload your resume in the ATS Analyzer tab first","Click the Resume Templates tab — your resume is passed over automatically","Click Auto-Fill from Resume to let AI parse and pre-fill all fields","Review and edit each section — name, summary, experience, education, skills","Add or remove jobs as needed (up to 7 jobs supported)","Select a template: Sharp, Ivy, Slate, Ember, Clarity, or Royal","Check the Declaration checkbox if required","Click Download PDF to save your formatted resume"]} tip="The AI pre-fills your resume data but always review and adjust before downloading — especially bullet points and dates." />}
