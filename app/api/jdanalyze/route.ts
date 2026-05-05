@@ -19,8 +19,8 @@ export async function POST(req: Request) {
   if (!userSnap.empty) {
     const userData = userSnap.docs[0].data();
     isPro =
-      userData.plan === "pro" &&
-      (!userData.proExpiry || new Date(userData.proExpiry) >= new Date());
+      (userData.plan === "pro" && (!userData.proExpiry || new Date(userData.proExpiry) >= new Date())) ||
+      userData.firstSessionActive === true;
   }
 
   try {

@@ -300,11 +300,16 @@ export default function Page() {
   const [interviewJD, setInterviewJD] = useState("");
   const [interviewResult, setInterviewResult] = useState<any>(null);
   const [interviewLoading, setInterviewLoading] = useState(false);
+  const [isFirstSession, setIsFirstSession] = useState(false);
+  const [showIdleWarning, setShowIdleWarning] = useState(false);
+  const [idleCountdown, setIdleCountdown] = useState(120);
 
   // ── Template states ──────────────────────────────────────────
-   
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const idleWarningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const idleLogoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const emptyResult = { score: 0, matched: [] as string[], missing: [] as string[], suggestions: [] as string[] };
   const [result, setResult] = useState(emptyResult);
 
@@ -320,6 +325,36 @@ export default function Page() {
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(""), 3500);
+  }
+
+  function resetIdleTimer() {
+    if (idleWarningTimerRef.current) clearTimeout(idleWarningTimerRef.current);
+    if (idleLogoutTimerRef.current) clearTimeout(idleLogoutTimerRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setShowIdleWarning(false);
+    setIdleCountdown(120);
+    idleWarningTimerRef.current = setTimeout(() => {
+      setShowIdleWarning(true);
+      let count = 120;
+      setIdleCountdown(count);
+      countdownIntervalRef.current = setInterval(() => {
+        count--;
+        setIdleCountdown(count);
+        if (count <= 0) {
+          clearInterval(countdownIntervalRef.current!);
+          handleAutoLogout();
+        }
+      }, 1000);
+    }, 780000); // warn at 13 min
+  }
+
+  async function handleAutoLogout() {
+    if (idleWarningTimerRef.current) clearTimeout(idleWarningTimerRef.current);
+    if (idleLogoutTimerRef.current) clearTimeout(idleLogoutTimerRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setShowIdleWarning(false);
+    await signOut(auth);
+    showToast("You were logged out due to inactivity.");
   }
 
   useEffect(() => {
@@ -344,7 +379,21 @@ export default function Page() {
 
   useEffect(() => {
     if (user) { loadHistory(); loadUserPlan(); loadSavedResumes(); }
-    else { setHistory([]); setScansUsed(0); setIsPro(false); setSavedResumes([]); }
+    else { setHistory([]); setScansUsed(0); setIsPro(false); setSavedResumes([]); setIsFirstSession(false); }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const events = ["mousemove", "mousedown", "keypress", "touchstart", "scroll", "click"];
+    const onActivity = () => resetIdleTimer();
+    events.forEach((e) => window.addEventListener(e, onActivity, { passive: true }));
+    resetIdleTimer();
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, onActivity));
+      if (idleWarningTimerRef.current) clearTimeout(idleWarningTimerRef.current);
+      if (idleLogoutTimerRef.current) clearTimeout(idleLogoutTimerRef.current);
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    };
   }, [user]);
 
   async function loadHistory() {
@@ -362,11 +411,13 @@ export default function Page() {
       const newCode = generateReferralCode(user.uid);
       const refBy = localStorage.getItem("ref_code") || "";
       localStorage.removeItem("ref_code");
+      setIsFirstSession(true);
       await addDoc(collection(db, "users"), {
         uid: user.uid, email: user.email, plan: "free",
         scansUsed: 0, scansLimit: 3,
         monthYear: new Date().toISOString().slice(0, 7),
         createdAt: serverTimestamp(),
+        firstSessionActive: true,
         referralCode: newCode,
         referralCount: 0,
         referralConverted: 0,
@@ -403,6 +454,10 @@ export default function Page() {
         }
       } else {
         setIsPro(data.plan === "pro");
+      }
+      if (data.firstSessionActive === true) {
+        setIsFirstSession(true);
+        await updateDoc(snap.docs[0].ref, { firstSessionActive: false });
       }
       setUserPlan(data.proPlan || "monthly");
       setJdAnalysesUsed(data.jdAnalysesUsed || 0);
@@ -819,7 +874,7 @@ ${resume.slice(0, 4000)}`;
       window.location.href = "/templates";
       return;
     }
-    if (!isPro && t !== "ats" && t !== "billing" && t !== "help" && t !== "dashboard" && t !== "interview") {
+    if (!isPro && !isFirstSession && t !== "ats" && t !== "billing" && t !== "help" && t !== "dashboard" && t !== "interview") {
       showToast("This feature requires Pro plan!"); switchTab("billing"); return;
     }
     switchTab(t);
@@ -851,10 +906,10 @@ ${resume.slice(0, 4000)}`;
   const navItems = [
     { id: "dashboard", label: "👤 My Dashboard", locked: false },
     { id: "ats", label: "🔍 ATS Analyzer", locked: false },
-    { id: "resume", label: "✍️ AI Resume Writer", locked: !isPro },
-    { id: "cover", label: "📝 Cover Letter", locked: !isPro },
-    { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: !isPro },
-    { id: "templates", label: "📄 Resume Templates", locked: !isPro },
+    { id: "resume", label: "✍️ AI Resume Writer", locked: !isPro && !isFirstSession },
+    { id: "cover", label: "📝 Cover Letter", locked: !isPro && !isFirstSession },
+    { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: !isPro && !isFirstSession },
+    { id: "templates", label: "📄 Resume Templates", locked: !isPro && !isFirstSession },
     { id: "jdanalyzer", label: "🎯 JD Analyzer", locked: false },
     { id: "interview", label: "🎤 Interview Prep", locked: false },
     { id: "billing", label: "💳 Billing & Plans", locked: false },
@@ -967,6 +1022,21 @@ ${resume.slice(0, 4000)}`;
 
       <div className="page-bg">
         {toast && <div className="toast">{toast}</div>}
+
+        {/* Idle timeout warning modal */}
+        {showIdleWarning && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 9998, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ background: "#fff", borderRadius: "18px", padding: "36px 32px", maxWidth: "380px", width: "90%", textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+              <div style={{ fontSize: "44px", marginBottom: "14px" }}>⏱️</div>
+              <p style={{ fontSize: "18px", fontWeight: 700, color: "#111827", margin: "0 0 10px" }}>Session Expiring</p>
+              <p style={{ fontSize: "14px", color: "#6b7280", margin: "0 0 8px" }}>You'll be logged out due to inactivity in</p>
+              <p style={{ fontSize: "36px", fontWeight: 800, color: idleCountdown <= 30 ? "#e11d48" : "#059669", margin: "0 0 24px" }}>{idleCountdown}s</p>
+              <button onClick={resetIdleTimer} style={{ background: "#059669", color: "#fff", border: "none", borderRadius: "10px", padding: "12px 36px", fontSize: "15px", fontWeight: 700, cursor: "pointer", width: "100%" }}>
+                Stay Logged In
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Sidebar overlay */}
         <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)} />
