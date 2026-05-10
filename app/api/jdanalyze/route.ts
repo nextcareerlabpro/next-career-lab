@@ -29,6 +29,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing data" }, { status: 400 });
     }
 
+    // Reject meaningless JD input — require at least 30 words
+    const jdWordCount = jdText.trim().split(/\s+/).filter(Boolean).length;
+    if (jdWordCount < 30) {
+      return NextResponse.json({
+        error: "invalid_jd",
+        message: "Please paste a complete job description (at least 30 words). A single character or short text cannot be analyzed.",
+      }, { status: 400 });
+    }
+
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -41,6 +50,11 @@ export async function POST(req: Request) {
           {
             role: "user",
             content: `You are an expert career coach and ATS specialist. Analyze this job description against the candidate's resume and return ONLY a valid JSON object with no explanation, no markdown, no backticks.
+
+IMPORTANT VALIDATION RULES:
+- If the job description is not a real job posting (too short, random text, gibberish, only punctuation, or unrelated content), return matchScore: 0 and overallVerdict explaining it is not a valid job description.
+- matchScore must reflect genuine keyword and skill overlap — do NOT inflate scores. A resume with no matching keywords should score below 20. Only award high scores when there is clear, specific alignment.
+- matchScore range: 0-100. Be strict and realistic.
 
 Return exactly this JSON structure:
 {

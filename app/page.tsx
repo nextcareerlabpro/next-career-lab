@@ -102,6 +102,8 @@ export default function Page() {
     if (!requireLogin()) return;
     if (!resume.trim()) { showToast("Please upload your resume in ATS tab first!"); switchTab("ats"); return; }
     if (!jdText.trim()) { showToast("Please paste a job description!"); return; }
+    const jdWords = jdText.trim().split(/\s+/).filter(Boolean).length;
+    if (jdWords < 30) { showToast("⚠️ Please paste a complete job description (minimum 30 words)."); return; }
     setJdLoading(true);
     try {
       const token = await user.getIdToken();
@@ -111,6 +113,10 @@ export default function Page() {
         body: JSON.stringify({ resume, jdText }),
       });
       const data = await res.json();
+      if (data.error === "invalid_jd") {
+        showToast("⚠️ " + (data.message || "Please paste a complete job description."));
+        setJdLoading(false); return;
+      }
       setJdResult(data);
       if (!data.error) {
         const snap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
