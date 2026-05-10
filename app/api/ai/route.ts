@@ -1,30 +1,35 @@
 import { NextResponse } from "next/server";
-
-async function verifyFirebaseToken(idToken: string): Promise<boolean> {
-  try {
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-    const res = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
-      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken }) }
-    );
-    if (!res.ok) return false;
-    const data = await res.json();
-    return !!data?.users?.[0]?.localId;
-  } catch { return false; }
-}
+import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
 
 export async function POST(req: Request) {
   const token = req.headers.get("Authorization")?.replace("Bearer ", "");
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const valid = await verifyFirebaseToken(token);
-  if (!valid) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  let uid: string;
+  try {
+    const decoded = await adminAuth.verifyIdToken(token);
+    uid = decoded.uid;
+  } catch {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
+
+  // Check user plan from Firestore — never trust client-side isPro
+  let isPro = false;
+  try {
+    const userSnap = await adminDb.collection("users").where("uid", "==", uid).limit(1).get();
+    if (!userSnap.empty) {
+      const d = userSnap.docs[0].data();
+      isPro =
+        (d.plan === "pro" && (!d.proExpiry || new Date(d.proExpiry) >= new Date())) ||
+        d.firstSessionActive === true;
+    }
+  } catch { /* if Firestore check fails, default to requiresUpgrade */ }
 
   try {
     const body = await req.json();
     const prompt = body.prompt || "";
     if (!prompt.trim()) {
-      return NextResponse.json({ output: "No prompt received." });
+      return NextResponse.json({ output: "No prompt received.", requiresUpgrade: false });
     }
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -45,7 +50,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: groqError }, { status: 502 });
     }
     const output = data?.choices?.[0]?.message?.content || "No response.";
-    return NextResponse.json({ output });
+    return NextResponse.json({ output, requiresUpgrade: !isPro });
   } catch (e: any) {
     console.error("AI route error:", e?.message);
     return NextResponse.json({ error: "AI request failed. Try again." }, { status: 500 });

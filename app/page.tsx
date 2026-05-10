@@ -24,6 +24,26 @@ import {
 
 type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "jdanalyzer" | "billing" | "help" | "dashboard" | "interview";
 
+function BlurWrap({ blurred, onUpgrade, children }: { blurred: boolean; onUpgrade: () => void; children: React.ReactNode }) {
+  return (
+    <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden" }}>
+      <div style={{ filter: blurred ? "blur(7px)" : "none", userSelect: blurred ? "none" : "auto", pointerEvents: blurred ? "none" : "auto", transition: "filter 0.35s ease" }}>
+        {children}
+      </div>
+      {blurred && (
+        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.45)", backdropFilter: "blur(3px)", borderRadius: "10px", padding: "20px", textAlign: "center" }}>
+          <div style={{ fontSize: "32px", marginBottom: "10px" }}>🔒</div>
+          <p style={{ fontSize: "15px", fontWeight: 700, color: "#111827", margin: "0 0 6px" }}>Upgrade to Pro to unlock this output</p>
+          <p style={{ fontSize: "13px", color: "#6b7280", margin: "0 0 18px" }}>Your result was generated — upgrade to read it in full</p>
+          <button onClick={onUpgrade} style={{ background: "linear-gradient(135deg,#059669,#047857)", color: "#fff", border: "none", borderRadius: "10px", padding: "11px 28px", fontSize: "14px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(5,150,105,0.35)" }}>
+            Upgrade to Pro →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Page() {
   const [tab, setTab] = useState<TabType>("ats");
   function switchTab(t: TabType) { setTab(t); sessionStorage.setItem("ncl_tab", t); }
@@ -303,6 +323,10 @@ export default function Page() {
   const [isFirstSession, setIsFirstSession] = useState(false);
   const [showIdleWarning, setShowIdleWarning] = useState(false);
   const [idleCountdown, setIdleCountdown] = useState(120);
+  const [resumeBlur, setResumeBlur] = useState(false);
+  const [coverBlur, setCoverBlur] = useState(false);
+  const [linkedinBlur, setLinkedinBlur] = useState(false);
+  const [linkedinExportBlur, setLinkedinExportBlur] = useState(false);
 
   // ── Template states ──────────────────────────────────────────
 
@@ -761,32 +785,41 @@ export default function Page() {
   }
 
   async function improveResume() {
+    if (!requireLogin()) return;
     if (!resumeLine.trim()) return;
-    setResumeOutput("Generating...");
+    setResumeOutput("Generating..."); setResumeBlur(false);
     try {
       const token = await user.getIdToken();
       const res = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ prompt: `Rewrite this resume bullet point professionally with measurable impact:\n${resumeLine}` }) });
-      const data = await res.json(); setResumeOutput(data.output);
+      const data = await res.json();
+      setResumeOutput(data.output);
+      if (data.requiresUpgrade) setTimeout(() => setResumeBlur(true), 200);
     } catch { setResumeOutput("Failed."); }
   }
 
   async function generateCover() {
+    if (!requireLogin()) return;
     if (!coverRole.trim() || !coverCompany.trim()) return;
-    setCoverOutput("Generating...");
+    setCoverOutput("Generating..."); setCoverBlur(false);
     try {
       const token = await user.getIdToken();
       const res = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ prompt: `Write a professional cover letter for ${coverRole} role at ${coverCompany}. Keep it concise and impressive.` }) });
-      const data = await res.json(); setCoverOutput(data.output);
+      const data = await res.json();
+      setCoverOutput(data.output);
+      if (data.requiresUpgrade) setTimeout(() => setCoverBlur(true), 200);
     } catch { setCoverOutput("Failed."); }
   }
 
   async function generateLinkedin() {
+    if (!requireLogin()) return;
     if (!linkedinRole.trim()) return;
-    setLinkedinOutput("Generating...");
+    setLinkedinOutput("Generating..."); setLinkedinBlur(false);
     try {
       const token = await user.getIdToken();
       const res = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ prompt: `Create a strong LinkedIn headline and About section for a ${linkedinRole}. Optimize for recruiter SEO.` }) });
-      const data = await res.json(); setLinkedinOutput(data.output);
+      const data = await res.json();
+      setLinkedinOutput(data.output);
+      if (data.requiresUpgrade) setTimeout(() => setLinkedinBlur(true), 200);
     } catch { setLinkedinOutput("Failed."); }
   }
 
@@ -794,7 +827,7 @@ export default function Page() {
     if (!resume.trim()) { showToast("Upload your resume in the ATS tab first!"); return; }
     const role = linkedinRole.trim() || "Professional";
     setLinkedinExportLoading(true);
-    setLinkedinExportOutput("");
+    setLinkedinExportOutput(""); setLinkedinExportBlur(false);
     try {
       const token = await user.getIdToken();
       const prompt = `Based on this resume, generate a complete LinkedIn profile export for the role of "${role}". Structure your response EXACTLY with these section headers:
@@ -816,6 +849,7 @@ ${resume.slice(0, 4000)}`;
       const res = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ prompt }) });
       const data = await res.json();
       setLinkedinExportOutput(data.output || "Generation failed.");
+      if (data.requiresUpgrade) setTimeout(() => setLinkedinExportBlur(true), 200);
     } catch { setLinkedinExportOutput("Failed. Try again."); }
     setLinkedinExportLoading(false);
   }
@@ -874,9 +908,7 @@ ${resume.slice(0, 4000)}`;
       window.location.href = "/templates";
       return;
     }
-    if (!isPro && !isFirstSession && t !== "ats" && t !== "billing" && t !== "help" && t !== "dashboard" && t !== "interview") {
-      showToast("This feature requires Pro plan!"); switchTab("billing"); return;
-    }
+    // All tabs are accessible — blur overlay handles upgrade prompting
     switchTab(t);
     setSidebarOpen(false);
   }
@@ -906,10 +938,10 @@ ${resume.slice(0, 4000)}`;
   const navItems = [
     { id: "dashboard", label: "👤 My Dashboard", locked: false },
     { id: "ats", label: "🔍 ATS Analyzer", locked: false },
-    { id: "resume", label: "✍️ AI Resume Writer", locked: !isPro && !isFirstSession },
-    { id: "cover", label: "📝 Cover Letter", locked: !isPro && !isFirstSession },
-    { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: !isPro && !isFirstSession },
-    { id: "templates", label: "📄 Resume Templates", locked: !isPro && !isFirstSession },
+    { id: "resume", label: "✍️ AI Resume Writer", locked: false },
+    { id: "cover", label: "📝 Cover Letter", locked: false },
+    { id: "linkedin", label: "💼 LinkedIn Optimizer", locked: false },
+    { id: "templates", label: "📄 Resume Templates", locked: false },
     { id: "jdanalyzer", label: "🎯 JD Analyzer", locked: false },
     { id: "interview", label: "🎤 Interview Prep", locked: false },
     { id: "billing", label: "💳 Billing & Plans", locked: false },
@@ -1224,18 +1256,20 @@ ${resume.slice(0, 4000)}`;
                 </div>
               )}
 
-              {tab === "resume" && isPro && (
+              {tab === "resume" && (
                 <div className="card">
                   <p className="card-title">AI Resume Writer</p>
                   <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Paste weak bullet point</p>
                   <textarea rows={4} value={resumeLine} onChange={(e) => setResumeLine(e.target.value)} placeholder="e.g. Managed team and handled projects..." style={{ ...inp, resize: "vertical", marginBottom: "12px" }} />
                   <button className="btn-primary" onClick={improveResume} style={{ marginBottom: "12px" }}>Improve Bullet</button>
                   <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Improved Result</p>
-                  <textarea rows={6} value={resumeOutput} readOnly style={{ ...inp, background: "#f9fafb", resize: "vertical" }} />
+                  <BlurWrap blurred={resumeBlur} onUpgrade={() => switchTab("billing")}>
+                    <textarea rows={6} value={resumeOutput} readOnly style={{ width: "100%", background: "#f9fafb", border: "1.5px solid #d1fae5", borderRadius: "10px", padding: "12px 14px", fontSize: "14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box", resize: "vertical" }} />
+                  </BlurWrap>
                 </div>
               )}
 
-              {tab === "cover" && isPro && (
+              {tab === "cover" && (
                 <div className="card">
                   <p className="card-title">Cover Letter Writer</p>
                   <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Job Role</p>
@@ -1243,11 +1277,13 @@ ${resume.slice(0, 4000)}`;
                   <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Company Name</p>
                   <input value={coverCompany} onChange={(e) => setCoverCompany(e.target.value)} placeholder="e.g. Google" style={{ ...inp, marginBottom: "12px" }} />
                   <button className="btn-primary" onClick={generateCover} style={{ marginBottom: "12px" }}>Generate Cover Letter</button>
-                  <textarea rows={10} value={coverOutput} readOnly style={{ ...inp, background: "#f9fafb", resize: "vertical" }} />
+                  <BlurWrap blurred={coverBlur} onUpgrade={() => switchTab("billing")}>
+                    <textarea rows={10} value={coverOutput} readOnly style={{ width: "100%", background: "#f9fafb", border: "1.5px solid #d1fae5", borderRadius: "10px", padding: "12px 14px", fontSize: "14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box", resize: "vertical" }} />
+                  </BlurWrap>
                 </div>
               )}
 
-              {tab === "linkedin" && isPro && (
+              {tab === "linkedin" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   {/* Quick Optimizer */}
                   <div className="card">
@@ -1255,8 +1291,12 @@ ${resume.slice(0, 4000)}`;
                     <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Target Role</p>
                     <input value={linkedinRole} onChange={(e) => setLinkedinRole(e.target.value)} placeholder="e.g. Frontend Developer" style={{ ...inp, marginBottom: "12px" }} />
                     <button className="btn-primary" onClick={generateLinkedin} style={{ marginBottom: "12px" }}>Generate Headline & About</button>
-                    {linkedinOutput && <textarea rows={10} value={linkedinOutput} readOnly style={{ ...inp, background: "#f9fafb", resize: "vertical", marginBottom: "8px" }} />}
-                    {linkedinOutput && <button onClick={() => { navigator.clipboard.writeText(linkedinOutput); showToast("Copied!"); }} style={{ fontSize: "12px", fontWeight: 600, color: "#059669", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px", padding: "7px 14px", cursor: "pointer" }}>📋 Copy All</button>}
+                    {linkedinOutput && (
+                      <BlurWrap blurred={linkedinBlur} onUpgrade={() => switchTab("billing")}>
+                        <textarea rows={10} value={linkedinOutput} readOnly style={{ width: "100%", background: "#f9fafb", border: "1.5px solid #d1fae5", borderRadius: "10px", padding: "12px 14px", fontSize: "14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box", resize: "vertical", marginBottom: "8px" }} />
+                        <button onClick={() => { navigator.clipboard.writeText(linkedinOutput); showToast("Copied!"); }} style={{ fontSize: "12px", fontWeight: 600, color: "#059669", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px", padding: "7px 14px", cursor: "pointer" }}>📋 Copy All</button>
+                      </BlurWrap>
+                    )}
                   </div>
 
                   {/* Full Profile Export */}
@@ -1272,23 +1312,25 @@ ${resume.slice(0, 4000)}`;
                       {linkedinExportLoading ? "Generating..." : "🚀 Generate Full LinkedIn Profile"}
                     </button>
                     {linkedinExportOutput && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                        {linkedinExportOutput.split(/\n(?=HEADLINE:|ABOUT:|EXPERIENCE BULLETS:|SKILLS:)/).map((section, i) => {
-                          const lines = section.trim().split("\n");
-                          const header = lines[0];
-                          const body = lines.slice(1).join("\n").trim();
-                          if (!body) return null;
-                          return (
-                            <div key={i} style={{ background: "#f9fafb", borderRadius: "10px", border: "1px solid #e5e7eb", overflow: "hidden" }}>
-                              <div style={{ background: "#059669", padding: "8px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>{header}</span>
-                                <button onClick={() => { navigator.clipboard.writeText(body); showToast("Copied!"); }} style={{ fontSize: "11px", fontWeight: 600, color: "#d1fae5", background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "6px", padding: "4px 10px", cursor: "pointer" }}>📋 Copy</button>
+                      <BlurWrap blurred={linkedinExportBlur} onUpgrade={() => switchTab("billing")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                          {linkedinExportOutput.split(/\n(?=HEADLINE:|ABOUT:|EXPERIENCE BULLETS:|SKILLS:)/).map((section, i) => {
+                            const lines = section.trim().split("\n");
+                            const header = lines[0];
+                            const body = lines.slice(1).join("\n").trim();
+                            if (!body) return null;
+                            return (
+                              <div key={i} style={{ background: "#f9fafb", borderRadius: "10px", border: "1px solid #e5e7eb", overflow: "hidden" }}>
+                                <div style={{ background: "#059669", padding: "8px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>{header}</span>
+                                  <button onClick={() => { navigator.clipboard.writeText(body); showToast("Copied!"); }} style={{ fontSize: "11px", fontWeight: 600, color: "#d1fae5", background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "6px", padding: "4px 10px", cursor: "pointer" }}>📋 Copy</button>
+                                </div>
+                                <pre style={{ margin: 0, padding: "12px 14px", fontSize: "12px", color: "#374151", whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: "1.6" }}>{body}</pre>
                               </div>
-                              <pre style={{ margin: 0, padding: "12px 14px", fontSize: "12px", color: "#374151", whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: "1.6" }}>{body}</pre>
-                            </div>
-                          );
-                        })}
-                      </div>
+                            );
+                          })}
+                        </div>
+                      </BlurWrap>
                     )}
                   </div>
                 </div>
@@ -1296,15 +1338,6 @@ ${resume.slice(0, 4000)}`;
 
               {tab === "jdanalyzer" && (
                 <div className="card">
-                  {!isPro && (
-                    <div style={{ padding:"16px", borderRadius:"12px", background:"#fff7ed", border:"1px solid #fed7aa", marginBottom:"16px", textAlign:"center" }}>
-                      <p style={{ fontSize:"15px", fontWeight:700, color:"#c2410c", margin:"0 0 8px" }}>🔒 Pro Feature</p>
-                      <p style={{ fontSize:"13px", color:"#9a3412", margin:"0 0 12px" }}>JD Analyzer is available for Pro users only.</p>
-                      <button onClick={() => switchTab("billing")} style={{ padding:"10px 24px", borderRadius:"9px", fontSize:"13px", fontWeight:700, background:"#f97316", color:"#fff", border:"none", cursor:"pointer" }}>
-                        Upgrade to Pro →
-                      </button>
-                    </div>
-                  )}
                   <div>
                   <p className="card-title">🎯 Job Description Analyzer</p>
                   <p style={{ fontSize:"13px", color:"#6b7280", marginBottom:"20px" }}>
