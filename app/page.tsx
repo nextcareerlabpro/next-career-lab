@@ -1380,10 +1380,17 @@ ${resume.slice(0, 4000)}`;
                   {jdResult && !jdResult.error && (
                     <div>
                       {/* Match Score */}
+                      {(() => {
+                        const ms = jdResult.matchScore || 0;
+                        const scoreBg = ms >= 70 ? "linear-gradient(135deg,#059669,#34d399)" : ms >= 40 ? "linear-gradient(135deg,#f97316,#fb923c)" : "linear-gradient(135deg,#dc2626,#f87171)";
+                        const scoreSubColor = ms >= 70 ? "#d1fae5" : ms >= 40 ? "#fed7aa" : "#fecaca";
+                        const scoreLabel = ms >= 70 ? "Strong Match" : ms >= 40 ? "Moderate Match" : ms > 0 ? "Low Match" : "No Match";
+                        return (
                       <div style={{ display:"flex", gap:"16px", marginBottom:"20px", flexWrap:"wrap" }}>
-                        <div style={{ flex:1, minWidth:"140px", padding:"16px", borderRadius:"12px", background:"linear-gradient(135deg,#059669,#34d399)", textAlign:"center" }}>
-                          <p style={{ fontSize:"36px", fontWeight:800, color:"#fff", margin:0 }}>{jdResult.matchScore || 0}%</p>
-                          <p style={{ fontSize:"12px", color:"#d1fae5", margin:"4px 0 0" }}>JD Match Score</p>
+                        <div style={{ flex:1, minWidth:"140px", padding:"16px", borderRadius:"12px", background: scoreBg, textAlign:"center" }}>
+                          <p style={{ fontSize:"36px", fontWeight:800, color:"#fff", margin:0 }}>{ms}%</p>
+                          <p style={{ fontSize:"12px", color: scoreSubColor, margin:"4px 0 0", fontWeight:600 }}>{scoreLabel}</p>
+                          <p style={{ fontSize:"11px", color: scoreSubColor, margin:"2px 0 0", opacity:0.8 }}>JD Match Score</p>
                         </div>
                         <div style={{ flex:2, minWidth:"200px", padding:"16px", borderRadius:"12px", background:"#f9fafb", border:"1px solid #e5e7eb" }}>
                           <p style={{ fontSize:"13px", fontWeight:700, color:"#111827", margin:"0 0 4px" }}>{jdResult.jobTitle || "Position"}</p>
@@ -1391,6 +1398,8 @@ ${resume.slice(0, 4000)}`;
                           <p style={{ fontSize:"12px", color:"#374151", margin:0, lineHeight:1.5 }}>{jdResult.overallVerdict}</p>
                         </div>
                       </div>
+                        );
+                      })()}
 
                       {/* Keywords */}
                       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"12px", marginBottom:"16px" }}>
