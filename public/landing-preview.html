@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Landing Page Preview — Upgrade Your Resume</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, Arial, sans-serif; background: #f8fafc; color: #1e293b; }
+  a { text-decoration: none; }
+
+  /* NAV */
+  nav { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
+  .logo-wrap { display: flex; flex-direction: column; }
+  .logo-text { font-size: 22px; font-weight: 900; }
+  .logo-g { color: #059669; }
+  .logo-o { color: #f97316; }
+  .logo-sub { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+  .nav-btns { display: flex; gap: 10px; }
+  .btn-outline { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #374151; background: #fff; border: 1.5px solid #d1d5db; cursor: pointer; }
+  .btn-green { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; color: #fff; background: #059669; border: none; cursor: pointer; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #0f172a 0%, #0d2a4a 60%, #0f172a 100%); padding: 80px 24px 90px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(5,150,105,0.15) 0%, transparent 70%); }
+  .hero-badge { display: inline-block; background: rgba(5,150,105,0.15); border: 1px solid rgba(5,150,105,0.4); border-radius: 20px; padding: 5px 16px; font-size: 12px; color: #34d399; font-weight: 600; margin-bottom: 22px; letter-spacing: 0.06em; position: relative; }
+  .hero h1 { font-size: clamp(28px, 5vw, 54px); font-weight: 900; color: #fff; line-height: 1.12; margin-bottom: 18px; position: relative; }
+  .hero h1 span { color: #34d399; }
+  .hero-sub { font-size: clamp(14px, 2vw, 18px); color: #94a3b8; max-width: 580px; margin: 0 auto 36px; line-height: 1.75; position: relative; }
+  .hero-cta { display: inline-block; padding: 15px 40px; border-radius: 12px; font-size: 17px; font-weight: 800; color: #fff; background: linear-gradient(135deg, #059669, #34d399); border: none; cursor: pointer; box-shadow: 0 8px 28px rgba(5,150,105,0.45); position: relative; transition: transform 0.2s; }
+  .hero-cta:hover { transform: translateY(-2px); }
+  .hero-micro { font-size: 12px; color: #475569; margin-top: 14px; position: relative; }
+
+  /* SCORE CARD PREVIEW */
+  .score-preview { max-width: 400px; margin: 52px auto 0; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 24px; text-align: left; position: relative; backdrop-filter: blur(4px); }
+  .score-preview-label { font-size: 11px; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+  .score-row { display: flex; align-items: center; gap: 20px; }
+  .score-ring { width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(#34d399 252deg, #1e293b 0); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .score-inner { width: 58px; height: 58px; border-radius: 50%; background: #0f172a; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+  .score-num { font-size: 18px; font-weight: 900; color: #34d399; line-height: 1; }
+  .score-pct { font-size: 10px; color: #475569; }
+  .kw-line { font-size: 11px; margin-bottom: 4px; }
+  .kw-green { color: #34d399; }
+  .kw-red { color: #f87171; }
+  .score-title { font-size: 14px; font-weight: 800; color: #e2e8f0; margin-bottom: 8px; }
+
+  /* STAT STRIP */
+  .stats { background: #059669; padding: 28px 24px; }
+  .stats-inner { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+  .stat-item { text-align: center; padding: 12px; }
+  .stat-num { font-size: 30px; font-weight: 900; color: #fff; }
+  .stat-txt { font-size: 12px; color: #a7f3d0; margin-top: 4px; font-weight: 500; }
+
+  /* SECTION BASE */
+  section { padding: 72px 24px; }
+  .section-tag { display: inline-block; font-size: 12px; font-weight: 700; color: #059669; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 20px; padding: 4px 14px; letter-spacing: 0.06em; margin-bottom: 14px; }
+  .section-title { font-size: clamp(22px, 3vw, 34px); font-weight: 900; color: #0f172a; margin-bottom: 10px; }
+  .section-sub { font-size: 15px; color: #6b7280; line-height: 1.7; max-width: 560px; }
+  .center { text-align: center; }
+  .center .section-sub { margin: 0 auto; }
+
+  /* WHY ATS */
+  .why-ats { background: #fff; }
+  .ats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1000px; margin: 48px auto 0; align-items: center; }
+  .ats-facts { display: flex; flex-direction: column; gap: 16px; }
+  .fact-card { display: flex; align-items: flex-start; gap: 14px; background: #f8fafc; border-radius: 12px; padding: 16px 18px; border: 1px solid #e5e7eb; }
+  .fact-icon { font-size: 24px; flex-shrink: 0; }
+  .fact-title { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 3px; }
+  .fact-desc { font-size: 12px; color: #6b7280; line-height: 1.5; }
+  .ats-visual { background: linear-gradient(135deg, #0f172a, #1e3a5f); border-radius: 20px; padding: 32px; color: #fff; }
+  .ats-visual h3 { font-size: 18px; font-weight: 800; color: #34d399; margin-bottom: 20px; }
+  .pipeline-step { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; padding: 12px 16px; border-radius: 10px; }
+  .pipeline-step.reject { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); }
+  .pipeline-step.pass { background: rgba(5,150,105,0.15); border: 1px solid rgba(5,150,105,0.3); }
+  .step-icon { font-size: 20px; }
+  .step-text { font-size: 13px; font-weight: 600; }
+  .reject .step-text { color: #fca5a5; }
+  .pass .step-text { color: #6ee7b7; }
+  .step-note { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+
+  /* HOW IT WORKS */
+  .how { background: #f8fafc; }
+  .steps-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; max-width: 900px; margin: 48px auto 0; }
+  .step-card { background: #fff; border-radius: 16px; padding: 28px 24px; border: 1px solid #e5e7eb; text-align: center; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+  .step-num { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg,#059669,#34d399); color: #fff; font-size: 18px; font-weight: 900; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .step-title { font-size: 15px; font-weight: 800; color: #111827; margin-bottom: 8px; }
+  .step-desc { font-size: 13px; color: #6b7280; line-height: 1.6; }
+  .step-connector { display: flex; align-items: center; justify-content: center; padding-top: 36px; color: #d1d5db; font-size: 24px; }
+
+  /* FEATURES */
+  .features { background: #fff; }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; max-width: 1000px; margin: 48px auto 0; }
+  .feat-card { border-radius: 16px; padding: 26px; border: 1px solid #e5e7eb; transition: box-shadow 0.2s, transform 0.2s; }
+  .feat-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+  .feat-icon { font-size: 32px; margin-bottom: 14px; }
+  .feat-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .feat-title { font-size: 15px; font-weight: 800; color: #111827; }
+  .feat-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .badge-free { background: #f0fdf4; color: #059669; }
+  .badge-pro { background: #fff7ed; color: #f97316; }
+  .feat-benefit { font-size: 14px; font-weight: 600; color: #059669; margin-bottom: 6px; }
+  .feat-desc { font-size: 13px; color: #6b7280; line-height: 1.6; }
+
+  /* BEFORE AFTER */
+  .beforeafter { background: linear-gradient(135deg, #0f172a 0%, #0d2a4a 100%); padding: 72px 24px; }
+  .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 860px; margin: 48px auto 0; }
+  .ba-card { border-radius: 18px; padding: 28px; }
+  .ba-before { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+  .ba-after { background: rgba(5,150,105,0.1); border: 1px solid rgba(5,150,105,0.3); }
+  .ba-label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .ba-before .ba-label { color: #f87171; }
+  .ba-after .ba-label { color: #34d399; }
+  .ba-score { font-size: 48px; font-weight: 900; margin-bottom: 6px; line-height: 1; }
+  .ba-before .ba-score { color: #f87171; }
+  .ba-after .ba-score { color: #34d399; }
+  .ba-score-label { font-size: 13px; margin-bottom: 16px; }
+  .ba-before .ba-score-label { color: #fca5a5; }
+  .ba-after .ba-score-label { color: #6ee7b7; }
+  .ba-line { font-size: 12px; line-height: 1.7; }
+  .ba-before .ba-line { color: #94a3b8; }
+  .ba-after .ba-line { color: #a7f3d0; }
+  .ba-arrow { display: flex; align-items: center; justify-content: center; font-size: 40px; padding-top: 80px; color: #34d399; }
+  .ba-note { text-align: center; font-size: 14px; color: #64748b; margin-top: 28px; }
+  .ba-note strong { color: #34d399; }
+
+  /* TESTIMONIALS */
+  .testimonials { background: #f8fafc; }
+  .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 960px; margin: 48px auto 0; }
+  .testi-card { background: #fff; border-radius: 16px; padding: 26px; border: 1px solid #e5e7eb; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+  .stars { color: #f59e0b; font-size: 14px; margin-bottom: 14px; letter-spacing: 2px; }
+  .testi-text { font-size: 14px; color: #374151; line-height: 1.7; font-style: italic; margin-bottom: 18px; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #fff; flex-shrink: 0; }
+  .testi-name { font-size: 13px; font-weight: 700; color: #111827; }
+  .testi-role { font-size: 11px; color: #9ca3af; }
+
+  /* PRICING */
+  .pricing { background: #fff; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px; max-width: 960px; margin: 48px auto 0; }
+  .price-card { border-radius: 16px; padding: 26px; border: 1px solid #e5e7eb; position: relative; }
+  .price-card.popular { border: 2px solid #059669; box-shadow: 0 6px 24px rgba(5,150,105,0.18); }
+  .pop-badge { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: #059669; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 14px; border-radius: 20px; white-space: nowrap; letter-spacing: 0.05em; }
+  .price-name { font-size: 13px; font-weight: 700; color: #6b7280; margin-bottom: 8px; }
+  .price-amount { font-size: 32px; font-weight: 900; color: #111827; margin-bottom: 4px; }
+  .price-per { font-size: 12px; color: #9ca3af; font-weight: 400; }
+  .price-val { font-size: 12px; color: #059669; font-weight: 600; margin-bottom: 18px; }
+  .price-features { list-style: none; margin-bottom: 22px; }
+  .price-features li { font-size: 12px; color: #374151; padding: 4px 0; border-bottom: 1px solid #f1f5f9; }
+  .price-features li::before { content: "✅ "; }
+  .price-btn { width: 100%; padding: 10px; border-radius: 9px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; }
+  .price-daily { font-size: 11px; color: #9ca3af; text-align: center; margin-top: 10px; }
+
+  /* FAQ */
+  .faq { background: #f8fafc; }
+  .faq-list { max-width: 720px; margin: 48px auto 0; display: flex; flex-direction: column; gap: 12px; }
+  .faq-item { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+  .faq-q { padding: 18px 20px; font-size: 14px; font-weight: 700; color: #111827; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .faq-q:hover { background: #f9fafb; }
+  .faq-a { padding: 0 20px 18px; font-size: 13px; color: #6b7280; line-height: 1.7; display: none; }
+  .faq-item.open .faq-a { display: block; }
+  .faq-item.open .faq-arrow { transform: rotate(180deg); }
+  .faq-arrow { transition: transform 0.2s; color: #9ca3af; font-size: 12px; }
+
+  /* FINAL CTA */
+  .final-cta { background: linear-gradient(135deg, #059669, #047857); padding: 80px 24px; text-align: center; }
+  .final-cta h2 { font-size: clamp(24px, 4vw, 40px); font-weight: 900; color: #fff; margin-bottom: 14px; }
+  .final-cta p { font-size: 15px; color: #a7f3d0; margin-bottom: 36px; }
+  .final-btn { display: inline-block; padding: 16px 44px; border-radius: 12px; font-size: 17px; font-weight: 800; color: #059669; background: #fff; border: none; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: transform 0.2s; }
+  .final-btn:hover { transform: translateY(-2px); }
+  .final-micro { font-size: 12px; color: #6ee7b7; margin-top: 14px; }
+
+  /* FOOTER */
+  footer { background: #0f172a; padding: 36px 24px; text-align: center; }
+  .footer-links { margin-bottom: 14px; }
+  .footer-links a { color: #475569; font-size: 12px; margin: 0 12px; transition: color 0.2s; }
+  .footer-links a:hover { color: #94a3b8; }
+  .footer-copy { color: #334155; font-size: 12px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .ats-grid, .ba-grid { grid-template-columns: 1fr; }
+    .ba-arrow { padding-top: 0; }
+    .nav-btns .btn-outline { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo-wrap">
+    <div class="logo-text">
+      <span class="logo-g">Upgrade </span><span class="logo-o">Your </span><span class="logo-g">Resume</span>
+    </div>
+    <div class="logo-sub">AI Powered Career Suite</div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-outline">Sign In</button>
+    <button class="btn-green">Get Started Free →</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🚀 AI-POWERED CAREER TOOLS — TRUSTED BY JOB SEEKERS ACROSS INDIA</div>
+  <h1>73% of Resumes Never Reach<br>a Human Recruiter.<br><span>Is Yours One of Them?</span></h1>
+  <p class="hero-sub">Companies use ATS software to auto-reject resumes before anyone reads them. Our AI checks your resume against the same filters — and tells you exactly what to fix in 60 seconds.</p>
+  <button class="hero-cta">Check My Resume Free →</button>
+  <p class="hero-micro">✅ No credit card &nbsp;·&nbsp; ✅ No signup hassle &nbsp;·&nbsp; ✅ 3 free scans every month</p>
+
+  <div class="score-preview">
+    <div class="score-preview-label">📊 Live ATS Score Example</div>
+    <div class="score-row">
+      <div class="score-ring">
+        <div class="score-inner">
+          <span class="score-num">70</span>
+          <span class="score-pct">%</span>
+        </div>
+      </div>
+      <div>
+        <div class="score-title">Good Match — Can Be Better</div>
+        <p class="kw-line kw-green">✅ Matched: React, Node.js, REST API</p>
+        <p class="kw-line kw-red">❌ Missing: Docker, Kubernetes, CI/CD</p>
+        <p class="kw-line" style="color:#64748b;font-size:11px;margin-top:6px;">Fix these keywords → Score jumps to 91%</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STAT STRIP -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num">98%</div>
+      <div class="stat-txt">Fortune 500 companies use ATS to filter resumes</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">75%</div>
+      <div class="stat-txt">Resumes rejected before a recruiter sees them</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">3×</div>
+      <div class="stat-txt">More interview calls with an ATS-optimized resume</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">60s</div>
+      <div class="stat-txt">Time to get your full ATS score and fix list</div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY ATS MATTERS -->
+<section class="why-ats">
+  <div style="max-width:1000px;margin:0 auto;">
+    <div class="center">
+      <div class="section-tag">WHY IT MATTERS</div>
+      <h2 class="section-title">Your Resume Is Being Judged by a Robot First</h2>
+      <p class="section-sub center">Before any recruiter reads your resume, it passes through an ATS filter. If it doesn't match the keywords — it gets auto-rejected. You never even know.</p>
+    </div>
+    <div class="ats-grid">
+      <div class="ats-facts">
+        <div class="fact-card">
+          <div class="fact-icon">🤖</div>
+          <div>
+            <div class="fact-title">ATS filters out 75% of resumes automatically</div>
+            <div class="fact-desc">Most companies receive 200+ applications per job. ATS software shortlists only keyword-matched resumes before a human reviews them.</div>
+          </div>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">🔑</div>
+          <div>
+            <div class="fact-title">1 missing keyword = rejected application</div>
+            <div class="fact-desc">ATS looks for exact keywords from the job description. A software engineer with 5 years experience gets rejected if "REST API" isn't on their resume.</div>
+          </div>
+        </div>
+        <div class="fact-card">
+          <div class="fact-icon">📈</div>
+          <div>
+            <div class="fact-title">ATS-optimized resumes get 3× more callbacks</div>
+            <div class="fact-desc">Candidates who tailor their resume to each job description consistently get more interview calls — even with the same experience level.</div>
+          </div>
+        </div>
+      </div>
+      <div class="ats-visual">
+        <h3>🏢 How ATS Works at a Company</h3>
+        <div class="pipeline-step reject">
+          <div class="step-icon">📄</div>
+          <div>
+            <div class="step-text">Resume enters ATS system</div>
+            <div class="step-note">200+ applications received for 1 job</div>
+          </div>
+        </div>
+        <div class="pipeline-step reject">
+          <div class="step-icon">🤖</div>
+          <div>
+            <div class="step-text">ATS scans for keywords</div>
+            <div class="step-note">Checks job title, skills, experience</div>
+          </div>
+        </div>
+        <div class="pipeline-step reject">
+          <div class="step-icon">❌</div>
+          <div>
+            <div class="step-text">150 resumes auto-rejected</div>
+            <div class="step-note">Low keyword match — never seen by recruiter</div>
+          </div>
+        </div>
+        <div class="pipeline-step pass">
+          <div class="step-icon">✅</div>
+          <div>
+            <div class="step-text">50 resumes reach recruiter</div>
+            <div class="step-note">High match score — ATS approved</div>
+          </div>
+        </div>
+        <div class="pipeline-step pass">
+          <div class="step-icon">📞</div>
+          <div>
+            <div class="step-text">Interview calls go out</div>
+            <div class="step-note">Only keyword-optimized resumes make it</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="center">
+    <div class="section-tag">HOW IT WORKS</div>
+    <h2 class="section-title">Get Your ATS Score in 3 Simple Steps</h2>
+    <p class="section-sub">No complex setup. No forms to fill. Just paste and analyze.</p>
+  </div>
+  <div class="steps-row">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Upload Your Resume</div>
+      <div class="step-desc">Paste your resume text or upload a PDF/DOCX file. Works with any format — fresher or experienced.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">Paste the Job Description</div>
+      <div class="step-desc">Copy-paste the job description from Naukri, LinkedIn, or any company site. The more complete, the better your analysis.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">Get Your Score + Fix List</div>
+      <div class="step-desc">Instantly see your ATS score, matched keywords, missing keywords, and exactly what to add to get shortlisted.</div>
+    </div>
+  </div>
+  <p style="text-align:center;font-size:13px;color:#9ca3af;margin-top:28px;">⚡ Takes less than 60 seconds · No signup required for first scan</p>
+</section>
+
+<!-- FEATURES + BENEFITS -->
+<section class="features">
+  <div class="center">
+    <div class="section-tag">6 POWERFUL TOOLS</div>
+    <h2 class="section-title">Everything You Need to Land the Job</h2>
+    <p class="section-sub">Not just an ATS checker — a complete AI career suite. Each tool solves a specific job search problem.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card" style="background:#f0fdf4;border-color:#bbf7d0;">
+      <div class="feat-icon">🔍</div>
+      <div class="feat-top">
+        <div class="feat-title">ATS Resume Analyzer</div>
+        <span class="feat-badge badge-free">FREE</span>
+      </div>
+      <div class="feat-benefit">Find out why your resume is getting rejected</div>
+      <div class="feat-desc">Upload your resume + job description. Get your ATS score, matched keywords, and a complete list of what's missing — in 60 seconds.</div>
+    </div>
+    <div class="feat-card" style="background:#fff;">
+      <div class="feat-icon">✍️</div>
+      <div class="feat-top">
+        <div class="feat-title">AI Resume Writer</div>
+        <span class="feat-badge badge-pro">PRO</span>
+      </div>
+      <div class="feat-benefit">Turn weak bullet points into achievements</div>
+      <div class="feat-desc">Paste any resume line. AI rewrites it with numbers, metrics, and impact — the exact language recruiters and ATS systems look for.</div>
+    </div>
+    <div class="feat-card" style="background:#fff;">
+      <div class="feat-icon">📝</div>
+      <div class="feat-top">
+        <div class="feat-title">Cover Letter Generator</div>
+        <span class="feat-badge badge-pro">PRO</span>
+      </div>
+      <div class="feat-benefit">A tailored cover letter in 30 seconds</div>
+      <div class="feat-desc">No more staring at a blank page. Enter the role and company — AI writes a professional, personalized cover letter instantly.</div>
+    </div>
+    <div class="feat-card" style="background:#fff;">
+      <div class="feat-icon">💼</div>
+      <div class="feat-top">
+        <div class="feat-title">LinkedIn Optimizer</div>
+        <span class="feat-badge badge-pro">PRO</span>
+      </div>
+      <div class="feat-benefit">Get found by recruiters on LinkedIn</div>
+      <div class="feat-desc">Optimize your headline and About section with the exact keywords recruiters in your industry search for. More views, more DMs.</div>
+    </div>
+    <div class="feat-card" style="background:#fff;">
+      <div class="feat-icon">🎯</div>
+      <div class="feat-top">
+        <div class="feat-title">JD Analyzer</div>
+        <span class="feat-badge badge-pro">PRO</span>
+      </div>
+      <div class="feat-benefit">Know your fit score before you apply</div>
+      <div class="feat-desc">Paste any job description — get a detailed match report, skill gaps, resume tweaks, and section-by-section feedback. Don't apply blind.</div>
+    </div>
+    <div class="feat-card" style="background:#fff;">
+      <div class="feat-icon">🎤</div>
+      <div class="feat-top">
+        <div class="feat-title">Interview Prep</div>
+        <span class="feat-badge badge-free">FREE</span>
+      </div>
+      <div class="feat-benefit">Walk into every interview prepared</div>
+      <div class="feat-desc">Paste the job description — AI generates role-specific technical questions, behavioral questions, and company research prompts.</div>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE / AFTER -->
+<section class="beforeafter">
+  <div class="center">
+    <div class="section-tag" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.3);color:#34d399;">REAL RESULTS</div>
+    <h2 class="section-title" style="color:#fff;">Same Resume. Same Experience.<br>Completely Different Result.</h2>
+    <p class="section-sub" style="color:#94a3b8;margin:0 auto;">See what happens when you optimize your resume using our ATS score and keyword suggestions.</p>
+  </div>
+  <div class="ba-grid">
+    <div class="ba-card ba-before">
+      <div class="ba-label">❌ BEFORE — Unoptimized Resume</div>
+      <div class="ba-score">34%</div>
+      <div class="ba-score-label">ATS Score — Auto-Rejected</div>
+      <div class="ba-line">
+        ❌ Missing: Docker, Kubernetes, CI/CD, REST API, Agile<br><br>
+        ❌ No measurable achievements in bullets<br><br>
+        ❌ Skills section doesn't match JD language<br><br>
+        ❌ Summary too generic — ATS can't parse role<br><br>
+        ❌ Result: Never reached a human recruiter
+      </div>
+    </div>
+    <div class="ba-card ba-after">
+      <div class="ba-label">✅ AFTER — ATS Optimized</div>
+      <div class="ba-score">91%</div>
+      <div class="ba-score-label">ATS Score — Shortlisted</div>
+      <div class="ba-line">
+        ✅ Added missing keywords naturally into bullets<br><br>
+        ✅ Rewrote 4 bullets with metrics using AI Writer<br><br>
+        ✅ Updated skills section to match JD exactly<br><br>
+        ✅ Summary now includes target role + top keywords<br><br>
+        ✅ Result: Interview call within 5 days
+      </div>
+    </div>
+  </div>
+  <p class="ba-note">Same person. Same experience. <strong>Different ATS score = different outcome.</strong></p>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="center">
+    <div class="section-tag">WHAT USERS SAY</div>
+    <h2 class="section-title">Job Seekers Love Upgrade Your Resume</h2>
+    <p class="section-sub">Real results from real people who optimized their resumes using our tools.</p>
+  </div>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-text">"I was applying to jobs for 2 months with zero callbacks. Checked my ATS score — it was 28%. Added the missing keywords, score went to 84%. Got 3 interview calls in the same week."</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#059669;">P</div>
+        <div>
+          <div class="testi-name">Priya Sharma</div>
+          <div class="testi-role">Software Engineer · Bangalore</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-text">"The Cover Letter Generator alone is worth the subscription. Used to spend 45 minutes per application writing cover letters. Now it's done in 30 seconds and sounds better than what I wrote."</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#f97316;">R</div>
+        <div>
+          <div class="testi-name">Rahul Verma</div>
+          <div class="testi-role">MBA Graduate · Delhi</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-text">"LinkedIn profile views went from 12/week to 89/week after using the LinkedIn Optimizer. Two recruiters messaged me for roles I wasn't even actively applying for. Incredible tool."</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#06b6d4;">S</div>
+        <div>
+          <div class="testi-name">Sneha Patel</div>
+          <div class="testi-role">Data Analyst · Pune</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="center">
+    <div class="section-tag">PRICING</div>
+    <h2 class="section-title">Simple, Honest Pricing</h2>
+    <p class="section-sub">Less than ₹10/day. Less than one cup of chai — for tools that could get you a job worth ₹5,00,000/year.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">FREE</div>
+      <div class="price-amount">₹0 <span class="price-per">/month</span></div>
+      <div class="price-val">Forever free</div>
+      <ul class="price-features">
+        <li>3 ATS scans per month</li>
+        <li>ATS score + keywords</li>
+        <li>PDF report download</li>
+        <li>Interview Prep tool</li>
+      </ul>
+      <button class="price-btn" style="background:#f3f4f6;color:#374151;">Start Free</button>
+    </div>
+    <div class="price-card popular">
+      <div class="pop-badge">⭐ MOST POPULAR</div>
+      <div class="price-name" style="color:#059669;">PRO MONTHLY</div>
+      <div class="price-amount">₹299 <span class="price-per">/month</span></div>
+      <div class="price-val">Billed monthly · Cancel anytime</div>
+      <ul class="price-features">
+        <li>Unlimited ATS scans</li>
+        <li>AI Resume Writer</li>
+        <li>Cover Letter Generator</li>
+        <li>LinkedIn Optimizer</li>
+        <li>JD Analyzer</li>
+        <li>Resume PDF Templates</li>
+      </ul>
+      <button class="price-btn" style="background:#059669;color:#fff;">Get Pro Monthly</button>
+      <div class="price-daily">Just ₹9.96/day</div>
+    </div>
+    <div class="price-card">
+      <div class="price-name" style="color:#06b6d4;">PRO QUARTERLY</div>
+      <div class="price-amount">₹199 <span class="price-per">/month</span></div>
+      <div class="price-val" style="color:#06b6d4;">Billed ₹597 every 3 months · Save 33%</div>
+      <ul class="price-features">
+        <li>Everything in Pro Monthly</li>
+        <li>Save ₹300 vs monthly</li>
+        <li>Priority support</li>
+        <li>Early access features</li>
+      </ul>
+      <button class="price-btn" style="background:#06b6d4;color:#fff;">Get Quarterly</button>
+      <div class="price-daily">Just ₹6.60/day</div>
+    </div>
+    <div class="price-card">
+      <div class="price-name" style="color:#f97316;">PRO ANNUAL</div>
+      <div class="price-amount">₹149 <span class="price-per">/month</span></div>
+      <div class="price-val" style="color:#f97316;">Billed ₹1,788/year · Save 50%</div>
+      <ul class="price-features">
+        <li>Everything in Pro Monthly</li>
+        <li>Save ₹1,800 vs monthly</li>
+        <li>Best value plan</li>
+        <li>Full year access</li>
+      </ul>
+      <button class="price-btn" style="background:#f97316;color:#fff;">Get Annual</button>
+      <div class="price-daily">Just ₹4.90/day</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="center">
+    <div class="section-tag">FAQ</div>
+    <h2 class="section-title">Common Questions</h2>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item open">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What is ATS and why does my score matter? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">ATS (Applicant Tracking System) is software used by companies to automatically filter resumes. If your resume doesn't contain the right keywords from the job description, ATS rejects it before a recruiter ever sees it. Your ATS score tells you how well your resume matches — and what to fix.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Will this guarantee I get an interview? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">We don't guarantee interviews — no tool can. But optimizing your ATS score significantly increases your chances of getting past the first filter. After that, your experience and skills take over. Think of it as removing a barrier you didn't know existed.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Is my resume data safe? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Yes. Resume content you submit for analysis is processed in real-time and not permanently stored on our servers. Your account data is secured in Google Firebase. We never sell or share your personal information.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Does this work for freshers or only experienced professionals? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Works for both. Freshers benefit from understanding what keywords to include in their projects and skills sections. Experienced professionals use it to tailor their resume to specific roles. The JD Analyzer and Interview Prep tools are especially useful for freshers preparing for campus placements.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I cancel my Pro subscription? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Yes, you can stop renewing at any time. However, please note that all purchases are non-refundable as per our refund policy. We recommend trying the free plan thoroughly before upgrading.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What's included in the free plan? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">The free plan includes 3 ATS resume scans per month, your full ATS score, matched and missing keywords, PDF report download, and the Interview Prep tool. No credit card required. It's genuinely useful — upgrade when you need more scans or want the AI writing tools.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <h2>Stop Applying Blind.<br>Know Your ATS Score Today.</h2>
+  <p>Every day you apply with an unoptimized resume, someone else with the same skills gets the interview. The difference? They knew their ATS score.</p>
+  <button class="final-btn">Check My Resume Free →</button>
+  <p class="final-micro">✅ Free forever &nbsp;·&nbsp; ✅ No credit card &nbsp;·&nbsp; ✅ Takes 60 seconds</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-links">
+    <a href="/terms.html">Terms & Conditions</a>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/refund.html">Refund Policy</a>
+    <a href="/blog">Blog & Tips</a>
+  </div>
+  <div class="footer-copy">© 2026 Upgrade Your Resume. All rights reserved. &nbsp;·&nbsp; upgradeyourresume.com</div>
+</footer>
+
+</body>
+</html>
