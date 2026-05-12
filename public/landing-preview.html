@@ -161,6 +161,18 @@
   .faq-item.open .faq-arrow { transform: rotate(180deg); }
   .faq-arrow { transition: transform 0.2s; color: #9ca3af; font-size: 12px; }
 
+  /* FIRST SESSION BANNER */
+  .first-session-callout { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, rgba(249,115,22,0.18), rgba(5,150,105,0.18)); border: 1.5px solid rgba(249,115,22,0.5); border-radius: 14px; padding: 12px 22px; margin: 20px auto 0; position: relative; }
+  .fsc-icon { font-size: 22px; }
+  .fsc-text { text-align: left; }
+  .fsc-title { font-size: 13px; font-weight: 800; color: #fbbf24; line-height: 1.3; }
+  .fsc-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .pricing-first-session { background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border: 2px solid #059669; border-radius: 14px; padding: 18px 24px; max-width: 620px; margin: 28px auto 0; display: flex; align-items: center; gap: 16px; }
+  .pfs-icon { font-size: 32px; flex-shrink: 0; }
+  .pfs-title { font-size: 15px; font-weight: 800; color: #047857; margin-bottom: 4px; }
+  .pfs-sub { font-size: 13px; color: #065f46; line-height: 1.5; }
+  .feat-first-session { font-size: 10px; color: #f97316; font-weight: 700; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 2px 8px; margin-top: 6px; display: inline-block; }
+
   /* FINAL CTA */
   .final-cta { background: linear-gradient(135deg, #059669, #047857); padding: 80px 24px; text-align: center; }
   .final-cta h2 { font-size: clamp(24px, 4vw, 40px); font-weight: 900; color: #fff; margin-bottom: 14px; }
@@ -206,7 +218,15 @@
   <h1>73% of Resumes Never Reach<br>a Human Recruiter.<br><span>Is Yours One of Them?</span></h1>
   <p class="hero-sub">Companies use ATS software to auto-reject resumes before anyone reads them. Our AI checks your resume against the same filters — and tells you exactly what to fix in 60 seconds.</p>
   <button class="hero-cta">Check My Resume Free →</button>
-  <p class="hero-micro">✅ No credit card &nbsp;·&nbsp; ✅ No signup hassle &nbsp;·&nbsp; ✅ 3 free scans every month</p>
+  <p class="hero-micro">✅ No credit card &nbsp;·&nbsp; ✅ No signup required &nbsp;·&nbsp; ✅ 3 free scans every month</p>
+
+  <div class="first-session-callout" style="margin-top:18px;">
+    <div class="fsc-icon">🎁</div>
+    <div class="fsc-text">
+      <div class="fsc-title">First Login = Every Pro Feature Unlocked — 100% Free</div>
+      <div class="fsc-sub">Resume Writer · Cover Letter · LinkedIn Optimizer · JD Analyzer — all yours on your first session. No card. No catch.</div>
+    </div>
+  </div>
 
   <div class="score-preview">
     <div class="score-preview-label">📊 Live ATS Score Example</div>
@@ -375,6 +395,7 @@
       </div>
       <div class="feat-benefit">Turn weak bullet points into achievements</div>
       <div class="feat-desc">Paste any resume line. AI rewrites it with numbers, metrics, and impact — the exact language recruiters and ATS systems look for.</div>
+      <div class="feat-first-session">🎁 Free on first login</div>
     </div>
     <div class="feat-card" style="background:#fff;">
       <div class="feat-icon">📝</div>
@@ -384,6 +405,7 @@
       </div>
       <div class="feat-benefit">A tailored cover letter in 30 seconds</div>
       <div class="feat-desc">No more staring at a blank page. Enter the role and company — AI writes a professional, personalized cover letter instantly.</div>
+      <div class="feat-first-session">🎁 Free on first login</div>
     </div>
     <div class="feat-card" style="background:#fff;">
       <div class="feat-icon">💼</div>
@@ -393,6 +415,7 @@
       </div>
       <div class="feat-benefit">Get found by recruiters on LinkedIn</div>
       <div class="feat-desc">Optimize your headline and About section with the exact keywords recruiters in your industry search for. More views, more DMs.</div>
+      <div class="feat-first-session">🎁 Free on first login</div>
     </div>
     <div class="feat-card" style="background:#fff;">
       <div class="feat-icon">🎯</div>
@@ -402,6 +425,7 @@
       </div>
       <div class="feat-benefit">Know your fit score before you apply</div>
       <div class="feat-desc">Paste any job description — get a detailed match report, skill gaps, resume tweaks, and section-by-section feedback. Don't apply blind.</div>
+      <div class="feat-first-session">🎁 Free on first login</div>
     </div>
     <div class="feat-card" style="background:#fff;">
       <div class="feat-icon">🎤</div>
@@ -502,6 +526,14 @@
     <h2 class="section-title">Simple, Honest Pricing</h2>
     <p class="section-sub">Less than ₹10/day. Less than one cup of chai — for tools that could get you a job worth ₹5,00,000/year.</p>
   </div>
+  <div class="pricing-first-session">
+    <div class="pfs-icon">🎁</div>
+    <div>
+      <div class="pfs-title">New here? Your first login unlocks every Pro feature — FREE</div>
+      <div class="pfs-sub">Sign up and explore Resume Writer, Cover Letter, LinkedIn Optimizer, and JD Analyzer with zero restrictions on your first session. No credit card. No trial period. Just full access.</div>
+    </div>
+  </div>
+
   <div class="pricing-grid">
     <div class="price-card">
       <div class="price-name">FREE</div>
@@ -567,7 +599,11 @@
     <h2 class="section-title">Common Questions</h2>
   </div>
   <div class="faq-list">
-    <div class="faq-item open">
+    <div class="faq-item open" style="border:2px solid #059669;">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')" style="color:#047857;">🎁 Do I really get all Pro features free on my first login? <span class="faq-arrow" style="color:#059669;">▼</span></div>
+      <div class="faq-a" style="color:#065f46;background:#f0fdf4;">Yes — 100% real, no tricks. When you sign up and log in for the first time, every Pro feature is fully unlocked for your entire first session. That includes AI Resume Writer, Cover Letter Generator, LinkedIn Optimizer, and JD Analyzer. Use all of them, explore everything. No credit card required, no timer counting down. From your second session onwards, you'll be on the free plan unless you upgrade — but by then you'll already know exactly what the tools can do for you.</div>
+    </div>
+    <div class="faq-item">
       <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What is ATS and why does my score matter? <span class="faq-arrow">▼</span></div>
       <div class="faq-a">ATS (Applicant Tracking System) is software used by companies to automatically filter resumes. If your resume doesn't contain the right keywords from the job description, ATS rejects it before a recruiter ever sees it. Your ATS score tells you how well your resume matches — and what to fix.</div>
     </div>
@@ -599,7 +635,7 @@
   <h2>Stop Applying Blind.<br>Know Your ATS Score Today.</h2>
   <p>Every day you apply with an unoptimized resume, someone else with the same skills gets the interview. The difference? They knew their ATS score.</p>
   <button class="final-btn">Check My Resume Free →</button>
-  <p class="final-micro">✅ Free forever &nbsp;·&nbsp; ✅ No credit card &nbsp;·&nbsp; ✅ Takes 60 seconds</p>
+  <p class="final-micro">🎁 First login — every Pro tool unlocked free &nbsp;·&nbsp; ✅ No credit card &nbsp;·&nbsp; ✅ 60 seconds to your score</p>
 </section>
 
 <!-- FOOTER -->
