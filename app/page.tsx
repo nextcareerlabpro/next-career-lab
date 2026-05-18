@@ -333,6 +333,7 @@ export default function Page() {
   const [coverBlur, setCoverBlur] = useState(false);
   const [linkedinBlur, setLinkedinBlur] = useState(false);
   const [linkedinExportBlur, setLinkedinExportBlur] = useState(false);
+  const [showScanLimitModal, setShowScanLimitModal] = useState(false);
 
   // ── Template states ──────────────────────────────────────────
 
@@ -556,12 +557,12 @@ export default function Page() {
   async function analyze() {
     if (!requireLogin()) return;
     if (!resume.trim() || !job.trim()) return;
-    if (!isPro && scansUsed >= scanLimit) { showToast("Free limit reached! Upgrade to Pro."); switchTab("billing"); return; }
+    if (!isPro && scansUsed >= scanLimit) { setShowScanLimitModal(true); return; }
     setLoading(true);
     try {
       const token = await user.getIdToken();
       const res = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ resume, job }) });
-      if (res.status === 403) { showToast("Free limit reached! Upgrade to Pro."); switchTab("billing"); setLoading(false); return; }
+      if (res.status === 403) { setShowScanLimitModal(true); setLoading(false); return; }
       const data = await res.json();
       const finalData = normalize(data);
       setResult(finalData);
@@ -1067,6 +1068,28 @@ ${resume.slice(0, 4000)}`;
           </div>
         )}
 
+        {/* Scan limit modal */}
+        {showScanLimitModal && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9998, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+            <div style={{ background: "#fff", borderRadius: "20px", padding: "32px 28px", maxWidth: "400px", width: "100%", textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
+              <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "#fff7ed", border: "2px solid #fed7aa", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px", fontSize: "28px" }}>🔒</div>
+              <p style={{ fontSize: "20px", fontWeight: 800, color: "#111827", margin: "0 0 8px" }}>Free Scan Limit Reached</p>
+              <p style={{ fontSize: "14px", color: "#6b7280", margin: "0 0 6px", lineHeight: 1.6 }}>You've used all <strong>3 free scans</strong> this month.</p>
+              <p style={{ fontSize: "13px", color: "#9ca3af", margin: "0 0 24px" }}>Resets on the 1st of next month — or upgrade now for unlimited scans.</p>
+              {/* Progress bar */}
+              <div style={{ background: "#f1f5f9", borderRadius: "8px", height: "8px", marginBottom: "24px", overflow: "hidden" }}>
+                <div style={{ height: "100%", width: "100%", background: "linear-gradient(90deg, #f97316, #ef4444)", borderRadius: "8px" }} />
+              </div>
+              <button onClick={() => { setShowScanLimitModal(false); switchTab("billing"); }} style={{ width: "100%", padding: "13px", borderRadius: "12px", fontSize: "15px", fontWeight: 700, color: "#fff", background: "linear-gradient(135deg,#059669,#047857)", border: "none", cursor: "pointer", marginBottom: "10px", boxShadow: "0 4px 14px rgba(5,150,105,0.35)" }}>
+                Upgrade to Pro — ₹299/month →
+              </button>
+              <button onClick={() => setShowScanLimitModal(false)} style={{ width: "100%", padding: "11px", borderRadius: "12px", fontSize: "13px", fontWeight: 600, color: "#6b7280", background: "#f9fafb", border: "1px solid #e5e7eb", cursor: "pointer" }}>
+                Maybe Later
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Sidebar overlay */}
         <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)} />
 
@@ -1126,13 +1149,26 @@ ${resume.slice(0, 4000)}`;
                 <span>❓ Help &amp; Tutorials</span>
               </button>
               {user && (
-                <div style={{ marginTop: "16px", padding: "12px", borderRadius: "10px", background: isPro ? "#f0fdf4" : "#fef9f0", border: `1px solid ${isPro ? "#bbf7d0" : "#fed7aa"}` }}>
-                  <p style={{ fontSize: "11px", fontWeight: 600, color: isPro ? "#059669" : "#f97316", margin: "0 0 4px" }}>
-                    {isPro ? "⭐ Pro Active" : "Free Plan"}
+                <div style={{ marginTop: "16px", padding: "12px", borderRadius: "10px", background: isPro ? "#f0fdf4" : "#fef9f0", border: `1px solid ${isPro ? "#bbf7d0" : scansUsed >= scanLimit ? "#fecdd3" : "#fed7aa"}` }}>
+                  <p style={{ fontSize: "11px", fontWeight: 700, color: isPro ? "#059669" : scansUsed >= scanLimit ? "#e11d48" : "#f97316", margin: "0 0 6px" }}>
+                    {isPro ? "⭐ Pro Active" : scansUsed >= scanLimit ? "❌ Limit Reached" : "Free Plan"}
                   </p>
-                  <p style={{ fontSize: "11px", color: "#6b7280", margin: 0 }}>
-                    {isPro ? `${scansUsed} scans this month` : `${scansUsed}/${scanLimit} scans used`}
-                  </p>
+                  {!isPro && (
+                    <>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "10px", color: "#6b7280" }}>Scans used</span>
+                        <span style={{ fontSize: "10px", fontWeight: 700, color: scansUsed >= scanLimit ? "#e11d48" : "#f97316" }}>{scansUsed}/{scanLimit}</span>
+                      </div>
+                      <div style={{ height: "5px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden", marginBottom: "6px" }}>
+                        <div style={{ height: "100%", width: `${Math.min(100, (scansUsed / scanLimit) * 100)}%`, background: scansUsed >= scanLimit ? "linear-gradient(90deg,#f97316,#ef4444)" : "linear-gradient(90deg,#059669,#34d399)", borderRadius: "10px", transition: "width 0.4s ease" }} />
+                      </div>
+                      {scansUsed >= scanLimit
+                        ? <button onClick={() => switchTab("billing")} style={{ width: "100%", fontSize: "10px", fontWeight: 700, color: "#fff", background: "#f97316", border: "none", borderRadius: "6px", padding: "5px", cursor: "pointer" }}>Upgrade →</button>
+                        : <p style={{ fontSize: "10px", color: "#9ca3af", margin: 0 }}>{scanLimit - scansUsed} scan{scanLimit - scansUsed !== 1 ? "s" : ""} remaining</p>
+                      }
+                    </>
+                  )}
+                  {isPro && <p style={{ fontSize: "10px", color: "#059669", margin: 0 }}>Unlimited scans · {scansUsed} used</p>}
                 </div>
               )}
             </aside>
@@ -1150,13 +1186,19 @@ ${resume.slice(0, 4000)}`;
                     </div>
                   )}
                   {user && !isPro && (
-                    <div className="status-strip" style={{ background: scansUsed >= scanLimit ? "#fff1f2" : "rgba(255,255,255,0.9)", border: `1px solid ${scansUsed >= scanLimit ? "#fecdd3" : "#a7f3d0"}` }}>
-                      <span style={{ color: scansUsed >= scanLimit ? "#e11d48" : "#059669" }}>
-                        {scansUsed >= scanLimit ? "Free limit reached!" : `Free: ${scansUsed}/${scanLimit} scans used`}
-                      </span>
-                      {scansUsed >= scanLimit && (
-                        <button onClick={() => switchTab("billing")} style={{ fontSize: "12px", fontWeight: 600, color: "#fff", background: "#f97316", border: "none", borderRadius: "6px", padding: "5px 12px", cursor: "pointer" }}>Upgrade →</button>
-                      )}
+                    <div style={{ background: scansUsed >= scanLimit ? "#fff1f2" : "rgba(255,255,255,0.9)", border: `1px solid ${scansUsed >= scanLimit ? "#fecdd3" : "#a7f3d0"}`, borderRadius: "10px", padding: "10px 14px", marginBottom: "14px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                        <span style={{ fontSize: "13px", fontWeight: 600, color: scansUsed >= scanLimit ? "#e11d48" : "#059669" }}>
+                          {scansUsed >= scanLimit ? "❌ Free scan limit reached" : `🔍 ${scanLimit - scansUsed} free scan${scanLimit - scansUsed !== 1 ? "s" : ""} remaining`}
+                        </span>
+                        {scansUsed >= scanLimit
+                          ? <button onClick={() => setShowScanLimitModal(true)} style={{ fontSize: "12px", fontWeight: 700, color: "#fff", background: "#f97316", border: "none", borderRadius: "6px", padding: "5px 12px", cursor: "pointer" }}>Upgrade →</button>
+                          : <span style={{ fontSize: "12px", color: "#9ca3af" }}>{scansUsed}/{scanLimit} used</span>
+                        }
+                      </div>
+                      <div style={{ height: "5px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${Math.min(100, (scansUsed / scanLimit) * 100)}%`, background: scansUsed >= scanLimit ? "linear-gradient(90deg,#f97316,#ef4444)" : "linear-gradient(90deg,#059669,#34d399)", borderRadius: "10px", transition: "width 0.4s ease" }} />
+                      </div>
                     </div>
                   )}
 
@@ -1222,6 +1264,56 @@ ${resume.slice(0, 4000)}`;
                           </span>
                         )}
                       </div>
+
+                      {/* ATS Score Context Card */}
+                      {score > 0 && (
+                        <div style={{ padding: "14px", borderRadius: "12px", background: score>=70?"#f0fdf4":score>=40?"#fff7ed":"#fff1f2", border: `1px solid ${score>=70?"#bbf7d0":score>=40?"#fed7aa":"#fecdd3"}` }}>
+                          <p style={{ fontSize: "12px", fontWeight: 700, color: score>=70?"#059669":score>=40?"#c2410c":"#dc2626", margin: "0 0 6px" }}>
+                            {score>=70?"✅ Your resume is likely reaching recruiters":score>=40?"⚠️ Your resume may be getting filtered out":"❌ High risk — ATS will likely auto-reject this"}
+                          </p>
+                          <p style={{ fontSize: "11px", color: "#6b7280", margin: "0 0 10px", lineHeight: 1.55 }}>
+                            {score>=70
+                              ? "Good keyword alignment. Focus on adding missing keywords to push toward 85%+ for best results."
+                              : score>=40
+                              ? "Your resume passes some filters but will lose to better-optimized candidates. Add the missing keywords below."
+                              : "Most companies' ATS will reject this before a recruiter reads it. Add the missing keywords immediately."}
+                          </p>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+                            {[
+                              { range: "0–39%", label: "Auto-rejected by ATS", color: "#dc2626", active: score < 40 },
+                              { range: "40–69%", label: "May pass, needs work", color: "#c2410c", active: score >= 40 && score < 70 },
+                              { range: "70–100%", label: "Strong — reaches recruiter", color: "#059669", active: score >= 70 },
+                            ].map((r) => (
+                              <div key={r.range} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 8px", borderRadius: "6px", background: r.active ? `${r.color}18` : "transparent" }}>
+                                <span style={{ fontSize: "10px", fontWeight: 700, color: r.color, minWidth: "42px" }}>{r.range}</span>
+                                <span style={{ fontSize: "10px", color: r.active ? r.color : "#9ca3af", fontWeight: r.active ? 600 : 400 }}>{r.label}</span>
+                                {r.active && <span style={{ fontSize: "10px", marginLeft: "auto" }}>👈 You</span>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Share My Score */}
+                      {score > 0 && (
+                        <div>
+                          <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>📤 Share My Score</p>
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <a
+                              href={`https://wa.me/?text=${encodeURIComponent(`My resume just scored ${score}% on ATS! 🎯\n\nCheck if your resume is passing ATS filters 👉 upgradeyourresume.com`)}`}
+                              target="_blank" rel="noopener noreferrer"
+                              style={{ flex: 1, padding: "9px 6px", borderRadius: "9px", fontSize: "12px", fontWeight: 700, background: "#dcfce7", color: "#16a34a", border: "1px solid #bbf7d0", textAlign: "center", textDecoration: "none", display: "block" }}>
+                              📱 WhatsApp
+                            </a>
+                            <a
+                              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Just checked my resume's ATS score — ${score}%! 📊\n\nIf you're job hunting, check yours free at upgradeyourresume.com 🚀\n\n#JobSearch #Resume #ATS #Hiring`)}`}
+                              target="_blank" rel="noopener noreferrer"
+                              style={{ flex: 1, padding: "9px 6px", borderRadius: "9px", fontSize: "12px", fontWeight: 700, background: "#dbeafe", color: "#1d4ed8", border: "1px solid #bfdbfe", textAlign: "center", textDecoration: "none", display: "block" }}>
+                              🐦 Twitter
+                            </a>
+                          </div>
+                        </div>
+                      )}
 
                       <KwBox title="Matched" data={result.matched} color="#059669" tagBg="#d1fae5" tagColor="#065f46" />
                       <KwBox title="Missing" data={result.missing} color="#dc2626" tagBg="#fee2e2" tagColor="#991b1b" />
