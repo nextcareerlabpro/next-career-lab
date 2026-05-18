@@ -36,15 +36,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  // Check scan limit in Firestore (server-side, cannot be bypassed)
+  // Check scan limit and increment server-side — client cannot bypass or falsify
+  let newScansUsed = 0;
   const userSnap = await adminDb.collection("users").where("uid", "==", uid).limit(1).get();
   if (!userSnap.empty) {
     const userData = userSnap.docs[0].data();
     const currentMonth = new Date().toISOString().slice(0, 7);
     if (userData.monthYear !== currentMonth) {
-      await userSnap.docs[0].ref.update({ scansUsed: 0, monthYear: currentMonth });
+      // New month — reset to 1 (this scan counts as the first)
+      newScansUsed = 1;
+      await userSnap.docs[0].ref.update({ scansUsed: 1, monthYear: currentMonth });
     } else if (userData.plan !== "pro" && (userData.scansUsed || 0) >= 3) {
       return NextResponse.json({ error: "Scan limit reached. Upgrade to Pro." }, { status: 403 });
+    } else {
+      // Increment count server-side
+      newScansUsed = (userData.scansUsed || 0) + 1;
+      await userSnap.docs[0].ref.update({ scansUsed: newScansUsed });
     }
   }
 
@@ -69,6 +76,7 @@ export async function POST(req: Request) {
       score,
       matched: matched.slice(0, 15),
       missing: missing.slice(0, 15),
+      scansUsed: newScansUsed,
       suggestions: [
         "Add measurable achievements.",
         "Include relevant technical skills.",

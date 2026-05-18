@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { adminDb } from "@/lib/firebaseAdmin";
 
 const PLAN_PRICES: Record<string, number> = {
   monthly: 29900,
@@ -65,7 +66,28 @@ export async function POST(req: Request) {
         .join("");
 
       if (expectedSign === razorpay_signature) {
-        return NextResponse.json({ success: true });
+        // Upgrade plan in Firestore server-side — never trust the client to do this
+        const { uid, planType } = body;
+        let proExpiry = "";
+        if (uid && planType) {
+          const now = new Date();
+          const expiry = new Date(now);
+          if (planType === "annual") expiry.setFullYear(expiry.getFullYear() + 1);
+          else if (planType === "quarterly") expiry.setMonth(expiry.getMonth() + 3);
+          else expiry.setMonth(expiry.getMonth() + 1);
+          proExpiry = expiry.toISOString();
+
+          const snap = await adminDb.collection("users").where("uid", "==", uid).limit(1).get();
+          if (!snap.empty) {
+            await snap.docs[0].ref.update({
+              plan: "pro",
+              proPlan: planType,
+              proSince: now.toISOString(),
+              proExpiry,
+            });
+          }
+        }
+        return NextResponse.json({ success: true, proExpiry, planType });
       } else {
         return NextResponse.json({ success: false });
       }

@@ -566,12 +566,8 @@ export default function Page() {
       const finalData = normalize(data);
       setResult(finalData);
       await addDoc(collection(db, "reports"), { uid: user.uid, ...finalData, createdAt: serverTimestamp() });
-      const snap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
-      if (!snap.empty) {
-        const newCount = (snap.docs[0].data().scansUsed || 0) + 1;
-        await updateDoc(snap.docs[0].ref, { scansUsed: newCount });
-        setScansUsed(newCount);
-      }
+      // scansUsed is incremented server-side in /api/analyze — use the returned count
+      if (data.scansUsed !== undefined) setScansUsed(data.scansUsed);
       await loadHistory();
     } catch { alert("Analyze failed."); }
     setLoading(false);
@@ -755,16 +751,11 @@ export default function Page() {
         name: "Upgrade Your Resume", description: planLabels[planType] + (activeCoupon ? ` (Coupon: ${couponCode})` : ""),
         order_id: order.id,
         handler: async function (response: any) {
-          const verifyRes = await fetch("/api/razorpay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "verify_payment", ...response }) });
+          // Pass uid + planType so the server can upgrade Firestore — never do it client-side
+          const verifyRes = await fetch("/api/razorpay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "verify_payment", ...response, uid: user.uid, planType }) });
           const v = await verifyRes.json();
           if (v.success) {
-            const now = new Date();
-            const expiry = new Date(now);
-            if (planType === "monthly") expiry.setMonth(expiry.getMonth() + 1);
-            else if (planType === "quarterly") expiry.setMonth(expiry.getMonth() + 3);
-            else if (planType === "annual") expiry.setFullYear(expiry.getFullYear() + 1);
-            const snap = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
-            if (!snap.empty) await updateDoc(snap.docs[0].ref, { plan: "pro", proPlan: planType, proSince: now.toISOString(), proExpiry: expiry.toISOString() });
+            // Plan already upgraded in Firestore by the server — just update UI state
             setIsPro(true); setUserPlan(planType);
             if (activeCoupon?.couponId) {
               await fetch("/api/coupon/use", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ couponId: activeCoupon.couponId }) });
@@ -777,7 +768,7 @@ export default function Page() {
             setCouponCode(""); setCouponResult(null);
             sendEmail("payment", { plan: planType, orderId: response.razorpay_order_id || "" });
             sendEmail("pro_activation", { plan: planType });
-            setProSince(now.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
+            setProSince(new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }));
             showToast(`Payment successful! ${planLabels[planType]} activated!`);
           } else { showToast("Verification failed. Contact support."); }
         },
