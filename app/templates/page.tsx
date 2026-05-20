@@ -16,7 +16,7 @@ import { generateResumePdf } from "../../lib/resumePdfTemplates";
 // ── Template preview data ────────────────────────────────────────
 const TEMPLATES = [
   {
-    id: 1, name: "Sharp", tag: "Corporate",
+    id: 1, name: "Sharp", tag: "Corporate", isPro: false,
     desc: "Dark sidebar, bold typography. Perfect for senior roles.",
     accent: "#0f172a", badge: "#0ea5e9",
     preview: (
@@ -44,7 +44,7 @@ const TEMPLATES = [
     ),
   },
   {
-    id: 2, name: "Ivy", tag: "Academic",
+    id: 2, name: "Ivy", tag: "Academic", isPro: false,
     desc: "Elegant centered layout. Ideal for academia & senior management.",
     accent: "#8b693c", badge: "#a16207",
     preview: (
@@ -67,7 +67,7 @@ const TEMPLATES = [
     ),
   },
   {
-    id: 3, name: "Slate", tag: "Tech / Startup",
+    id: 3, name: "Slate", tag: "Tech / Startup", isPro: false,
     desc: "Teal accent, 2-column. Modern feel for tech & product roles.",
     accent: "#0f766e", badge: "#14b8a6",
     preview: (
@@ -96,7 +96,7 @@ const TEMPLATES = [
     ),
   },
   {
-    id: 4, name: "Ember", tag: "Creative",
+    id: 4, name: "Ember", tag: "Creative", isPro: false,
     desc: "Warm orange tones. Great for marketing, design & creative fields.",
     accent: "#ea580c", badge: "#f97316",
     preview: (
@@ -123,7 +123,7 @@ const TEMPLATES = [
     ),
   },
   {
-    id: 5, name: "Clarity", tag: "Minimal",
+    id: 5, name: "Clarity", tag: "Minimal", isPro: false,
     desc: "Ultra-clean with bold left rule. Timeless for consulting & finance.",
     accent: "#111827", badge: "#6b7280",
     preview: (
@@ -147,7 +147,7 @@ const TEMPLATES = [
   {
     id: 6, name: "Royal", tag: "Executive",
     desc: "Navy & gold. Commands authority for C-suite & senior leadership.",
-    accent: "#0f172a", badge: "#a1823c",
+    accent: "#0f172a", badge: "#a1823c", isPro: false,
     preview: (
       <div style={{ background: "#faf9f6", height: "100%" }}>
         <div style={{ background: "#0f172a", padding: "10px 12px", textAlign: "center" }}>
@@ -168,6 +168,778 @@ const TEMPLATES = [
               <div key={s} style={{ fontSize: "6px", color: "#374151" }}>{s}</div>
             ))}
           </div>
+        </div>
+      </div>
+    ),
+  },
+
+  // ── PRO TEMPLATES ─────────────────────────────────────────────
+
+  // Modern
+  {
+    id: 7, name: "Vanguard", tag: "Modern", isPro: true,
+    desc: "Deep indigo sidebar with violet accents. Standout look for tech & product.",
+    accent: "#312e81", badge: "#818cf8",
+    preview: (
+      <div style={{ background: "#f8fafc", height: "100%", display: "flex" }}>
+        <div style={{ background: "#312e81", width: "38%", padding: "10px 7px" }}>
+          <div style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>ALEX MORGAN</div>
+          <div style={{ fontSize: "5.5px", color: "#818cf8", marginBottom: "6px" }}>Software Engineer</div>
+          <div style={{ fontSize: "5px", color: "#a5b4fc", fontWeight: 700, marginBottom: "2px" }}>SKILLS</div>
+          {["React", "TypeScript", "AWS"].map(s => (<div key={s} style={{ background: "#4338ca", borderRadius: "2px", padding: "1.5px 3px", marginBottom: "2px", fontSize: "5px", color: "#c7d2fe" }}>{s}</div>))}
+        </div>
+        <div style={{ flex: 1, padding: "10px 8px" }}>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#312e81", borderBottom: "1.5px solid #818cf8", paddingBottom: "1px", marginBottom: "4px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#1e1b4b" }}>Lead Engineer</div>
+          <div style={{ fontSize: "5.5px", color: "#818cf8", marginBottom: "2px" }}>TechCorp · 2021–Now</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Scaled platform to 5M users</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Reduced deploy time by 60%</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#312e81", borderBottom: "1.5px solid #818cf8", paddingBottom: "1px", marginTop: "6px", marginBottom: "4px" }}>EDUCATION</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#1e1b4b" }}>B.Tech CS · IIT Delhi</div>
+          <div style={{ fontSize: "5.5px", color: "#818cf8" }}>2018</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 8, name: "Metro Linear", tag: "Modern", isPro: true,
+    desc: "Bold navy banner header with bright blue accent stripe. Clean & corporate.",
+    accent: "#1e3a5f", badge: "#3b82f6",
+    preview: (
+      <div style={{ background: "#f0f9ff", height: "100%" }}>
+        <div style={{ background: "#1e3a5f", padding: "10px 12px" }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>PRIYA SHARMA</div>
+          <div style={{ fontSize: "7.5px", color: "#93c5fd", marginTop: "1px" }}>Product Manager</div>
+          <div style={{ fontSize: "6px", color: "#60a5fa", marginTop: "2px" }}>priya@corp.com · Mumbai</div>
+        </div>
+        <div style={{ background: "#3b82f6", height: "3px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "3px", marginBottom: "5px" }}>
+            {["Agile", "SQL", "Figma"].map(s => (<span key={s} style={{ background: "#dbeafe", color: "#1e3a8a", borderRadius: "3px", padding: "1.5px 4px", fontSize: "5.5px", fontWeight: 700 }}>{s}</span>))}
+          </div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#1e3a5f", marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "1px solid #93c5fd", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#111827" }}>Sr. Product Manager</div>
+          <div style={{ fontSize: "5.5px", color: "#1e3a5f", marginBottom: "2px" }}>GrowthCo · 2020–Now</div>
+          <div style={{ fontSize: "5.5px", color: "#475569" }}>• Launched 3 products, 50K+ users</div>
+          <div style={{ fontSize: "5.5px", color: "#475569" }}>• Increased retention by 35%</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 9, name: "Slate & Steel", tag: "Modern", isPro: true,
+    desc: "Dark slate sidebar, steel-gray accents. Sophisticated modern professional look.",
+    accent: "#1e293b", badge: "#64748b",
+    preview: (
+      <div style={{ background: "#f8fafc", height: "100%", display: "flex" }}>
+        <div style={{ background: "#1e293b", width: "38%", padding: "10px 7px" }}>
+          <div style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>RAHUL VERMA</div>
+          <div style={{ fontSize: "5.5px", color: "#94a3b8", marginBottom: "6px" }}>Data Engineer</div>
+          <div style={{ fontSize: "5px", color: "#64748b", fontWeight: 700, marginBottom: "2px" }}>SKILLS</div>
+          {["Python", "Spark", "AWS"].map(s => (<div key={s} style={{ background: "#334155", borderRadius: "2px", padding: "1.5px 3px", marginBottom: "2px", fontSize: "5px", color: "#94a3b8" }}>{s}</div>))}
+        </div>
+        <div style={{ flex: 1, padding: "10px 8px" }}>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#1e293b", borderBottom: "1.5px solid #64748b", paddingBottom: "1px", marginBottom: "4px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#0f172a" }}>Data Engineer</div>
+          <div style={{ fontSize: "5.5px", color: "#64748b", marginBottom: "2px" }}>CloudCo · 2020–Now</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Built pipelines for 10TB/day</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Reduced query time by 70%</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#1e293b", borderBottom: "1.5px solid #64748b", paddingBottom: "1px", marginTop: "6px", marginBottom: "4px" }}>EDUCATION</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#0f172a" }}>M.Tech CS · NIT</div>
+          <div style={{ fontSize: "5.5px", color: "#64748b" }}>2020</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 10, name: "Apex Corporate", tag: "Modern", isPro: true,
+    desc: "Charcoal header with gold accent stripe. Polished corporate presence.",
+    accent: "#111827", badge: "#f59e0b",
+    preview: (
+      <div style={{ background: "#fff", height: "100%" }}>
+        <div style={{ background: "#111827", padding: "10px 12px", textAlign: "center" as const }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>AMIT PATEL</div>
+          <div style={{ fontSize: "7.5px", color: "#fcd34d", marginTop: "1px" }}>Business Analyst</div>
+          <div style={{ fontSize: "6px", color: "#f59e0b", marginTop: "2px" }}>amit@corp.com · Ahmedabad</div>
+        </div>
+        <div style={{ background: "#f59e0b", height: "2px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#f59e0b", textAlign: "center" as const, marginBottom: "3px" }}>CORE COMPETENCIES</div>
+          <div style={{ borderBottom: "0.5px solid #f59e0b", marginBottom: "4px" }}></div>
+          <div style={{ fontSize: "6px", color: "#374151", textAlign: "center" as const, marginBottom: "5px" }}>Strategy · Analytics · Finance · Operations</div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#f59e0b", textAlign: "center" as const, marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "0.5px solid #f59e0b", marginBottom: "4px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#111827" }}>Senior Analyst — InfraGroup</div>
+          <div style={{ fontSize: "6px", color: "#f59e0b", marginBottom: "2px" }}>2020 – Present</div>
+          <div style={{ fontSize: "5.5px", color: "#374151" }}>*  Drove $5Cr cost reduction</div>
+        </div>
+      </div>
+    ),
+  },
+
+  // Classic
+  {
+    id: 11, name: "Executive Traditional", tag: "Classic", isPro: true,
+    desc: "Warm burgundy header, centered layout. Distinguished old-world executive style.",
+    accent: "#7c2d12", badge: "#b45309",
+    preview: (
+      <div style={{ background: "#fff", height: "100%" }}>
+        <div style={{ background: "#7c2d12", padding: "10px 12px", textAlign: "center" as const }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>RAJAN MEHTA</div>
+          <div style={{ fontSize: "7.5px", color: "#fbbf24", marginTop: "1px" }}>Director, Operations</div>
+          <div style={{ fontSize: "6px", color: "#fcd34d", marginTop: "2px" }}>rajan@corp.com · Delhi</div>
+        </div>
+        <div style={{ background: "#b45309", height: "2px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#b45309", textAlign: "center" as const, marginBottom: "3px" }}>PROFESSIONAL PROFILE</div>
+          <div style={{ borderBottom: "0.5px solid #b45309", marginBottom: "4px" }}></div>
+          <div style={{ fontSize: "6px", color: "#374151", fontStyle: "italic" as const, marginBottom: "5px" }}>Seasoned operations leader with 15+ years of P&L ownership...</div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#b45309", textAlign: "center" as const, marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "0.5px solid #b45309", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#1c1917" }}>Director — MegaCorp</div>
+          <div style={{ fontSize: "6px", color: "#b45309" }}>2018 – Present</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 12, name: "Ivy League Classic", tag: "Classic", isPro: true,
+    desc: "Rich forest green header, centered serif-inspired layout. Academia & consulting.",
+    accent: "#064e3b", badge: "#059669",
+    preview: (
+      <div style={{ background: "#fff", height: "100%" }}>
+        <div style={{ background: "#064e3b", padding: "10px 12px", textAlign: "center" as const }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>NISHA AGARWAL</div>
+          <div style={{ fontSize: "7.5px", color: "#6ee7b7", marginTop: "1px" }}>Senior Consultant</div>
+          <div style={{ fontSize: "6px", color: "#34d399", marginTop: "2px" }}>nisha@mckinsey.com · Pune</div>
+        </div>
+        <div style={{ background: "#059669", height: "2px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#059669", textAlign: "center" as const, marginBottom: "3px" }}>PROFESSIONAL PROFILE</div>
+          <div style={{ borderBottom: "0.5px solid #059669", marginBottom: "4px" }}></div>
+          <div style={{ fontSize: "6px", color: "#374151", fontStyle: "italic" as const, marginBottom: "5px" }}>Strategy consultant with expertise in market entry and operational efficiency...</div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#059669", textAlign: "center" as const, marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "0.5px solid #059669", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#022c22" }}>Consultant — BCG Mumbai</div>
+          <div style={{ fontSize: "6px", color: "#059669" }}>2020 – Present</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 13, name: "Century Executive", tag: "Classic", isPro: true,
+    desc: "Timeless charcoal left rule, clean white canvas. Consulting & finance favourite.",
+    accent: "#1f2937", badge: "#4b5563",
+    preview: (
+      <div style={{ background: "#fff", height: "100%", display: "flex" }}>
+        <div style={{ width: "4px", background: "#1f2937", flexShrink: 0 }}></div>
+        <div style={{ padding: "10px 10px", flex: 1 }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>SURESH IYER</div>
+          <div style={{ fontSize: "8px", color: "#4b5563", marginBottom: "2px" }}>CFO</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginBottom: "8px" }}>suresh@firm.com · Chennai</div>
+          <div style={{ borderBottom: "0.5px solid #e5e7eb", marginBottom: "5px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#9ca3af", letterSpacing: "0.1em", marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#111827" }}>CFO — FinGroup India</div>
+          <div style={{ fontSize: "6.5px", color: "#4b5563", marginBottom: "3px" }}>2019 – Present</div>
+          <div style={{ fontSize: "6px", color: "#374151" }}>— Led IPO raising ₹500Cr</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginTop: "5px" }}>Finance  ·  Strategy  ·  Compliance</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 14, name: "Vintage Professional", tag: "Classic", isPro: true,
+    desc: "Rich sepia tones with an amber accent bar. Warm, trusted, timeless appeal.",
+    accent: "#78350f", badge: "#d97706",
+    preview: (
+      <div style={{ background: "#fefce8", height: "100%" }}>
+        <div style={{ background: "#78350f", padding: "10px 12px" }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>KAVITA DESAI</div>
+          <div style={{ fontSize: "7.5px", color: "#fde68a", marginTop: "1px" }}>HR Director</div>
+          <div style={{ fontSize: "6px", color: "#fcd34d", marginTop: "2px" }}>kavita@hr.com · Kolkata</div>
+        </div>
+        <div style={{ background: "#d97706", height: "3px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "3px", marginBottom: "5px" }}>
+            {["HRBP", "Talent Acq.", "L&D"].map(s => (<span key={s} style={{ background: "#fef3c7", color: "#78350f", borderRadius: "3px", padding: "1.5px 4px", fontSize: "5.5px", fontWeight: 700 }}>{s}</span>))}
+          </div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#78350f", marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "1px solid #fbbf24", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#1c1917" }}>HR Director — LargeCorp</div>
+          <div style={{ fontSize: "5.5px", color: "#78350f" }}>2019 – Present</div>
+          <div style={{ fontSize: "5.5px", color: "#44403c" }}>• Built HR team from 3 to 25</div>
+        </div>
+      </div>
+    ),
+  },
+
+  // Creative
+  {
+    id: 15, name: "Studio Vanguard", tag: "Creative", isPro: true,
+    desc: "Bold purple header with violet accents. Artistic and eye-catching for creative roles.",
+    accent: "#6b21a8", badge: "#a855f7",
+    preview: (
+      <div style={{ background: "#faf5ff", height: "100%" }}>
+        <div style={{ background: "#6b21a8", padding: "10px 12px" }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>ISHA KAPOOR</div>
+          <div style={{ fontSize: "7.5px", color: "#e9d5ff", marginTop: "1px" }}>Creative Director</div>
+          <div style={{ fontSize: "6px", color: "#d8b4fe", marginTop: "2px" }}>isha@studio.io · Bangalore</div>
+        </div>
+        <div style={{ background: "#a855f7", height: "3px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "3px", marginBottom: "5px" }}>
+            {["Branding", "Figma", "Motion"].map(s => (<span key={s} style={{ background: "#f3e8ff", color: "#6b21a8", borderRadius: "3px", padding: "1.5px 4px", fontSize: "5.5px", fontWeight: 700 }}>{s}</span>))}
+          </div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#6b21a8", marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "1px solid #c084fc", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#2e1065" }}>Creative Director — AdFirm</div>
+          <div style={{ fontSize: "5.5px", color: "#6b21a8" }}>2021 – Present</div>
+          <div style={{ fontSize: "5.5px", color: "#44403c" }}>• Rebranded 20+ enterprise clients</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 16, name: "Spectrum Dynamic", tag: "Creative", isPro: true,
+    desc: "Hot pink sidebar, vibrant & bold. Makes a lasting first impression.",
+    accent: "#be185d", badge: "#f472b6",
+    preview: (
+      <div style={{ background: "#fdf2f8", height: "100%", display: "flex" }}>
+        <div style={{ background: "#be185d", width: "38%", padding: "10px 7px" }}>
+          <div style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>MEERA NAIR</div>
+          <div style={{ fontSize: "5.5px", color: "#f9a8d4", marginBottom: "6px" }}>UX Researcher</div>
+          <div style={{ fontSize: "5px", color: "#fbcfe8", fontWeight: 700, marginBottom: "2px" }}>SKILLS</div>
+          {["User Testing", "Figma", "Miro"].map(s => (<div key={s} style={{ background: "#db2777", borderRadius: "2px", padding: "1.5px 3px", marginBottom: "2px", fontSize: "5px", color: "#fce7f3" }}>{s}</div>))}
+        </div>
+        <div style={{ flex: 1, padding: "10px 8px" }}>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#be185d", borderBottom: "1.5px solid #f472b6", paddingBottom: "1px", marginBottom: "4px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#500724" }}>UX Lead</div>
+          <div style={{ fontSize: "5.5px", color: "#be185d", marginBottom: "2px" }}>DesignLab · 2022–Now</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Led 0-to-1 product design</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Improved NPS score by 40%</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#be185d", borderBottom: "1.5px solid #f472b6", paddingBottom: "1px", marginTop: "5px", marginBottom: "3px" }}>EDUCATION</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#500724" }}>M.Des — NID</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 17, name: "Prism Flow", tag: "Creative", isPro: true,
+    desc: "Teal header with lime-green accent. Fresh, energetic, design-forward.",
+    accent: "#0f766e", badge: "#84cc16",
+    preview: (
+      <div style={{ background: "#fff", height: "100%" }}>
+        <div style={{ background: "#0f766e", padding: "10px 12px", textAlign: "center" as const }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>ARJUN REDDY</div>
+          <div style={{ fontSize: "7.5px", color: "#d9f99d", marginTop: "1px" }}>Motion Designer</div>
+          <div style={{ fontSize: "6px", color: "#bef264", marginTop: "2px" }}>arjun@design.io · Hyderabad</div>
+        </div>
+        <div style={{ background: "#84cc16", height: "2px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#84cc16", textAlign: "center" as const, marginBottom: "3px" }}>CORE COMPETENCIES</div>
+          <div style={{ borderBottom: "0.5px solid #84cc16", marginBottom: "4px" }}></div>
+          <div style={{ fontSize: "6px", color: "#374151", textAlign: "center" as const, marginBottom: "5px" }}>After Effects · Premiere Pro · 3D · Branding</div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#84cc16", textAlign: "center" as const, marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "0.5px solid #84cc16", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#0f172a" }}>Motion Lead — Studio X</div>
+          <div style={{ fontSize: "5.5px", color: "#0f766e" }}>*  Created viral campaign with 10M views</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 18, name: "Bold Curator", tag: "Creative", isPro: true,
+    desc: "Crimson left rule on white. Bold, assertive, minimally creative.",
+    accent: "#991b1b", badge: "#ef4444",
+    preview: (
+      <div style={{ background: "#fff", height: "100%", display: "flex" }}>
+        <div style={{ width: "4px", background: "#991b1b", flexShrink: 0 }}></div>
+        <div style={{ padding: "10px 10px", flex: 1 }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>ZARA KHAN</div>
+          <div style={{ fontSize: "8px", color: "#6b7280", marginBottom: "2px" }}>Art Director</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginBottom: "8px" }}>zara@art.io · Delhi</div>
+          <div style={{ borderBottom: "0.5px solid #fee2e2", marginBottom: "5px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#ef4444", letterSpacing: "0.1em", marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#111827" }}>Art Director — MediaCo</div>
+          <div style={{ fontSize: "6.5px", color: "#6b7280", marginBottom: "3px" }}>2020 – Present</div>
+          <div style={{ fontSize: "6px", color: "#374151" }}>— Won 3 national design awards</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginTop: "5px" }}>Illustration  ·  Typography  ·  Brand</div>
+        </div>
+      </div>
+    ),
+  },
+
+  // Minimal
+  {
+    id: 19, name: "Clean Slate", tag: "Minimal", isPro: true,
+    desc: "Grey left rule, pure white canvas. Ultra-clean for any industry.",
+    accent: "#374151", badge: "#9ca3af",
+    preview: (
+      <div style={{ background: "#fff", height: "100%", display: "flex" }}>
+        <div style={{ width: "4px", background: "#374151", flexShrink: 0 }}></div>
+        <div style={{ padding: "10px 10px", flex: 1 }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>DIVYA MENON</div>
+          <div style={{ fontSize: "8px", color: "#6b7280", marginBottom: "2px" }}>Operations Manager</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginBottom: "8px" }}>divya@ops.com · Kochi</div>
+          <div style={{ borderBottom: "0.5px solid #e5e7eb", marginBottom: "5px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#9ca3af", letterSpacing: "0.1em", marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#111827" }}>Ops Manager — LogiCo</div>
+          <div style={{ fontSize: "6.5px", color: "#6b7280", marginBottom: "3px" }}>2021 – Present</div>
+          <div style={{ fontSize: "6px", color: "#374151" }}>— Reduced cost by 25%</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginTop: "6px" }}>Lean  ·  Six Sigma  ·  ERP  ·  SCM</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 20, name: "Pure Typographic", tag: "Minimal", isPro: true,
+    desc: "Black rule, pure typography. Absolute minimalism for bold first impressions.",
+    accent: "#111827", badge: "#6b7280",
+    preview: (
+      <div style={{ background: "#fff", height: "100%", display: "flex" }}>
+        <div style={{ width: "4px", background: "#000", flexShrink: 0 }}></div>
+        <div style={{ padding: "10px 10px", flex: 1 }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "#000" }}>ROHAN GUPTA</div>
+          <div style={{ fontSize: "8px", color: "#6b7280", marginBottom: "2px" }}>Strategy Consultant</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginBottom: "8px" }}>rohan@mcg.com · Gurgaon</div>
+          <div style={{ borderBottom: "0.5px solid #111827", marginBottom: "5px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#6b7280", letterSpacing: "0.12em", marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#000" }}>Consultant — Big4</div>
+          <div style={{ fontSize: "6.5px", color: "#6b7280", marginBottom: "3px" }}>2021 – Present</div>
+          <div style={{ fontSize: "6px", color: "#374151" }}>— Led digital transformation</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginTop: "6px" }}>Strategy  ·  Finance  ·  Ops  ·  Tech</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 21, name: "Linear Accent", tag: "Minimal", isPro: true,
+    desc: "Deep indigo sidebar, minimal layout. Premium feel for tech and finance.",
+    accent: "#3730a3", badge: "#6366f1",
+    preview: (
+      <div style={{ background: "#f8fafc", height: "100%", display: "flex" }}>
+        <div style={{ background: "#3730a3", width: "38%", padding: "10px 7px" }}>
+          <div style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>VIKRAM SINGH</div>
+          <div style={{ fontSize: "5.5px", color: "#a5b4fc", marginBottom: "6px" }}>Quant Analyst</div>
+          <div style={{ fontSize: "5px", color: "#c7d2fe", fontWeight: 700, marginBottom: "2px" }}>SKILLS</div>
+          {["Python", "R", "FinTech"].map(s => (<div key={s} style={{ background: "#4f46e5", borderRadius: "2px", padding: "1.5px 3px", marginBottom: "2px", fontSize: "5px", color: "#e0e7ff" }}>{s}</div>))}
+        </div>
+        <div style={{ flex: 1, padding: "10px 8px" }}>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#3730a3", borderBottom: "1.5px solid #6366f1", paddingBottom: "1px", marginBottom: "4px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#1e1b4b" }}>Quant Analyst</div>
+          <div style={{ fontSize: "5.5px", color: "#6366f1", marginBottom: "2px" }}>HedgeFund · 2021–Now</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ 28% alpha on models built</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Automated 15 workflows</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#3730a3", borderBottom: "1.5px solid #6366f1", paddingBottom: "1px", marginTop: "5px", marginBottom: "3px" }}>EDUCATION</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#1e1b4b" }}>M.Sc Statistics · ISI</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 22, name: "Nordic Minimal", tag: "Minimal", isPro: true,
+    desc: "Arctic blue rule on white. Calm, clean Scandinavian-inspired minimalism.",
+    accent: "#0c4a6e", badge: "#0ea5e9",
+    preview: (
+      <div style={{ background: "#fff", height: "100%", display: "flex" }}>
+        <div style={{ width: "4px", background: "#0c4a6e", flexShrink: 0 }}></div>
+        <div style={{ padding: "10px 10px", flex: 1 }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "#0c4a6e" }}>ANANYA ROY</div>
+          <div style={{ fontSize: "8px", color: "#0ea5e9", marginBottom: "2px" }}>Product Designer</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginBottom: "8px" }}>ananya@ux.io · Bengaluru</div>
+          <div style={{ borderBottom: "0.5px solid #bae6fd", marginBottom: "5px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#0ea5e9", letterSpacing: "0.1em", marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#0c4a6e" }}>Sr. Designer — PixelCo</div>
+          <div style={{ fontSize: "6.5px", color: "#0ea5e9", marginBottom: "3px" }}>2021 – Present</div>
+          <div style={{ fontSize: "6px", color: "#374151" }}>— Led design system for 50+ devs</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginTop: "6px" }}>Figma  ·  Prototyping  ·  UX Research</div>
+        </div>
+      </div>
+    ),
+  },
+
+  // Tech
+  {
+    id: 23, name: "Stack Developer", tag: "Tech", isPro: true,
+    desc: "Dark terminal-inspired layout with green accents. Made for developers.",
+    accent: "#15803d", badge: "#4ade80",
+    preview: (
+      <div style={{ background: "#0d1117", height: "100%", display: "flex" }}>
+        <div style={{ background: "#161b22", width: "38%", padding: "10px 7px", borderRight: "1px solid #30363d" }}>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#4ade80", marginBottom: "2px" }}>{"> NIKHIL DEV"}</div>
+          <div style={{ fontSize: "5.5px", color: "#86efac", marginBottom: "6px" }}>Full Stack Engineer</div>
+          <div style={{ fontSize: "5px", color: "#4ade80", fontWeight: 700, marginBottom: "2px" }}># TECH STACK</div>
+          {["React", "Node.js", "Go"].map(s => (<div key={s} style={{ fontSize: "5px", color: "#6ee7b7", marginBottom: "2px" }}>{`+ ${s}`}</div>))}
+        </div>
+        <div style={{ flex: 1, padding: "10px 8px" }}>
+          <div style={{ fontSize: "5.5px", color: "#4ade80", fontWeight: 700, marginBottom: "1px" }}>{"// EXPERIENCE"}</div>
+          <div style={{ borderBottom: "0.5px solid #4ade80", marginBottom: "4px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#fff" }}>Sr. Engineer</div>
+          <div style={{ fontSize: "5.5px", color: "#4ade80", marginBottom: "2px" }}>{"TechCo @ 2021–Now"}</div>
+          <div style={{ fontSize: "5px", color: "#9ca3af" }}>{"> Built micro-services for 2M users"}</div>
+          <div style={{ fontSize: "5px", color: "#9ca3af" }}>{"> OSS contributor 1k+ stars"}</div>
+          <div style={{ fontSize: "5.5px", color: "#4ade80", fontWeight: 700, marginTop: "5px", marginBottom: "1px" }}>{"// EDUCATION"}</div>
+          <div style={{ borderBottom: "0.5px solid #4ade80", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#fff" }}>B.Tech CS — NIT</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 24, name: "Cloud Architect", tag: "Tech", isPro: true,
+    desc: "Sky blue sidebar, tech-forward. Built for cloud and infrastructure roles.",
+    accent: "#0c4a6e", badge: "#0ea5e9",
+    preview: (
+      <div style={{ background: "#f0f9ff", height: "100%", display: "flex" }}>
+        <div style={{ background: "#0c4a6e", width: "38%", padding: "10px 7px" }}>
+          <div style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>ARPIT SHAH</div>
+          <div style={{ fontSize: "5.5px", color: "#7dd3fc", marginBottom: "6px" }}>Cloud Architect</div>
+          <div style={{ fontSize: "5px", color: "#38bdf8", fontWeight: 700, marginBottom: "2px" }}>SKILLS</div>
+          {["AWS", "Terraform", "K8s"].map(s => (<div key={s} style={{ background: "#0369a1", borderRadius: "2px", padding: "1.5px 3px", marginBottom: "2px", fontSize: "5px", color: "#bae6fd" }}>{s}</div>))}
+        </div>
+        <div style={{ flex: 1, padding: "10px 8px" }}>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#0c4a6e", borderBottom: "1.5px solid #0ea5e9", paddingBottom: "1px", marginBottom: "4px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#0c2340" }}>Cloud Architect</div>
+          <div style={{ fontSize: "5.5px", color: "#0ea5e9", marginBottom: "2px" }}>CloudCorp · 2020–Now</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Migrated 200+ apps to AWS</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Saved ₹2Cr in infra costs</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#0c4a6e", borderBottom: "1.5px solid #0ea5e9", paddingBottom: "1px", marginTop: "5px", marginBottom: "3px" }}>EDUCATION</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#0c2340" }}>B.Tech CSE · BITS</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 25, name: "Git Commit", tag: "Tech", isPro: true,
+    desc: "Emerald-green left rule on white. Developer-friendly, clean, readable.",
+    accent: "#16c784", badge: "#10b981",
+    preview: (
+      <div style={{ background: "#fff", height: "100%", display: "flex" }}>
+        <div style={{ width: "4px", background: "#16c784", flexShrink: 0 }}></div>
+        <div style={{ padding: "10px 10px", flex: 1 }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>KARAN MEHTA</div>
+          <div style={{ fontSize: "8px", color: "#6b7280", marginBottom: "2px" }}>Backend Engineer</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginBottom: "8px" }}>karan@dev.io · Pune</div>
+          <div style={{ borderBottom: "0.5px solid #d1fae5", marginBottom: "5px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#374151", letterSpacing: "0.1em", marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#111827" }}>Backend Eng. — PayCo</div>
+          <div style={{ fontSize: "6.5px", color: "#6b7280", marginBottom: "3px" }}>2021 – Present</div>
+          <div style={{ fontSize: "6px", color: "#374151" }}>— Processed 10M txns/day</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginTop: "6px" }}>Go  ·  Kafka  ·  PostgreSQL  ·  Docker</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 26, name: "UI Wireframe", tag: "Tech", isPro: true,
+    desc: "Cool slate rule, technical precision layout. Perfect for UI/UX engineers.",
+    accent: "#374151", badge: "#9ca3af",
+    preview: (
+      <div style={{ background: "#fff", height: "100%", display: "flex" }}>
+        <div style={{ width: "4px", background: "#374151", flexShrink: 0 }}></div>
+        <div style={{ padding: "10px 10px", flex: 1 }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "#1f2937" }}>PALLAVI RAO</div>
+          <div style={{ fontSize: "8px", color: "#6b7280", marginBottom: "2px" }}>Frontend Engineer</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginBottom: "8px" }}>pallavi@frontend.io · Hyderabad</div>
+          <div style={{ borderBottom: "0.5px solid #e5e7eb", marginBottom: "5px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#6b7280", letterSpacing: "0.1em", marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#1f2937" }}>Frontend Eng. — SaaSCo</div>
+          <div style={{ fontSize: "6.5px", color: "#6b7280", marginBottom: "3px" }}>2020 – Present</div>
+          <div style={{ fontSize: "6px", color: "#374151" }}>— Built component library used by 50+ devs</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginTop: "6px" }}>React  ·  TypeScript  ·  CSS  ·  A11y</div>
+        </div>
+      </div>
+    ),
+  },
+
+  // Executive
+  {
+    id: 27, name: "Chief Executive", tag: "Executive", isPro: true,
+    desc: "Deep navy banner with gold accent bar. Commands authority at the C-suite level.",
+    accent: "#0f172a", badge: "#f59e0b",
+    preview: (
+      <div style={{ background: "#faf9f6", height: "100%" }}>
+        <div style={{ background: "#0f172a", padding: "10px 12px" }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>RAJESH KAPOOR</div>
+          <div style={{ fontSize: "7.5px", color: "#fbbf24", marginTop: "1px" }}>Chief Executive Officer</div>
+          <div style={{ fontSize: "6px", color: "#d4b46e", marginTop: "2px" }}>rajesh@corp.com · Mumbai</div>
+        </div>
+        <div style={{ background: "#f59e0b", height: "3px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "3px", marginBottom: "5px" }}>
+            {["P&L", "M&A", "Board"].map(s => (<span key={s} style={{ background: "#fef3c7", color: "#78350f", borderRadius: "3px", padding: "1.5px 4px", fontSize: "5.5px", fontWeight: 700 }}>{s}</span>))}
+          </div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#161130", marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "1px solid #f59e0b", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#0f172a" }}>CEO — Fortune 500 India</div>
+          <div style={{ fontSize: "5.5px", color: "#a1823c" }}>2018 – Present</div>
+          <div style={{ fontSize: "5.5px", color: "#44403c" }}>• Grew revenue from ₹100Cr to ₹500Cr</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 28, name: "Enterprise Pillar", tag: "Executive", isPro: true,
+    desc: "Charcoal sidebar, steel-gray accents. Strong, authoritative executive presence.",
+    accent: "#1e293b", badge: "#475569",
+    preview: (
+      <div style={{ background: "#f8fafc", height: "100%", display: "flex" }}>
+        <div style={{ background: "#1e293b", width: "38%", padding: "10px 7px" }}>
+          <div style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>VIVEK SHARMA</div>
+          <div style={{ fontSize: "5.5px", color: "#94a3b8", marginBottom: "6px" }}>VP Engineering</div>
+          <div style={{ fontSize: "5px", color: "#475569", fontWeight: 700, marginBottom: "2px" }}>SKILLS</div>
+          {["Leadership", "P&L", "Scaling"].map(s => (<div key={s} style={{ background: "#334155", borderRadius: "2px", padding: "1.5px 3px", marginBottom: "2px", fontSize: "5px", color: "#94a3b8" }}>{s}</div>))}
+        </div>
+        <div style={{ flex: 1, padding: "10px 8px" }}>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#1e293b", borderBottom: "1.5px solid #475569", paddingBottom: "1px", marginBottom: "4px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#0f172a" }}>VP Engineering</div>
+          <div style={{ fontSize: "5.5px", color: "#475569", marginBottom: "2px" }}>BigTech · 2019–Now</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Led 200-person eng org</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ $50M ARR product portfolio</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#1e293b", borderBottom: "1.5px solid #475569", paddingBottom: "1px", marginTop: "5px", marginBottom: "3px" }}>EDUCATION</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#0f172a" }}>MBA · IIM A · 2011</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 29, name: "Vice President", tag: "Executive", isPro: true,
+    desc: "Deep wine header with champagne gold accents. Elegant VP and Director-level.",
+    accent: "#450a0a", badge: "#fbbf24",
+    preview: (
+      <div style={{ background: "#fffdf7", height: "100%" }}>
+        <div style={{ background: "#450a0a", padding: "10px 12px", textAlign: "center" as const }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>SANJAY BATRA</div>
+          <div style={{ fontSize: "7.5px", color: "#fde68a", marginTop: "1px" }}>Vice President, Sales</div>
+          <div style={{ fontSize: "6px", color: "#fbbf24", marginTop: "2px" }}>sanjay@corp.com · Delhi</div>
+        </div>
+        <div style={{ background: "#fbbf24", height: "2px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#fbbf24", textAlign: "center" as const, marginBottom: "3px" }}>PROFESSIONAL PROFILE</div>
+          <div style={{ borderBottom: "0.5px solid #fbbf24", marginBottom: "4px" }}></div>
+          <div style={{ fontSize: "6px", color: "#374151", fontStyle: "italic" as const, marginBottom: "5px" }}>Sales executive with 18 years building enterprise relationships across APAC...</div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#fbbf24", textAlign: "center" as const, marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "0.5px solid #fbbf24", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#1c0505" }}>VP Sales — TechGiant India</div>
+          <div style={{ fontSize: "5.5px", color: "#fbbf24" }}>*  Closed ₹200Cr in 2023</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 30, name: "Visionary Officer", tag: "Executive", isPro: true,
+    desc: "Black rule with gold section labels. Stark, powerful, C-suite authority.",
+    accent: "#000000", badge: "#a1823c",
+    preview: (
+      <div style={{ background: "#fff", height: "100%", display: "flex" }}>
+        <div style={{ width: "4px", background: "#000", flexShrink: 0 }}></div>
+        <div style={{ padding: "10px 10px", flex: 1 }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "#000" }}>ADITYA BIRLA</div>
+          <div style={{ fontSize: "8px", color: "#6b7280", marginBottom: "2px" }}>Chief Operating Officer</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginBottom: "8px" }}>aditya@corp.com · Mumbai</div>
+          <div style={{ borderBottom: "0.5px solid #000", marginBottom: "5px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#a1823c", letterSpacing: "0.1em", marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#000" }}>COO — Industrial Group</div>
+          <div style={{ fontSize: "6.5px", color: "#6b7280", marginBottom: "3px" }}>2016 – Present</div>
+          <div style={{ fontSize: "6px", color: "#374151" }}>— Integrated 5 acquisitions, $2B AUM</div>
+          <div style={{ fontSize: "6.5px", color: "#a1823c", marginTop: "6px" }}>Strategy  ·  M&A  ·  Ops  ·  P&L</div>
+        </div>
+      </div>
+    ),
+  },
+
+  // Entry-Level
+  {
+    id: 31, name: "Graduate Launchpad", tag: "Entry-Level", isPro: true,
+    desc: "Emerald green banner — fresh, energetic. Ideal for new grads & interns.",
+    accent: "#065f46", badge: "#10b981",
+    preview: (
+      <div style={{ background: "#f0fdf4", height: "100%" }}>
+        <div style={{ background: "#065f46", padding: "10px 12px" }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>RITU GUPTA</div>
+          <div style={{ fontSize: "7.5px", color: "#6ee7b7", marginTop: "1px" }}>Fresh Graduate · CS</div>
+          <div style={{ fontSize: "6px", color: "#34d399", marginTop: "2px" }}>ritu@gmail.com · Jaipur</div>
+        </div>
+        <div style={{ background: "#10b981", height: "3px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "3px", marginBottom: "5px" }}>
+            {["Python", "SQL", "Excel"].map(s => (<span key={s} style={{ background: "#d1fae5", color: "#065f46", borderRadius: "3px", padding: "1.5px 4px", fontSize: "5.5px", fontWeight: 700 }}>{s}</span>))}
+          </div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#065f46", marginBottom: "2px" }}>PROJECTS</div>
+          <div style={{ borderBottom: "1px solid #6ee7b7", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#022c22" }}>Final Year: ML Price Predictor</div>
+          <div style={{ fontSize: "5.5px", color: "#065f46" }}>• 93% accuracy on test set</div>
+          <div style={{ fontSize: "5.5px", color: "#065f46" }}>• Published on GitHub (250+ stars)</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 32, name: "Project Engine", tag: "Entry-Level", isPro: true,
+    desc: "Electric blue sidebar — confident and modern for early-career candidates.",
+    accent: "#1d4ed8", badge: "#60a5fa",
+    preview: (
+      <div style={{ background: "#f0f9ff", height: "100%", display: "flex" }}>
+        <div style={{ background: "#1d4ed8", width: "38%", padding: "10px 7px" }}>
+          <div style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>SONAL PATEL</div>
+          <div style={{ fontSize: "5.5px", color: "#93c5fd", marginBottom: "6px" }}>Junior Developer</div>
+          <div style={{ fontSize: "5px", color: "#bfdbfe", fontWeight: 700, marginBottom: "2px" }}>SKILLS</div>
+          {["React", "Node.js", "Git"].map(s => (<div key={s} style={{ background: "#2563eb", borderRadius: "2px", padding: "1.5px 3px", marginBottom: "2px", fontSize: "5px", color: "#dbeafe" }}>{s}</div>))}
+        </div>
+        <div style={{ flex: 1, padding: "10px 8px" }}>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#1d4ed8", borderBottom: "1.5px solid #60a5fa", paddingBottom: "1px", marginBottom: "4px" }}>PROJECTS</div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#1e3a8a" }}>E-commerce Platform</div>
+          <div style={{ fontSize: "5.5px", color: "#60a5fa", marginBottom: "2px" }}>React + Node + MongoDB</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ 500+ active users</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Stripe payments integrated</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#1d4ed8", borderBottom: "1.5px solid #60a5fa", paddingBottom: "1px", marginTop: "5px", marginBottom: "3px" }}>EDUCATION</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#1e3a8a" }}>B.Tech IT · VIT · 2024</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 33, name: "Career Pivot", tag: "Entry-Level", isPro: true,
+    desc: "Sky blue centered header. Perfect for career changers & lateral moves.",
+    accent: "#0369a1", badge: "#38bdf8",
+    preview: (
+      <div style={{ background: "#f0f9ff", height: "100%" }}>
+        <div style={{ background: "#0369a1", padding: "10px 12px", textAlign: "center" as const }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>MOHAN DAS</div>
+          <div style={{ fontSize: "7.5px", color: "#bae6fd", marginTop: "1px" }}>Career Transitioner → Data</div>
+          <div style={{ fontSize: "6px", color: "#7dd3fc", marginTop: "2px" }}>mohan@email.com · Chennai</div>
+        </div>
+        <div style={{ background: "#38bdf8", height: "2px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#38bdf8", textAlign: "center" as const, marginBottom: "3px" }}>TRANSFERABLE SKILLS</div>
+          <div style={{ borderBottom: "0.5px solid #38bdf8", marginBottom: "4px" }}></div>
+          <div style={{ fontSize: "6px", color: "#374151", textAlign: "center" as const, marginBottom: "5px" }}>Python  ·  Tableau  ·  SQL  ·  Excel  ·  Statistics</div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#38bdf8", textAlign: "center" as const, marginBottom: "2px" }}>RELEVANT PROJECTS</div>
+          <div style={{ borderBottom: "0.5px solid #38bdf8", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#0c4a6e" }}>Sales Dashboard — Tableau</div>
+          <div style={{ fontSize: "5.5px", color: "#0369a1" }}>*  Presented to 50-person sales team</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 34, name: "Bold Ambition", tag: "Entry-Level", isPro: true,
+    desc: "Fiery orange banner — high energy and enthusiasm. Stand out from the crowd.",
+    accent: "#c2410c", badge: "#fb923c",
+    preview: (
+      <div style={{ background: "#fff7ed", height: "100%" }}>
+        <div style={{ background: "#c2410c", padding: "10px 12px" }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>NEHA JOSHI</div>
+          <div style={{ fontSize: "7.5px", color: "#fed7aa", marginTop: "1px" }}>Marketing Intern → Associate</div>
+          <div style={{ fontSize: "6px", color: "#fb923c", marginTop: "2px" }}>neha@email.com · Indore</div>
+        </div>
+        <div style={{ background: "#f97316", height: "3px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "3px", marginBottom: "5px" }}>
+            {["Social Media", "Canva", "SEO"].map(s => (<span key={s} style={{ background: "#ffedd5", color: "#9a3412", borderRadius: "3px", padding: "1.5px 4px", fontSize: "5.5px", fontWeight: 700 }}>{s}</span>))}
+          </div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#c2410c", marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "1px solid #fb923c", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#1c1917" }}>Marketing Intern — StartupX</div>
+          <div style={{ fontSize: "5.5px", color: "#c2410c" }}>• Grew Instagram from 2K to 50K</div>
+          <div style={{ fontSize: "5.5px", color: "#c2410c" }}>• Ran ₹5L campaign, 3x ROI</div>
+        </div>
+      </div>
+    ),
+  },
+
+  // Industry-Specific
+  {
+    id: 35, name: "Clinical Specialist", tag: "Healthcare", isPro: true,
+    desc: "Medical blue rule on white. Professional, trustworthy — built for healthcare.",
+    accent: "#1e3a8a", badge: "#3b82f6",
+    preview: (
+      <div style={{ background: "#fff", height: "100%", display: "flex" }}>
+        <div style={{ width: "4px", background: "#1e3a8a", flexShrink: 0 }}></div>
+        <div style={{ padding: "10px 10px", flex: 1 }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "#1e3a8a" }}>DR. POOJA RAO</div>
+          <div style={{ fontSize: "8px", color: "#3b82f6", marginBottom: "2px" }}>Clinical Pharmacist</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginBottom: "8px" }}>pooja@hospital.com · Bangalore</div>
+          <div style={{ borderBottom: "0.5px solid #bfdbfe", marginBottom: "5px" }}></div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#3b82f6", letterSpacing: "0.1em", marginBottom: "3px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "8px", fontWeight: 700, color: "#1e3a8a" }}>Clinical Pharmacist — Apollo</div>
+          <div style={{ fontSize: "6.5px", color: "#6b7280", marginBottom: "3px" }}>2020 – Present</div>
+          <div style={{ fontSize: "6px", color: "#374151" }}>— Managed formulary for 300-bed ICU</div>
+          <div style={{ fontSize: "6.5px", color: "#9ca3af", marginTop: "6px" }}>Pharm.D  ·  ICU  ·  Drug Safety  ·  DUE</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 36, name: "Financial Quant", tag: "Finance", isPro: true,
+    desc: "Forest green sidebar, trusted & established. Finance, banking & investment.",
+    accent: "#14532d", badge: "#16a34a",
+    preview: (
+      <div style={{ background: "#f0fdf4", height: "100%", display: "flex" }}>
+        <div style={{ background: "#14532d", width: "38%", padding: "10px 7px" }}>
+          <div style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>ROHIT BANSAL</div>
+          <div style={{ fontSize: "5.5px", color: "#86efac", marginBottom: "6px" }}>Investment Analyst</div>
+          <div style={{ fontSize: "5px", color: "#4ade80", fontWeight: 700, marginBottom: "2px" }}>SKILLS</div>
+          {["DCF", "Python", "Bloomberg"].map(s => (<div key={s} style={{ background: "#15803d", borderRadius: "2px", padding: "1.5px 3px", marginBottom: "2px", fontSize: "5px", color: "#bbf7d0" }}>{s}</div>))}
+        </div>
+        <div style={{ flex: 1, padding: "10px 8px" }}>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#14532d", borderBottom: "1.5px solid #16a34a", paddingBottom: "1px", marginBottom: "4px" }}>EXPERIENCE</div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#052e16" }}>Investment Analyst</div>
+          <div style={{ fontSize: "5.5px", color: "#16a34a", marginBottom: "2px" }}>PE Firm · 2021–Now</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Screened 200+ deals annually</div>
+          <div style={{ fontSize: "5px", color: "#475569" }}>▸ Modeled ₹500Cr exits</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#14532d", borderBottom: "1.5px solid #16a34a", paddingBottom: "1px", marginTop: "5px", marginBottom: "3px" }}>EDUCATION</div>
+          <div style={{ fontSize: "6px", fontWeight: 700, color: "#052e16" }}>MBA Finance · IIM C</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 37, name: "Legal Associate", tag: "Legal", isPro: true,
+    desc: "Charcoal header with amber law accents. Authoritative and precise for legal.",
+    accent: "#1c1917", badge: "#a16207",
+    preview: (
+      <div style={{ background: "#fafaf9", height: "100%" }}>
+        <div style={{ background: "#1c1917", padding: "10px 12px", textAlign: "center" as const }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>ADV. SUPRIYA NAIR</div>
+          <div style={{ fontSize: "7.5px", color: "#fcd34d", marginTop: "1px" }}>Corporate Lawyer</div>
+          <div style={{ fontSize: "6px", color: "#d97706", marginTop: "2px" }}>supriya@lawfirm.com · Bombay HC</div>
+        </div>
+        <div style={{ background: "#a16207", height: "2px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#a16207", textAlign: "center" as const, marginBottom: "3px" }}>PROFESSIONAL PROFILE</div>
+          <div style={{ borderBottom: "0.5px solid #a16207", marginBottom: "4px" }}></div>
+          <div style={{ fontSize: "6px", color: "#374151", fontStyle: "italic" as const, marginBottom: "5px" }}>Corporate counsel specialising in M&A, joint ventures and regulatory compliance...</div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#a16207", textAlign: "center" as const, marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "0.5px solid #a16207", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#1c1917" }}>Associate — AZB & Partners</div>
+          <div style={{ fontSize: "5.5px", color: "#a16207" }}>*  Advised on ₹1,000Cr acquisition</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 38, name: "Nonprofit Advocate", tag: "NGO / Social", isPro: true,
+    desc: "Deep forest green banner with amber. Warm & mission-driven for NGO/CSR roles.",
+    accent: "#0f4c35", badge: "#d97706",
+    preview: (
+      <div style={{ background: "#f0fdf4", height: "100%" }}>
+        <div style={{ background: "#0f4c35", padding: "10px 12px" }}>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#fff" }}>SHWETA BOSE</div>
+          <div style={{ fontSize: "7.5px", color: "#6ee7b7", marginTop: "1px" }}>Program Manager · NGO</div>
+          <div style={{ fontSize: "6px", color: "#34d399", marginTop: "2px" }}>shweta@ngo.org · Kolkata</div>
+        </div>
+        <div style={{ background: "#d97706", height: "3px" }}></div>
+        <div style={{ padding: "8px 10px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "3px", marginBottom: "5px" }}>
+            {["Fundraising", "M&E", "Grants"].map(s => (<span key={s} style={{ background: "#d1fae5", color: "#065f46", borderRadius: "3px", padding: "1.5px 4px", fontSize: "5.5px", fontWeight: 700 }}>{s}</span>))}
+          </div>
+          <div style={{ fontSize: "6.5px", fontWeight: 700, color: "#0f4c35", marginBottom: "2px" }}>EXPERIENCE</div>
+          <div style={{ borderBottom: "1px solid #6ee7b7", marginBottom: "3px" }}></div>
+          <div style={{ fontSize: "7px", fontWeight: 700, color: "#022c22" }}>Program Manager — ChildFirst</div>
+          <div style={{ fontSize: "5.5px", color: "#0f4c35" }}>• Raised ₹2Cr in grants, FY 2023</div>
+          <div style={{ fontSize: "5.5px", color: "#0f4c35" }}>• Managed 50+ field staff across 3 states</div>
         </div>
       </div>
     ),
@@ -229,9 +1001,12 @@ export default function TemplatesPage() {
         const stored = sessionStorage.getItem("ncl_resume_text");
         if (stored) { setResumeText(stored); }
         else { setNoResumeWarning(true); }
-        // Load pro status
+        // Load pro status — also grant first-session users full access
         const snap = await getDocs(query(collection(db, "users"), where("uid", "==", u.uid)));
-        if (!snap.empty) setIsPro(snap.docs[0].data().plan === "pro");
+        if (!snap.empty) {
+          const ud = snap.docs[0].data();
+          setIsPro(ud.plan === "pro" || ud.firstSessionActive === true);
+        }
       }
       setBooting(false);
     });
@@ -436,35 +1211,64 @@ export default function TemplatesPage() {
                 )}
 
                 <div className="gallery-grid">
-                  {TEMPLATES.map(t => (
-                    <div key={t.id} className={`g-card ${selectedId === t.id ? "selected" : ""}`} onClick={() => setSelectedId(t.id)}>
-                      <div className="g-preview">{t.preview}</div>
-                      <div style={{ padding: "8px 14px 4px", borderTop: "1px solid #f3f4f6" }}>
-                        <p style={{ fontSize: "12px", color: "#9ca3af", margin: "0 0 4px" }}>{t.desc}</p>
-                      </div>
-                      <div className="g-footer">
-                        <div>
-                          <span className="g-name">{t.name}</span>
-                          <span className="g-tag" style={{ marginLeft: "6px" }}>{t.tag}</span>
+                  {TEMPLATES.map(t => {
+                    const isProTemplate = (t as any).isPro === true;
+                    const locked = isProTemplate && !isPro;
+                    return (
+                      <div key={t.id} className={`g-card ${selectedId === t.id ? "selected" : ""}`} onClick={() => setSelectedId(t.id)}
+                        style={{ opacity: locked ? 0.85 : 1 }}>
+                        <div style={{ position: "relative" }}>
+                          <div className="g-preview">{t.preview}</div>
+                          {/* FREE / PRO badge */}
+                          {isProTemplate ? (
+                            <div style={{ position: "absolute", top: "8px", right: "8px", background: "linear-gradient(135deg,#f97316,#ea580c)", color: "#fff", fontSize: "9px", fontWeight: 700, padding: "3px 8px", borderRadius: "20px", letterSpacing: "0.04em" }}>⭐ PRO</div>
+                          ) : (
+                            <div style={{ position: "absolute", top: "8px", right: "8px", background: "#059669", color: "#fff", fontSize: "9px", fontWeight: 700, padding: "3px 8px", borderRadius: "20px" }}>FREE</div>
+                          )}
+                          {/* Lock overlay for non-Pro users on Pro templates */}
+                          {locked && (
+                            <div style={{ position: "absolute", inset: 0, background: "rgba(15,23,42,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <div style={{ background: "rgba(255,255,255,0.92)", borderRadius: "10px", padding: "8px 14px", textAlign: "center" as const }}>
+                                <div style={{ fontSize: "18px", marginBottom: "2px" }}>🔒</div>
+                                <div style={{ fontSize: "10px", fontWeight: 700, color: "#0f172a" }}>Pro Template</div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <button
-                          className="g-use-btn"
-                          style={{ background: t.accent }}
-                          onClick={e => { e.stopPropagation(); handleUseTemplate(t.id); }}
-                          disabled={parsing}
-                        >
-                          {parsing && selectedId === t.id ? "⏳ AI Working..." : "Use This →"}
-                        </button>
+                        <div style={{ padding: "8px 14px 4px", borderTop: "1px solid #f3f4f6" }}>
+                          <p style={{ fontSize: "12px", color: "#9ca3af", margin: "0 0 4px" }}>{t.desc}</p>
+                        </div>
+                        <div className="g-footer">
+                          <div>
+                            <span className="g-name">{t.name}</span>
+                            <span className="g-tag" style={{ marginLeft: "6px" }}>{t.tag}</span>
+                          </div>
+                          <button
+                            className="g-use-btn"
+                            style={{ background: locked ? "#9ca3af" : t.accent, cursor: locked ? "not-allowed" : "pointer" }}
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (locked) {
+                                showToast("🔒 This is a Pro template. Upgrade to access all 32 Pro designs.");
+                                return;
+                              }
+                              handleUseTemplate(t.id);
+                            }}
+                            disabled={parsing && selectedId === t.id}
+                          >
+                            {parsing && selectedId === t.id ? "⏳ AI Working..." : locked ? "🔒 Pro Only" : "Use This →"}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {!isPro && (
                   <div className="pro-banner">
                     <div>
-                      <p style={{ fontSize: "13px", fontWeight: 700, color: "#c2410c", margin: "0 0 2px" }}>🔒 Download requires Pro plan</p>
-                      <p style={{ fontSize: "12px", color: "#9ca3af", margin: 0 }}>Browse and preview freely. Upgrade to download your AI-enhanced resume.</p>
+                      <p style={{ fontSize: "13px", fontWeight: 700, color: "#c2410c", margin: "0 0 2px" }}>🔒 32 Pro templates + AI download</p>
+                      <p style={{ fontSize: "12px", color: "#9ca3af", margin: 0 }}>6 FREE templates available now. Upgrade to unlock all 32 Pro designs & PDF download.</p>
                     </div>
                     <a href="/" style={{ padding: "9px 18px", borderRadius: "9px", fontSize: "13px", fontWeight: 700, background: "#f97316", color: "#fff", textDecoration: "none" }}>
                       Upgrade to Pro →
