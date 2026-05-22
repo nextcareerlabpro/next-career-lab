@@ -24,6 +24,215 @@ import {
 
 type TabType = "ats" | "resume" | "cover" | "linkedin" | "templates" | "jdanalyzer" | "billing" | "help" | "dashboard" | "interview";
 
+// ─── Score Share Card Generator ─────────────────────────────────────────────
+function rrPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+async function generateScoreCard(score: number, matched: string[], missing: string[]): Promise<Blob> {
+  const S = 1080; const DPR = 2;
+  const cv = document.createElement("canvas");
+  cv.width = S * DPR; cv.height = S * DPR;
+  const ctx = cv.getContext("2d")!;
+  ctx.scale(DPR, DPR);
+  const W = S, H = S;
+
+  const isStrong   = score >= 70;
+  const isMod      = score >= 40 && score < 70;
+  const scoreColor = isStrong ? "#10b981" : isMod ? "#f97316" : "#ef4444";
+  const scoreGlow  = isStrong ? "rgba(16,185,129," : isMod ? "rgba(249,115,22," : "rgba(239,68,68,";
+
+  // ── Background ─────────────────────────────────────────────────────────────
+  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+  bgGrad.addColorStop(0,   "#070d1a");
+  bgGrad.addColorStop(0.5, "#0f172a");
+  bgGrad.addColorStop(1,   "#091a12");
+  ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, W, H);
+
+  // ambient glows
+  const g1 = ctx.createRadialGradient(W * 0.75, H * 0.25, 0, W * 0.75, H * 0.25, 460);
+  g1.addColorStop(0, scoreGlow + "0.18)"); g1.addColorStop(1, "transparent");
+  ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+
+  const g2 = ctx.createRadialGradient(W * 0.2, H * 0.8, 0, W * 0.2, H * 0.8, 340);
+  g2.addColorStop(0, "rgba(59,130,246,0.12)"); g2.addColorStop(1, "transparent");
+  ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
+
+  // decorative grid dots (subtle)
+  ctx.fillStyle = "rgba(255,255,255,0.025)";
+  for (let x = 40; x < W; x += 60) for (let y = 40; y < H; y += 60) {
+    ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // ── Top accent bar ──────────────────────────────────────────────────────────
+  const topBar = ctx.createLinearGradient(0, 0, W, 0);
+  topBar.addColorStop(0, "#059669"); topBar.addColorStop(0.5, "#10b981"); topBar.addColorStop(1, "#3b82f6");
+  ctx.fillStyle = topBar; ctx.fillRect(0, 0, W, 7);
+
+  // ── Brand header ────────────────────────────────────────────────────────────
+  // Logo circle
+  const lcx = 64, lcy = 66, lr = 26;
+  const lcg = ctx.createRadialGradient(lcx - 8, lcy - 8, 0, lcx, lcy, lr);
+  lcg.addColorStop(0, "#10b981"); lcg.addColorStop(1, "#059669");
+  ctx.fillStyle = lcg; ctx.beginPath(); ctx.arc(lcx, lcy, lr, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = "bold 28px system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("U", lcx, lcy + 1);
+
+  // Brand name
+  ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.fillStyle = "#ffffff"; ctx.font = "bold 36px system-ui";
+  ctx.fillText("Upgrade Your Resume", 102, 49);
+  ctx.fillStyle = "rgba(74,222,128,0.85)"; ctx.font = "500 21px system-ui";
+  ctx.fillText("AI-Powered Career Suite", 103, 90);
+
+  // URL badge (top right)
+  rrPath(ctx, W - 338, 46, 298, 42, 21);
+  ctx.fillStyle = "rgba(5,150,105,0.18)"; ctx.fill();
+  ctx.strokeStyle = "rgba(16,185,129,0.5)"; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = "#4ade80"; ctx.font = "500 20px system-ui";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("upgradeyourresume.com", W - 189, 67);
+
+  // Thin separator line
+  const sep = ctx.createLinearGradient(0, 0, W, 0);
+  sep.addColorStop(0, "transparent"); sep.addColorStop(0.15, "#10b981");
+  sep.addColorStop(0.85, "rgba(16,185,129,0.4)"); sep.addColorStop(1, "transparent");
+  ctx.strokeStyle = sep; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(60, 128); ctx.lineTo(W - 60, 128); ctx.stroke();
+
+  // "ATS SCORE REPORT" caption
+  ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.fillStyle = "rgba(74,222,128,0.6)"; ctx.font = "600 18px system-ui";
+  ctx.fillText("A T S   S C O R E   R E P O R T", 62, 142);
+
+  // ── Central score ring ───────────────────────────────────────────────────────
+  const cx = W / 2, cy = 430, R = 188;
+
+  // outer glow
+  const og = ctx.createRadialGradient(cx, cy, R * 0.7, cx, cy, R * 1.45);
+  og.addColorStop(0, scoreGlow + "0.25)"); og.addColorStop(1, "transparent");
+  ctx.fillStyle = og; ctx.beginPath(); ctx.arc(cx, cy, R * 1.45, 0, Math.PI * 2); ctx.fill();
+
+  // ring backing plate
+  const rg = ctx.createRadialGradient(cx - 50, cy - 70, 0, cx, cy, R);
+  rg.addColorStop(0, "#1a2744"); rg.addColorStop(1, "#0d1520");
+  ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+
+  // track
+  ctx.strokeStyle = "rgba(255,255,255,0.06)"; ctx.lineWidth = 14;
+  ctx.beginPath(); ctx.arc(cx, cy, R - 7, 0, Math.PI * 2); ctx.stroke();
+
+  // score arc (with gradient stroke via shadow trick)
+  const arcStart = -Math.PI / 2;
+  const arcEnd   = arcStart + (score / 100) * Math.PI * 2;
+  // glowing trail
+  ctx.save();
+  ctx.shadowColor = scoreColor; ctx.shadowBlur = 24;
+  ctx.strokeStyle = scoreColor; ctx.lineWidth = 14; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.arc(cx, cy, R - 7, arcStart, arcEnd); ctx.stroke();
+  ctx.restore();
+
+  // arc end dot
+  const dotX = cx + (R - 7) * Math.cos(arcEnd);
+  const dotY = cy + (R - 7) * Math.sin(arcEnd);
+  ctx.save(); ctx.shadowColor = scoreColor; ctx.shadowBlur = 20;
+  ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(dotX, dotY, 10, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // score number
+  ctx.save(); ctx.shadowColor = scoreColor; ctx.shadowBlur = 40;
+  const fontSize = score === 100 ? 108 : 124;
+  ctx.fillStyle = "#ffffff"; ctx.font = `800 ${fontSize}px system-ui`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(`${score}%`, cx, cy - 14);
+  ctx.restore();
+
+  // "ATS SCORE" under number
+  ctx.fillStyle = "rgba(148,163,184,0.85)"; ctx.font = "600 22px system-ui";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("ATS MATCH SCORE", cx, cy + 72);
+
+  // status badge
+  const statusText = isStrong ? "✅  STRONG MATCH" : isMod ? "⚡  MODERATE MATCH" : "⚠️  NEEDS IMPROVEMENT";
+  const bW = 340, bH = 56, bX = cx - bW / 2, bY = cy + 106;
+  rrPath(ctx, bX, bY, bW, bH, 28);
+  ctx.fillStyle = scoreGlow + "0.2)"; ctx.fill();
+  ctx.strokeStyle = scoreGlow + "0.45)"; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.save(); ctx.shadowColor = scoreColor; ctx.shadowBlur = 12;
+  ctx.fillStyle = scoreColor; ctx.font = "bold 24px system-ui";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(statusText, cx, bY + 28);
+  ctx.restore();
+
+  // ── Stats strip ─────────────────────────────────────────────────────────────
+  const sY = 730;
+  const sepL = ctx.createLinearGradient(0, 0, W, 0);
+  sepL.addColorStop(0, "transparent"); sepL.addColorStop(0.1, "rgba(71,85,105,0.6)");
+  sepL.addColorStop(0.9, "rgba(71,85,105,0.6)"); sepL.addColorStop(1, "transparent");
+  ctx.strokeStyle = sepL; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(60, sY - 18); ctx.lineTo(W - 60, sY - 18); ctx.stroke();
+
+  const stats = [
+    { icon: "✅", val: String(matched.length), label: "Keywords Matched" },
+    { icon: "📌", val: String(missing.length),  label: "Keywords Missing"  },
+    { icon: "📅", val: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }), label: "Report Date" },
+  ];
+  const colW = (W - 120) / 3;
+  stats.forEach((st, i) => {
+    const scx = 60 + i * colW + colW / 2;
+    // icon
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.font = "32px system-ui"; ctx.fillStyle = "#fff";
+    ctx.fillText(st.icon, scx, sY);
+    // value
+    ctx.save(); ctx.shadowColor = scoreColor; ctx.shadowBlur = 10;
+    ctx.fillStyle = scoreColor; ctx.font = "bold 40px system-ui";
+    ctx.fillText(st.val, scx, sY + 44); ctx.restore();
+    // label
+    ctx.fillStyle = "rgba(148,163,184,0.8)"; ctx.font = "20px system-ui";
+    ctx.fillText(st.label, scx, sY + 96);
+    // vertical divider between cols
+    if (i < 2) {
+      ctx.strokeStyle = "rgba(71,85,105,0.5)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(60 + (i + 1) * colW, sY); ctx.lineTo(60 + (i + 1) * colW, sY + 122); ctx.stroke();
+    }
+  });
+
+  // ── Bottom quote + CTA ───────────────────────────────────────────────────────
+  const qY = 912;
+  // quote bg pill
+  rrPath(ctx, 60, qY - 18, W - 120, 52, 26);
+  ctx.fillStyle = "rgba(255,255,255,0.04)"; ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.65)";
+  ctx.font = "italic 500 26px Georgia, 'Times New Roman', serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText('"Is your resume passing the ATS filter? Find out free!"', W / 2, qY + 8);
+
+  // CTA link
+  ctx.fillStyle = "#4ade80"; ctx.font = "600 24px system-ui";
+  ctx.fillText("→  upgradeyourresume.com", W / 2, qY + 52);
+
+  // ── Bottom bar ───────────────────────────────────────────────────────────────
+  const botBar = ctx.createLinearGradient(0, 0, W, 0);
+  botBar.addColorStop(0, "#059669"); botBar.addColorStop(0.5, "#10b981"); botBar.addColorStop(1, "#3b82f6");
+  ctx.fillStyle = botBar; ctx.fillRect(0, H - 7, W, 7);
+
+  return new Promise<Blob>((resolve, reject) =>
+    cv.toBlob(b => b ? resolve(b) : reject(new Error("Canvas toBlob failed")), "image/png", 0.95)
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function BlurWrap({ blurred, onUpgrade, children }: { blurred: boolean; onUpgrade: () => void; children: React.ReactNode }) {
   return (
     <div style={{ position: "relative", borderRadius: "10px", overflow: "hidden" }}>
@@ -334,6 +543,7 @@ export default function Page() {
   const [linkedinBlur, setLinkedinBlur] = useState(false);
   const [linkedinExportBlur, setLinkedinExportBlur] = useState(false);
   const [showScanLimitModal, setShowScanLimitModal] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
 
   // ── Template states ──────────────────────────────────────────
 
@@ -372,6 +582,39 @@ export default function Page() {
     setShowIdleWarning(false);
     await signOut(auth);
     showToast("You have been logged out due to inactivity.");
+  }
+
+  async function shareScoreCard(platform: "whatsapp" | "twitter") {
+    if (platform === "twitter") {
+      const text = `🎯 My resume just scored ${score}% on ATS!\n\nIf you're job hunting, check if YOUR resume is passing the ATS filter — it's free!\n\n👉 upgradeyourresume.com\n\n#Resume #ATS #JobSearch #Hiring #CareerTips`;
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
+      return;
+    }
+    // WhatsApp — generate branded image card and share via Web Share API
+    setShareLoading(true);
+    try {
+      const blob = await generateScoreCard(score, result.matched, result.missing);
+      const file = new File([blob], "ats-score-upgradeyourresume.png", { type: "image/png" });
+      if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
+        // Native share sheet (mobile) — user picks WhatsApp, Instagram, etc.
+        await navigator.share({
+          files: [file],
+          text: `🎯 My resume just scored ${score}% on ATS! Check yours free at upgradeyourresume.com`,
+        });
+      } else {
+        // Desktop fallback — download the card image + open wa.me text link
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "ats-score-upgradeyourresume.png"; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        const msg = `🎯 My resume just scored ${score}% on ATS!\n\n✅ Keywords matched: ${result.matched.length}\n📌 Keywords to improve: ${result.missing.length}\n\n🔍 Check if YOUR resume is passing ATS filters — free!\n👉 upgradeyourresume.com\n\n— via Upgrade Your Resume`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+        showToast("📥 Score card downloaded! Share it on WhatsApp.");
+      }
+    } catch (err: any) {
+      if (err?.name !== "AbortError") showToast("Could not share. Try again.");
+    }
+    setShareLoading(false);
   }
 
   useEffect(() => {
@@ -1342,22 +1585,31 @@ ${resume.slice(0, 4000)}`;
 
                       {/* Share My Score */}
                       {score > 0 && (
-                        <div>
-                          <p style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>📤 Share My Score</p>
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <a
-                              href={`https://wa.me/?text=${encodeURIComponent(`My resume just scored ${score}% on ATS! 🎯\n\nCheck if your resume is passing ATS filters 👉 upgradeyourresume.com`)}`}
-                              target="_blank" rel="noopener noreferrer"
-                              style={{ flex: 1, padding: "9px 6px", borderRadius: "9px", fontSize: "12px", fontWeight: 700, background: "#dcfce7", color: "#16a34a", border: "1px solid #bbf7d0", textAlign: "center", textDecoration: "none", display: "block" }}>
-                              📱 WhatsApp
-                            </a>
-                            <a
-                              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Just checked my resume's ATS score — ${score}%! 📊\n\nIf you're job hunting, check yours free at upgradeyourresume.com 🚀\n\n#JobSearch #Resume #ATS #Hiring`)}`}
-                              target="_blank" rel="noopener noreferrer"
-                              style={{ flex: 1, padding: "9px 6px", borderRadius: "9px", fontSize: "12px", fontWeight: 700, background: "#dbeafe", color: "#1d4ed8", border: "1px solid #bfdbfe", textAlign: "center", textDecoration: "none", display: "block" }}>
-                              🐦 Twitter
-                            </a>
+                        <div style={{ background: "linear-gradient(135deg,rgba(5,150,105,0.07),rgba(16,185,129,0.04))", border: "1px solid rgba(5,150,105,0.2)", borderRadius: "14px", padding: "14px 14px 12px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "10px" }}>
+                            <div style={{ width: "24px", height: "24px", borderRadius: "6px", background: "linear-gradient(135deg,#059669,#10b981)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px" }}>📤</div>
+                            <p style={{ fontSize: "12px", fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: "0.07em", margin: 0 }}>Share Your Score</p>
                           </div>
+                          <p style={{ fontSize: "11px", color: "#6b7280", margin: "0 0 10px", lineHeight: 1.5 }}>
+                            Share a <strong>branded score card</strong> — beautiful, professional image with your ATS score, keywords & brand.
+                          </p>
+                          {/* Primary: WhatsApp image card share */}
+                          <button
+                            onClick={() => shareScoreCard("whatsapp")}
+                            disabled={shareLoading}
+                            style={{ width: "100%", padding: "11px 14px", borderRadius: "10px", fontSize: "13px", fontWeight: 700, border: "none", cursor: shareLoading ? "wait" : "pointer", marginBottom: "7px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", background: "linear-gradient(135deg,#059669,#16a34a)", color: "#fff", boxShadow: "0 4px 14px rgba(5,150,105,0.3)", transition: "opacity 0.2s", opacity: shareLoading ? 0.7 : 1 }}>
+                            {shareLoading ? (
+                              <><span style={{ fontSize: "15px" }}>⏳</span> Generating card…</>
+                            ) : (
+                              <><span style={{ fontSize: "15px" }}>📱</span> Share Score Card on WhatsApp</>
+                            )}
+                          </button>
+                          {/* Secondary: Twitter text share */}
+                          <button
+                            onClick={() => shareScoreCard("twitter")}
+                            style={{ width: "100%", padding: "9px 14px", borderRadius: "10px", fontSize: "12px", fontWeight: 600, border: "1px solid #bfdbfe", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", background: "#eff6ff", color: "#1d4ed8" }}>
+                            <span style={{ fontSize: "14px" }}>𝕏</span> Post on Twitter / X
+                          </button>
                         </div>
                       )}
 
