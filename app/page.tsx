@@ -543,7 +543,7 @@ export default function Page() {
   const [linkedinBlur, setLinkedinBlur] = useState(false);
   const [linkedinExportBlur, setLinkedinExportBlur] = useState(false);
   const [showScanLimitModal, setShowScanLimitModal] = useState(false);
-  const [shareLoading, setShareLoading] = useState(false);
+  const [shareLoading, setShareLoading] = useState<"whatsapp" | "twitter" | null>(null);
 
   // ── Template states ──────────────────────────────────────────
 
@@ -585,13 +585,55 @@ export default function Page() {
   }
 
   async function shareScoreCard(platform: "whatsapp" | "twitter") {
+    const isStrongScore = score >= 70;
+    const isModScore    = score >= 40 && score < 70;
+
+    // ── Twitter / X ────────────────────────────────────────────────────────
     if (platform === "twitter") {
-      const text = `🎯 My resume just scored ${score}% on ATS!\n\nIf you're job hunting, check if YOUR resume is passing the ATS filter — it's free!\n\n👉 upgradeyourresume.com\n\n#Resume #ATS #JobSearch #Hiring #CareerTips`;
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
+      setShareLoading("twitter");
+      try {
+        const blob = await generateScoreCard(score, result.matched, result.missing);
+        const file = new File([blob], "ats-score-upgradeyourresume.png", { type: "image/png" });
+
+        const statusLine = isStrongScore
+          ? `my resume is crushing the ATS filter 🚀`
+          : isModScore
+          ? `ATS says: room to grow ⚡ — optimizing now`
+          : `reality check — most resumes never reach a human ⚠️`;
+
+        const matchLine = isStrongScore
+          ? `✅ ${result.matched.length} keywords matched — fully ATS-optimised`
+          : `✅ ${result.matched.length} matched · 📌 ${result.missing.length} keywords left to add`;
+
+        const tweetText =
+          `🎯 ATS Score: ${score}% — ${statusLine}\n\n` +
+          `${matchLine}\n\n` +
+          `Analysed with @upgradeyourresume — 100% free for your first scan.\n` +
+          `Is YOUR resume ATS-ready? 👇\n` +
+          `upgradeyourresume.com\n\n` +
+          `#Resume #ATS #JobSearch #Hiring #CareerTips #GetHired`;
+
+        if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
+          // Mobile: native share sheet → user picks Twitter/X; image attaches automatically
+          await navigator.share({ files: [file], text: tweetText });
+        } else {
+          // Desktop: download the card → open Twitter intent with pre-filled text
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url; a.download = "ats-score-upgradeyourresume.png"; a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "_blank");
+          showToast("📥 Card downloaded! Attach it to your tweet for max impact 🔥");
+        }
+      } catch (err: any) {
+        if (err?.name !== "AbortError") showToast("Could not share. Try again.");
+      }
+      setShareLoading(null);
       return;
     }
-    // WhatsApp — generate branded image card and share via Web Share API
-    setShareLoading(true);
+
+    // ── WhatsApp — generate branded image card and share via Web Share API ──
+    setShareLoading("whatsapp");
     try {
       const blob = await generateScoreCard(score, result.matched, result.missing);
       const file = new File([blob], "ats-score-upgradeyourresume.png", { type: "image/png" });
@@ -614,7 +656,7 @@ export default function Page() {
     } catch (err: any) {
       if (err?.name !== "AbortError") showToast("Could not share. Try again.");
     }
-    setShareLoading(false);
+    setShareLoading(null);
   }
 
   useEffect(() => {
@@ -1593,22 +1635,27 @@ ${resume.slice(0, 4000)}`;
                           <p style={{ fontSize: "11px", color: "#6b7280", margin: "0 0 10px", lineHeight: 1.5 }}>
                             Share a <strong>branded score card</strong> — beautiful, professional image with your ATS score, keywords & brand.
                           </p>
-                          {/* Primary: WhatsApp image card share */}
+                          {/* Primary: WhatsApp branded image card */}
                           <button
                             onClick={() => shareScoreCard("whatsapp")}
-                            disabled={shareLoading}
-                            style={{ width: "100%", padding: "11px 14px", borderRadius: "10px", fontSize: "13px", fontWeight: 700, border: "none", cursor: shareLoading ? "wait" : "pointer", marginBottom: "7px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", background: "linear-gradient(135deg,#059669,#16a34a)", color: "#fff", boxShadow: "0 4px 14px rgba(5,150,105,0.3)", transition: "opacity 0.2s", opacity: shareLoading ? 0.7 : 1 }}>
-                            {shareLoading ? (
+                            disabled={shareLoading !== null}
+                            style={{ width: "100%", padding: "11px 14px", borderRadius: "10px", fontSize: "13px", fontWeight: 700, border: "none", cursor: shareLoading !== null ? "wait" : "pointer", marginBottom: "7px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", background: "linear-gradient(135deg,#059669,#16a34a)", color: "#fff", boxShadow: "0 4px 14px rgba(5,150,105,0.3)", transition: "opacity 0.2s", opacity: shareLoading !== null ? 0.6 : 1 }}>
+                            {shareLoading === "whatsapp" ? (
                               <><span style={{ fontSize: "15px" }}>⏳</span> Generating card…</>
                             ) : (
                               <><span style={{ fontSize: "15px" }}>📱</span> Share Score Card on WhatsApp</>
                             )}
                           </button>
-                          {/* Secondary: Twitter text share */}
+                          {/* Secondary: Twitter / X branded image card */}
                           <button
                             onClick={() => shareScoreCard("twitter")}
-                            style={{ width: "100%", padding: "9px 14px", borderRadius: "10px", fontSize: "12px", fontWeight: 600, border: "1px solid #bfdbfe", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", background: "#eff6ff", color: "#1d4ed8" }}>
-                            <span style={{ fontSize: "14px" }}>𝕏</span> Post on Twitter / X
+                            disabled={shareLoading !== null}
+                            style={{ width: "100%", padding: "11px 14px", borderRadius: "10px", fontSize: "13px", fontWeight: 700, border: "none", cursor: shareLoading !== null ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", background: shareLoading === "twitter" ? "#333" : "#0f0f0f", color: "#fff", boxShadow: "0 4px 14px rgba(0,0,0,0.35)", transition: "opacity 0.2s", opacity: shareLoading !== null ? 0.6 : 1 }}>
+                            {shareLoading === "twitter" ? (
+                              <><span style={{ fontSize: "15px" }}>⏳</span> Generating card…</>
+                            ) : (
+                              <><span style={{ fontFamily: "serif", fontWeight: 900, fontSize: "16px", letterSpacing: "-0.5px" }}>𝕏</span> Post Score Card on X / Twitter</>
+                            )}
                           </button>
                         </div>
                       )}
