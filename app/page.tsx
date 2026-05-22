@@ -164,7 +164,7 @@ async function generateScoreCard(score: number, matched: string[], missing: stri
 
   // status badge
   const statusText = isStrong ? "✅  STRONG MATCH" : isMod ? "⚡  MODERATE MATCH" : "⚠️  NEEDS IMPROVEMENT";
-  const bW = 340, bH = 56, bX = cx - bW / 2, bY = cy + 106;
+  const bW = 340, bH = 56, bX = cx - bW / 2, bY = cy + R + 20;
   rrPath(ctx, bX, bY, bW, bH, 28);
   ctx.fillStyle = scoreGlow + "0.2)"; ctx.fill();
   ctx.strokeStyle = scoreGlow + "0.45)"; ctx.lineWidth = 1.5; ctx.stroke();
