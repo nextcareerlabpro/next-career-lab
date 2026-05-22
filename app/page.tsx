@@ -338,9 +338,11 @@ export default function Page() {
   // ── Template states ──────────────────────────────────────────
 
   const fileRef = useRef<HTMLInputElement>(null);
-  const idleWarningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const idleLogoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // ── Inactivity logout (timestamp-based so it survives tab backgrounding) ──
+  const lastActivityRef = useRef<number>(Date.now());   // wall-clock of last user action
+  const idleCheckRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+  const IDLE_WARN_MS  = 13 * 60 * 1000;   // show warning after 13 min idle
+  const IDLE_TOTAL_MS = 15 * 60 * 1000;   // auto-logout after 15 min idle
   const emptyResult = { score: 0, matched: [] as string[], missing: [] as string[], suggestions: [] as string[] };
   const [result, setResult] = useState(emptyResult);
 
@@ -358,34 +360,18 @@ export default function Page() {
     setTimeout(() => setToast(""), 3500);
   }
 
-  function resetIdleTimer() {
-    if (idleWarningTimerRef.current) clearTimeout(idleWarningTimerRef.current);
-    if (idleLogoutTimerRef.current) clearTimeout(idleLogoutTimerRef.current);
-    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+  // Stamp activity — called on every user interaction
+  function stampActivity() {
+    lastActivityRef.current = Date.now();
+    // If the warning is showing and user does something (e.g. moves mouse), dismiss it
     setShowIdleWarning(false);
-    setIdleCountdown(120);
-    idleWarningTimerRef.current = setTimeout(() => {
-      setShowIdleWarning(true);
-      let count = 120;
-      setIdleCountdown(count);
-      countdownIntervalRef.current = setInterval(() => {
-        count--;
-        setIdleCountdown(count);
-        if (count <= 0) {
-          clearInterval(countdownIntervalRef.current!);
-          handleAutoLogout();
-        }
-      }, 1000);
-    }, 780000); // warn at 13 min
   }
 
   async function handleAutoLogout() {
-    if (idleWarningTimerRef.current) clearTimeout(idleWarningTimerRef.current);
-    if (idleLogoutTimerRef.current) clearTimeout(idleLogoutTimerRef.current);
-    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    if (idleCheckRef.current) clearInterval(idleCheckRef.current);
     setShowIdleWarning(false);
     await signOut(auth);
-    showToast("You were logged out due to inactivity.");
+    showToast("You have been logged out due to inactivity.");
   }
 
   useEffect(() => {
@@ -413,17 +399,74 @@ export default function Page() {
     else { setHistory([]); setScansUsed(0); setIsPro(false); setSavedResumes([]); setIsFirstSession(false); }
   }, [user]);
 
+  // ── Smooth countdown display: 1-second tick only while warning is visible ──
+  // The main idle checker (5s) handles actual logout logic; this only drives the
+  // countdown display so it ticks every second instead of every 5 seconds.
   useEffect(() => {
-    if (!user) return;
-    const events = ["mousemove", "mousedown", "keypress", "touchstart", "scroll", "click"];
-    const onActivity = () => resetIdleTimer();
-    events.forEach((e) => window.addEventListener(e, onActivity, { passive: true }));
-    resetIdleTimer();
+    if (!showIdleWarning) return;
+    const displayTick = setInterval(() => {
+      const elapsed = Date.now() - lastActivityRef.current;
+      const remaining = IDLE_TOTAL_MS - elapsed;
+      if (remaining <= 0) {
+        clearInterval(displayTick);
+        return;
+      }
+      setIdleCountdown(Math.ceil(remaining / 1000));
+    }, 1_000);
+    return () => clearInterval(displayTick);
+  }, [showIdleWarning]);
+
+  useEffect(() => {
+    if (!user) {
+      // Clear checker when user logs out
+      if (idleCheckRef.current) clearInterval(idleCheckRef.current);
+      return;
+    }
+
+    // Stamp last activity whenever user does anything
+    lastActivityRef.current = Date.now();
+    const events = ["mousemove", "mousedown", "keypress", "keydown", "touchstart", "scroll", "click", "pointerdown"];
+    events.forEach((e) => window.addEventListener(e, stampActivity, { passive: true }));
+
+    // ── Core idle checker ──────────────────────────────────────────────────
+    // Runs every 5 s. Uses Date.now() arithmetic so it stays correct even if
+    // the browser throttles/pauses the interval while the tab is hidden.
+    const checkIdle = () => {
+      const elapsed = Date.now() - lastActivityRef.current;
+      const remaining = IDLE_TOTAL_MS - elapsed;  // ms until forced logout
+
+      if (remaining <= 0) {
+        // Past deadline — logout immediately
+        handleAutoLogout();
+        return;
+      }
+
+      if (elapsed >= IDLE_WARN_MS) {
+        // Inside the warning window — show warning with accurate countdown
+        const secondsLeft = Math.ceil(remaining / 1000);
+        setIdleCountdown(secondsLeft);
+        setShowIdleWarning(true);
+      } else {
+        // Still inside safe zone — make sure warning is hidden
+        setShowIdleWarning(false);
+      }
+    };
+
+    idleCheckRef.current = setInterval(checkIdle, 5_000);  // 5-second polling
+
+    // ── visibilitychange: fires the check IMMEDIATELY when user returns ───
+    // This is the key fix — even if the interval was throttled for 10 minutes,
+    // as soon as the tab becomes visible we check the real elapsed time.
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") checkIdle();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
-      events.forEach((e) => window.removeEventListener(e, onActivity));
-      if (idleWarningTimerRef.current) clearTimeout(idleWarningTimerRef.current);
-      if (idleLogoutTimerRef.current) clearTimeout(idleLogoutTimerRef.current);
-      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+      events.forEach((e) => window.removeEventListener(e, stampActivity));
+      document.removeEventListener("visibilitychange", onVisibility);
+      if (idleCheckRef.current) clearInterval(idleCheckRef.current);
+      setShowIdleWarning(false);
     };
   }, [user]);
 
@@ -1061,7 +1104,10 @@ ${resume.slice(0, 4000)}`;
               <p style={{ fontSize: "18px", fontWeight: 700, color: "#111827", margin: "0 0 10px" }}>Session Expiring</p>
               <p style={{ fontSize: "14px", color: "#6b7280", margin: "0 0 8px" }}>You'll be logged out due to inactivity in</p>
               <p style={{ fontSize: "36px", fontWeight: 800, color: idleCountdown <= 30 ? "#e11d48" : "#059669", margin: "0 0 24px" }}>{idleCountdown}s</p>
-              <button onClick={resetIdleTimer} style={{ background: "#059669", color: "#fff", border: "none", borderRadius: "10px", padding: "12px 36px", fontSize: "15px", fontWeight: 700, cursor: "pointer", width: "100%" }}>
+              <button
+                onClick={() => { stampActivity(); setShowIdleWarning(false); }}
+                style={{ background: "#059669", color: "#fff", border: "none", borderRadius: "10px", padding: "12px 36px", fontSize: "15px", fontWeight: 700, cursor: "pointer", width: "100%" }}
+              >
                 Stay Logged In
               </button>
             </div>
