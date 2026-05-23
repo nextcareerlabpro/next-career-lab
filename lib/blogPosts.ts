@@ -367,6 +367,234 @@ export const blogPosts: BlogPost[] = [
     ],
     cta: { text: "Analyze My Resume vs This Job →", href: "https://upgradeyourresume.com" },
   },
+
+  // ── New posts added for SEO (Task 6) ─────────────────────────────────────────
+  {
+    slug: "how-to-pass-ats-resume-2026",
+    title: "How to Pass ATS in 2026: The Complete Step-by-Step Guide",
+    description:
+      "ATS systems rejected 75% of resumes before a human sees them. Here is the exact, up-to-date process to write an ATS-optimized resume that passes every filter in 2026.",
+    publishDate: "2026-05-10",
+    readTime: 7,
+    category: "ATS Tips",
+    sections: [
+      {
+        content:
+          "If you have applied to more than 10 jobs and heard back from fewer than 2, your resume is probably being rejected by an ATS before a recruiter ever sees it. In 2026, virtually every company with more than 50 employees uses an Applicant Tracking System. Here is exactly how to beat it.",
+      },
+      {
+        heading: "What Has Changed in ATS Technology in 2026",
+        content:
+          "Modern ATS systems are smarter than they were five years ago. They now use semantic matching — so they understand that 'revenue growth' and 'sales increase' mean similar things. But they still rely heavily on exact keyword matching for job-critical skills, tools, and certifications. The bar has risen: you now need both the right keywords AND logical, readable content.",
+        bullets: [
+          "Semantic matching: related terms score partial credit — but exact matches score highest",
+          "AI-powered resume parsing is now standard at enterprise companies",
+          "Multi-stage filtering: ATS score → recruiter screen → hiring manager screen",
+          "Mobile-first applications mean PDFs must parse cleanly on all devices",
+        ],
+      },
+      {
+        heading: "Step 1: Read the Job Description Three Times",
+        content:
+          "Most candidates skim job descriptions. Read it three times with different lenses: first for the overall role, second to identify hard requirements (must-haves), and third to extract exact keyword phrases to mirror in your resume.",
+        bullets: [
+          "First read: understand the role and whether you are a fit",
+          "Second read: highlight every required skill, tool, certification, and qualification",
+          "Third read: note every phrase you should mirror verbatim in your resume",
+        ],
+      },
+      {
+        heading: "Step 2: Check Your Current ATS Score",
+        content:
+          "Before changing anything, run your resume through an ATS checker against the specific job description. This tells you exactly where you stand and which keywords are missing. Most candidates are surprised to find they are scoring 45-60% on roles they feel qualified for.",
+      },
+      {
+        heading: "Step 3: Fix Your Resume Header",
+        content:
+          "Your contact information must be in the main body of the resume — not in a header or footer. Many ATS systems cannot read headers and footers, which means your name and email may not be parsed. Use plain text for all contact details.",
+        bullets: [
+          "Name, phone, email, LinkedIn URL — all in the body",
+          "Remove headers and footers entirely for ATS versions",
+          "No tables, text boxes, or columns for contact info",
+          "City and state are sufficient — full address is unnecessary",
+        ],
+      },
+      {
+        heading: "Step 4: Rewrite Your Professional Summary",
+        content:
+          "Your summary is the first thing ATS scans and the first thing a recruiter reads if your resume passes. It should be three to four sentences that directly mirror the job description language, include your top two or three keywords, and state your years of relevant experience.",
+      },
+      {
+        heading: "Step 5: Add Missing Keywords to Experience",
+        content:
+          "From your ATS score report, identify every missing keyword. Add each one naturally into your existing experience bullets where it genuinely applies. Do not create a keyword list at the bottom — integrate them into your achievements.",
+      },
+      {
+        heading: "Step 6: Verify Your Format",
+        content:
+          "Use a single-column format with standard section headings. Avoid tables, columns, graphics, charts, and text boxes. Use a standard font and standard bullet points. Export as PDF.",
+        bullets: [
+          "Section headings: Work Experience, Education, Skills, Certifications",
+          "Font: Arial, Calibri, or Times New Roman at 10-12pt",
+          "Margins: 0.75 to 1 inch on all sides",
+          "No images, logos, or icons",
+          "Save as PDF unless the application specifically requests DOCX",
+        ],
+      },
+      {
+        heading: "Step 7: Re-scan and Confirm 80%+",
+        content:
+          "After making changes, run your resume through the ATS checker again. Your target is 80% or higher. If you are still below 70%, repeat the keyword review and add more missing terms to your summary and skills section. A score of 80%+ means your resume will pass most ATS filters and reach a human.",
+      },
+    ],
+    cta: { text: "Check My ATS Score Free →", href: "https://upgradeyourresume.com" },
+  },
+
+  {
+    slug: "ai-cover-letter-tips",
+    title: "AI Cover Letter Tips: How to Use AI to Write Cover Letters That Get Interviews",
+    description:
+      "AI can write your cover letter in seconds — but only if you know how to prompt it correctly. Here are the exact techniques that produce recruiter-ready cover letters, not generic templates.",
+    publishDate: "2026-05-14",
+    readTime: 5,
+    category: "Cover Letter",
+    sections: [
+      {
+        content:
+          "AI cover letter generators have become extremely powerful — but most people use them wrong. They ask AI to 'write a cover letter for this job' and get something generic that sounds like a template. Here are the techniques that actually produce compelling, personalized cover letters.",
+      },
+      {
+        heading: "Why Most AI Cover Letters Fail",
+        content:
+          "Generic AI cover letters fail because they lack specificity. They say 'I am passionate about your company's mission' without referencing the actual mission. They use phrases like 'dynamic and results-driven' that every candidate uses. Recruiters recognize AI-generated templates immediately. The fix is giving AI the right inputs.",
+        bullets: [
+          "Generic input produces generic output — always provide the full job description",
+          "AI does not know your specific achievements — you must include them",
+          "Without company-specific context, AI writes for any company, not yours",
+          "The tone must match the company culture — formal vs startup vs creative",
+        ],
+      },
+      {
+        heading: "The Right Way to Prompt AI for a Cover Letter",
+        content:
+          "Give the AI three things: the full job description, your most relevant achievement with a specific number, and one thing you know about the company. This transforms generic output into a personalized letter.",
+        bullets: [
+          "Paste the full job description — not just the title",
+          "Include your single best achievement for this role: 'I increased X by Y% in Z timeframe'",
+          "Add one company-specific detail: a recent product launch, a news article, or a specific mission statement",
+          "Specify the tone: formal, conversational, or startup-casual",
+        ],
+      },
+      {
+        heading: "The Opening Line: The Make-or-Break Sentence",
+        content:
+          "The first sentence determines if the rest gets read. AI tends to write weak openers. After generating your cover letter, replace the first sentence with one of these proven structures:",
+        bullets: [
+          "Lead with a result: 'I grew Razorpay's blog from 5,000 to 800,000 readers — and I would like to do the same for Zepto.'",
+          "Reference a company moment: 'When I saw your Series B announcement last month, I thought about the exact growth problem I solved at my last company.'",
+          "Open with specificity: 'Three years of managing ₹2Cr+ Google Ads budgets taught me that most companies waste 40% of their spend — which is exactly the problem you listed in this job posting.'",
+        ],
+      },
+      {
+        heading: "How to Edit AI Output for Maximum Impact",
+        content:
+          "AI gives you a strong draft. These edits take it from good to great:",
+        bullets: [
+          "Remove every generic phrase: 'passionate', 'dynamic', 'team player', 'results-driven' — replace with specifics",
+          "Shorten it: cut to 200-280 words. If a sentence does not add value, delete it",
+          "Read it aloud — if it sounds robotic, rewrite that sentence in your own voice",
+          "Change the closing: replace 'Thank you for your consideration' with 'I would welcome a 20-minute conversation to discuss how my background fits your roadmap'",
+        ],
+      },
+      {
+        heading: "When to Use AI vs Write Manually",
+        content:
+          "Use AI for: the first draft, structure, and keyword integration. Write manually for: the opening line, any personal anecdote or connection to the company, and the closing sentence. The best cover letters combine AI efficiency with human specificity.",
+      },
+      {
+        heading: "Generate Your Cover Letter in 60 Seconds",
+        content:
+          "Our AI Cover Letter Generator uses your resume and the job description together to write a role-specific cover letter. It is pre-trained on what recruiters respond to — not just generic business writing. Paste the JD, add your resume, and get a draft you can personalize in minutes.",
+      },
+    ],
+    cta: { text: "Generate My Cover Letter Free →", href: "https://upgradeyourresume.com" },
+  },
+
+  {
+    slug: "linkedin-profile-tips-for-freshers",
+    title: "LinkedIn Profile Tips for Freshers: How to Get Noticed by Recruiters with No Experience",
+    description:
+      "No work experience does not mean no LinkedIn presence. Here are the exact steps freshers should take to build a LinkedIn profile that attracts recruiters and internship opportunities.",
+    publishDate: "2026-05-18",
+    readTime: 6,
+    category: "LinkedIn",
+    sections: [
+      {
+        content:
+          "If you are a fresher or recent graduate, you might think LinkedIn is only for people with 5 years of experience. You are wrong. Recruiters actively search LinkedIn for fresh talent — for internships, entry-level roles, and campus hiring. The difference between getting found and staying invisible is your profile.",
+      },
+      {
+        heading: "Why Freshers Need LinkedIn More Than Anyone",
+        content:
+          "Experienced professionals get referrals and direct recruiter outreach. Freshers typically only have job portals — which means competing with thousands of applicants for every role. LinkedIn gives freshers a second channel: recruiters find them, not the other way around. A well-optimized fresher profile can generate 3-5 recruiter messages per month.",
+      },
+      {
+        heading: "Tip 1: Write a Headline That Says More Than 'Student at X University'",
+        content:
+          "The default headline is your degree. Change it immediately. Your headline should describe what you can do and what you want — not where you study.",
+        bullets: [
+          "❌ 'B.Tech Student at VIT University'",
+          "✅ 'Aspiring Data Analyst | Python & SQL | Open to Internships & Entry-Level Roles'",
+          "❌ 'MBA Fresher looking for opportunities'",
+          "✅ 'MBA — Marketing Specialization | Digital Marketing & Brand Strategy | Available June 2026'",
+          "Include: your target role, 2-3 relevant skills, and availability",
+        ],
+      },
+      {
+        heading: "Tip 2: Build a Strong About Section Without Work Experience",
+        content:
+          "You do not need a job to write a compelling About section. Focus on: what you have learned, what problems you can solve, and what you are looking for.",
+        bullets: [
+          "Start with what you specialize in, not where you studied",
+          "Mention your final year project, thesis, or any real-world problem you worked on",
+          "List relevant coursework, certifications, or technical skills",
+          "End with a call to action: 'I am actively looking for data analyst internships — connect with me or message me directly'",
+        ],
+      },
+      {
+        heading: "Tip 3: Add Projects as Work Experience",
+        content:
+          "No job history does not mean your Experience section has to be empty. Add academic projects, freelance work, hackathons, college society roles, and internships — even short ones. Format them exactly like jobs: company name (or 'Personal Project'), role title, dates, and 2-3 achievement-focused bullet points.",
+      },
+      {
+        heading: "Tip 4: Get 50+ Connections in Your First Week",
+        content:
+          "LinkedIn's algorithm ranks profiles with fewer than 50 connections significantly lower. In your first week, connect with: all classmates and college seniors, every professor and lab supervisor, and anyone you have met at events, hackathons, or internships. Add a personalized note to every connection request.",
+        bullets: [
+          "Send 10-15 connection requests per day",
+          "Add a 2-sentence personalized note: 'Hi [Name], I am a final year B.Tech student interested in data analytics — I noticed your experience at [Company] and would love to connect.'",
+          "Join 5-10 LinkedIn Groups in your field",
+          "Follow companies you want to work for",
+        ],
+      },
+      {
+        heading: "Tip 5: Add the Right Skills (Not Just Hard Skills)",
+        content:
+          "Add up to 50 skills on LinkedIn. Include both technical skills (Python, Excel, SQL, Canva, Photoshop) and soft skills (Public Speaking, Team Leadership, Problem Solving). Skills are a ranking factor in recruiter searches. Ask professors, project teammates, and classmates to endorse your top skills.",
+      },
+      {
+        heading: "Tip 6: Post Once a Week to Stay Visible",
+        content:
+          "LinkedIn's algorithm boosts profiles with recent activity. Post once a week — it does not have to be a long article. Share what you learned in a certification, a takeaway from a book, or a reflection on a project. Even a 3-line post keeps you visible in your network's feed and shows recruiters you are active and engaged.",
+      },
+      {
+        heading: "Optimize Your LinkedIn Profile in 60 Seconds",
+        content:
+          "Our LinkedIn Optimizer writes a keyword-rich headline and About section specifically for freshers and recent graduates. Just enter your degree, target role, and top skills — and the AI generates profile content that makes you discoverable.",
+      },
+    ],
+    cta: { text: "Optimize My LinkedIn Free →", href: "https://upgradeyourresume.com" },
+  },
 ];
 
 export function getPostBySlug(slug: string): BlogPost | undefined {

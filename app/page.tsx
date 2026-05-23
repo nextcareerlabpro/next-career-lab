@@ -1275,6 +1275,21 @@ ${resume.slice(0, 4000)}`;
 
   return (
     <>
+      {/* ── TASK 3: Static SEO content — visually hidden, readable by Google ── */}
+      <div className="sr-only" aria-hidden="false">
+        <h1>Free ATS Resume Analyzer &amp; AI Career Tools</h1>
+        <p>Check your ATS score for free. AI-powered resume writer, cover letter generator, LinkedIn optimizer, and job description analyzer — everything you need to get hired faster.</p>
+        <h2>Free ATS Resume Checker</h2>
+        <p>Upload your resume, paste a job description, and get an instant ATS match score. See exactly which keywords are missing and fix them before you apply.</p>
+        <h2>AI Resume Writer</h2>
+        <p>Instantly rewrite your resume for any job description. Our AI adds missing keywords, improves formatting, and boosts your ATS score automatically.</p>
+        <h2>Cover Letter Generator</h2>
+        <p>Generate personalized, recruiter-ready cover letters in seconds. Just enter the job title and company — the AI handles the rest.</p>
+        <h2>LinkedIn Profile Optimizer</h2>
+        <p>AI rewrites your LinkedIn headline and About section with the right keywords to rank higher in recruiter searches and get 40x more profile views.</p>
+        <h2>Job Description Analyzer</h2>
+        <p>Extract key skills, responsibilities, and requirements from any job posting automatically. Know exactly what to include in your resume to pass ATS filters.</p>
+      </div>
       <style>{`
         * { box-sizing: border-box; }
         body { margin: 0; }
