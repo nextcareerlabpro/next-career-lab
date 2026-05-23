@@ -1239,21 +1239,59 @@ ${resume.slice(0, 4000)}`;
     setSidebarOpen(false);
   }
 
+  // ── SEO shell: renders in ALL states so Google crawlers always see it ────────
+  const HomepageSeoShell = (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            { "@type": "Question", name: "Is the ATS resume checker free?", acceptedAnswer: { "@type": "Answer", text: "Yes. Upload your resume and paste a job description to get your ATS match score instantly — no signup required for your first scan." } },
+            { "@type": "Question", name: "How does the AI resume writer work?", acceptedAnswer: { "@type": "Answer", text: "Our AI analyzes your existing resume and the target job description, then rewrites it to include missing keywords and improve ATS compatibility." } },
+            { "@type": "Question", name: "Can AI write my cover letter?", acceptedAnswer: { "@type": "Answer", text: "Yes. Paste the job description and your resume, and get a personalized, recruiter-ready cover letter in seconds." } },
+            { "@type": "Question", name: "How does the LinkedIn Profile Optimizer help?", acceptedAnswer: { "@type": "Answer", text: "Our LinkedIn Optimizer rewrites your headline and About section with the right keywords for your target role, helping you rank higher in recruiter searches." } },
+            { "@type": "Question", name: "What is a Job Description Analyzer?", acceptedAnswer: { "@type": "Answer", text: "The JD Analyzer extracts key skills, responsibilities, and requirements from any job posting so you know exactly what keywords to include in your resume." } },
+          ],
+        }) }}
+      />
+      <div className="sr-only" aria-hidden="false">
+        <h1>Free ATS Resume Analyzer &amp; AI Career Tools</h1>
+        <p>Check your ATS score for free. AI-powered resume writer, cover letter generator, LinkedIn optimizer, and job description analyzer — everything you need to get hired faster.</p>
+        <h2>Free ATS Resume Checker</h2>
+        <p>Upload your resume, paste a job description, and get an instant ATS match score. See exactly which keywords are missing and fix them before you apply.</p>
+        <h2>AI Resume Writer</h2>
+        <p>Instantly rewrite your resume for any job description. Our AI adds missing keywords, improves formatting, and boosts your ATS score automatically.</p>
+        <h2>Cover Letter Generator</h2>
+        <p>Generate personalized, recruiter-ready cover letters in seconds. Just enter the job title and company — the AI handles the rest.</p>
+        <h2>LinkedIn Profile Optimizer</h2>
+        <p>AI rewrites your LinkedIn headline and About section with the right keywords to rank higher in recruiter searches and get 40x more profile views.</p>
+        <h2>Job Description Analyzer</h2>
+        <p>Extract key skills, responsibilities, and requirements from any job posting automatically. Know exactly what to include in your resume to pass ATS filters.</p>
+      </div>
+    </>
+  );
+
   if (booting) return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #e6faf5 0%, #fef9f0 60%, #fde8e8 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "Inter, -apple-system, sans-serif", gap: "20px" }}>
-      <div style={{ position: "relative", width: "52px", height: "52px" }}>
-        <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "4px solid #d1fae5" }} />
-        <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "4px solid transparent", borderTopColor: "#059669", animation: "spin 0.8s linear infinite" }} />
+    <>
+      {HomepageSeoShell}
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #e6faf5 0%, #fef9f0 60%, #fde8e8 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "Inter, -apple-system, sans-serif", gap: "20px" }}>
+        <div style={{ position: "relative", width: "52px", height: "52px" }}>
+          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "4px solid #d1fae5" }} />
+          <div style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "4px solid transparent", borderTopColor: "#059669", animation: "spin 0.8s linear infinite" }} />
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <p style={{ fontSize: "16px", fontWeight: 700, color: "#059669", margin: "0 0 4px" }}>Upgrade Your Resume</p>
+          <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>Loading your dashboard...</p>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
-      <div style={{ textAlign: "center" }}>
-        <p style={{ fontSize: "16px", fontWeight: 700, color: "#059669", margin: "0 0 4px" }}>Upgrade Your Resume</p>
-        <p style={{ fontSize: "13px", color: "#9ca3af", margin: 0 }}>Loading your dashboard...</p>
-      </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
+    </>
   );
   if (!user) return (
     <>
+      {HomepageSeoShell}
       {toast && <div style={{ position:"fixed", top:"16px", left:"50%", transform:"translateX(-50%)", zIndex:9999, padding:"10px 20px", borderRadius:"12px", fontSize:"13px", fontWeight:600, background:"#fff", border:"1.5px solid #059669", color:"#059669", boxShadow:"0 4px 20px rgba(5,150,105,0.15)", whiteSpace:"nowrap", maxWidth:"90vw", textAlign:"center" }}>{toast}</div>}
       <LandingPage onLogin={login} />
     </>
@@ -1275,36 +1313,8 @@ ${resume.slice(0, 4000)}`;
 
   return (
     <>
-      {/* ── Homepage FAQPage schema — injected here, not in layout, to avoid duplicates on other pages ── */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: [
-            { "@type": "Question", name: "Is the ATS resume checker free?", acceptedAnswer: { "@type": "Answer", text: "Yes. Upload your resume and paste a job description to get your ATS match score instantly — no signup required for your first scan." } },
-            { "@type": "Question", name: "How does the AI resume writer work?", acceptedAnswer: { "@type": "Answer", text: "Our AI analyzes your existing resume and the target job description, then rewrites it to include missing keywords and improve ATS compatibility." } },
-            { "@type": "Question", name: "Can AI write my cover letter?", acceptedAnswer: { "@type": "Answer", text: "Yes. Paste the job description and your resume, and get a personalized, recruiter-ready cover letter in seconds." } },
-            { "@type": "Question", name: "How does the LinkedIn Profile Optimizer help?", acceptedAnswer: { "@type": "Answer", text: "Our LinkedIn Optimizer rewrites your headline and About section with the right keywords for your target role, helping you rank higher in recruiter searches." } },
-            { "@type": "Question", name: "What is a Job Description Analyzer?", acceptedAnswer: { "@type": "Answer", text: "The JD Analyzer extracts key skills, responsibilities, and requirements from any job posting so you know exactly what keywords to include in your resume." } },
-          ],
-        }) }}
-      />
-      {/* ── TASK 3: Static SEO content — visually hidden, readable by Google ── */}
-      <div className="sr-only" aria-hidden="false">
-        <h1>Free ATS Resume Analyzer &amp; AI Career Tools</h1>
-        <p>Check your ATS score for free. AI-powered resume writer, cover letter generator, LinkedIn optimizer, and job description analyzer — everything you need to get hired faster.</p>
-        <h2>Free ATS Resume Checker</h2>
-        <p>Upload your resume, paste a job description, and get an instant ATS match score. See exactly which keywords are missing and fix them before you apply.</p>
-        <h2>AI Resume Writer</h2>
-        <p>Instantly rewrite your resume for any job description. Our AI adds missing keywords, improves formatting, and boosts your ATS score automatically.</p>
-        <h2>Cover Letter Generator</h2>
-        <p>Generate personalized, recruiter-ready cover letters in seconds. Just enter the job title and company — the AI handles the rest.</p>
-        <h2>LinkedIn Profile Optimizer</h2>
-        <p>AI rewrites your LinkedIn headline and About section with the right keywords to rank higher in recruiter searches and get 40x more profile views.</p>
-        <h2>Job Description Analyzer</h2>
-        <p>Extract key skills, responsibilities, and requirements from any job posting automatically. Know exactly what to include in your resume to pass ATS filters.</p>
-      </div>
+      {/* ── SEO shell also included here for authenticated users ── */}
+      {HomepageSeoShell}
       <style>{`
         * { box-sizing: border-box; }
         body { margin: 0; }
