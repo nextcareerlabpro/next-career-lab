@@ -87,52 +87,8 @@ const appSchema = {
   },
 };
 
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "Is the ATS resume checker free?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes. Upload your resume and paste a job description to get your ATS match score instantly — no signup required for your first scan.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "How does the AI resume writer work?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Our AI analyzes your existing resume and the target job description, then rewrites your resume to include missing keywords and improve ATS compatibility.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Can AI write my cover letter?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes. Paste the job description and your resume, and get a personalized, recruiter-ready cover letter in seconds.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "How does the LinkedIn Profile Optimizer help?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Our LinkedIn Optimizer rewrites your headline and About section using AI to include the right keywords for your target role, helping you rank higher in recruiter searches.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What is a Job Description Analyzer?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "The JD Analyzer extracts key skills, responsibilities, and requirements from any job posting so you know exactly what keywords to include in your resume.",
-      },
-    },
-  ],
-};
+// FAQPage schema is NOT included globally — each page injects its own
+// specific FAQPage schema to avoid duplicates and maximise rich result eligibility.
 
 export default function RootLayout({
   children,
@@ -153,10 +109,6 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       </head>
       <Script

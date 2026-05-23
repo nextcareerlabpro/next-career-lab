@@ -1275,6 +1275,21 @@ ${resume.slice(0, 4000)}`;
 
   return (
     <>
+      {/* ── Homepage FAQPage schema — injected here, not in layout, to avoid duplicates on other pages ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            { "@type": "Question", name: "Is the ATS resume checker free?", acceptedAnswer: { "@type": "Answer", text: "Yes. Upload your resume and paste a job description to get your ATS match score instantly — no signup required for your first scan." } },
+            { "@type": "Question", name: "How does the AI resume writer work?", acceptedAnswer: { "@type": "Answer", text: "Our AI analyzes your existing resume and the target job description, then rewrites it to include missing keywords and improve ATS compatibility." } },
+            { "@type": "Question", name: "Can AI write my cover letter?", acceptedAnswer: { "@type": "Answer", text: "Yes. Paste the job description and your resume, and get a personalized, recruiter-ready cover letter in seconds." } },
+            { "@type": "Question", name: "How does the LinkedIn Profile Optimizer help?", acceptedAnswer: { "@type": "Answer", text: "Our LinkedIn Optimizer rewrites your headline and About section with the right keywords for your target role, helping you rank higher in recruiter searches." } },
+            { "@type": "Question", name: "What is a Job Description Analyzer?", acceptedAnswer: { "@type": "Answer", text: "The JD Analyzer extracts key skills, responsibilities, and requirements from any job posting so you know exactly what keywords to include in your resume." } },
+          ],
+        }) }}
+      />
       {/* ── TASK 3: Static SEO content — visually hidden, readable by Google ── */}
       <div className="sr-only" aria-hidden="false">
         <h1>Free ATS Resume Analyzer &amp; AI Career Tools</h1>
