@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "index:url": "node scripts/google-indexing.js --url",
+    "index:roles": "node scripts/google-indexing.js --batch-roles",
+    "index:file": "node scripts/google-indexing.js --file",
+    "index:status": "node scripts/google-indexing.js --status",
+    "ping:sitemap": "node scripts/ping-sitemap.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

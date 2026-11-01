@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { blogPosts } from "../lib/blogPosts";
+import { jobRoles } from "../lib/jobRoles";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://upgradeyourresume.com";
@@ -9,6 +10,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(post.publishDate),
     changeFrequency: "monthly",
     priority: 0.7,
+  }));
+
+  const roleEntries: MetadataRoute.Sitemap = jobRoles.map((role) => ({
+    url: `${base}/resume-for/${role.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.85,
   }));
 
   return [
@@ -54,6 +62,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.8,
     },
+    {
+      url: `${base}/resume-for`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    ...roleEntries,
     ...blogEntries,
   ];
 }

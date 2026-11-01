@@ -1,0 +1,24 @@
+{
+  "JOB_ROLES": [
+    { "slug": "software-engineer-fresher", "roleName": "Software Engineer Fresher" },
+    { "slug": "data-analyst", "roleName": "Data Analyst" },
+    { "slug": "product-manager", "roleName": "Product Manager" },
+    { "slug": "devops-cloud-engineer", "roleName": "DevOps & Cloud Engineer" },
+    { "slug": "digital-marketing-specialist", "roleName": "Digital Marketing Specialist" },
+    { "slug": "full-stack-developer", "roleName": "Full Stack Developer" },
+    { "slug": "frontend-react-developer", "roleName": "Frontend React Developer" },
+    { "slug": "backend-node-developer", "roleName": "Backend Node Developer" },
+    { "slug": "business-analyst", "roleName": "Business Analyst" },
+    { "slug": "ui-ux-designer", "roleName": "UI/UX Product Designer" },
+    { "slug": "machine-learning-engineer", "roleName": "Machine Learning Engineer" },
+    { "slug": "cybersecurity-analyst", "roleName": "Cybersecurity Analyst" },
+    { "slug": "human-resources-recruiter", "roleName": "HR Recruiter" },
+    { "slug": "financial-analyst", "roleName": "Financial Analyst" },
+    { "slug": "sales-account-executive", "roleName": "Sales Account Executive" },
+    { "slug": "qa-automation-tester", "roleName": "QA Automation Tester" },
+    { "slug": "scrum-master-agile-coach", "roleName": "Scrum Master" },
+    { "slug": "customer-success-manager", "roleName": "Customer Success Manager" },
+    { "slug": "data-engineer", "roleName": "Data Engineer" },
+    { "slug": "android-mobile-developer", "roleName": "Android Mobile Developer" }
+  ]
+}

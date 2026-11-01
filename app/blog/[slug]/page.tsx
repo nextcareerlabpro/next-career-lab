@@ -62,12 +62,52 @@ export default async function BlogPostPage({ params }: Props) {
     mainEntityOfPage: { "@type": "WebPage", "@id": `https://upgradeyourresume.com/blog/${post.slug}` },
   };
 
+  const howToSteps = post.sections
+    .filter((s) => s.heading)
+    .map((s, idx) => ({
+      "@type": "HowToStep",
+      position: idx + 1,
+      name: s.heading,
+      text: s.content,
+    }));
+
+  const howToSchema =
+    howToSteps.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "HowTo",
+          name: post.title,
+          description: post.description,
+          step: howToSteps,
+        }
+      : null;
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://upgradeyourresume.com" },
+      { "@type": "ListItem", position: 2, name: "Blog", item: "https://upgradeyourresume.com/blog" },
+      { "@type": "ListItem", position: 3, name: post.title, item: `https://upgradeyourresume.com/blog/${post.slug}` },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-gray-50">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      {howToSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        />
+      )}
 
       {/* Top nav */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">

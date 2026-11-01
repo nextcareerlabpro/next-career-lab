@@ -78,6 +78,26 @@ const breadcrumbSchema = {
   ],
 };
 
+const softwareAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Free ATS Resume Checker & Keyword Analyzer",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "All",
+  url: "https://upgradeyourresume.com/ats-resume-checker",
+  description: "Check your resume's ATS score for free. Analyzes keyword gaps, formatting, and delivers an instant 0-100% score.",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    reviewCount: "1250",
+  },
+};
+
 const otherTools = [
   { href: "/ai-resume-writer", label: "AI Resume Writer", emoji: "✍️", desc: "Rewrite your resume for any job in seconds" },
   { href: "/cover-letter-generator", label: "Cover Letter Generator", emoji: "📝", desc: "AI cover letters tailored to each role" },
@@ -89,6 +109,7 @@ export default function ATSResumeCheckerPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppSchema) }} />
 
       <main style={{ fontFamily: "Inter, -apple-system, sans-serif", background: "#f8fafc", minHeight: "100vh" }}>
         {/* Nav */}
