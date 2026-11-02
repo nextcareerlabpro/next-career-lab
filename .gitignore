@@ -6,4 +6,5 @@ out
 .vercel
 bin/
 service-account*.json
+hermes_resume_growth/
 *.log
