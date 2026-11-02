@@ -290,28 +290,30 @@ Options:
       const { JOB_ROLES } = JSON.parse(fs.readFileSync(rolesDataPath, 'utf-8'));
       slugs = JOB_ROLES.map(r => `https://upgradeyourresume.com/resume-for/${r.slug}`);
     } else {
-      // Default default programmatic slugs
       slugs = [
         'software-engineer-fresher',
         'data-analyst',
         'product-manager',
         'devops-cloud-engineer',
         'digital-marketing-specialist',
-        'full-stack-developer',
-        'frontend-react-developer',
-        'backend-node-developer',
-        'business-analyst',
-        'ui-ux-designer',
-        'machine-learning-engineer',
-        'cybersecurity-analyst',
-        'human-resources-recruiter',
-        'financial-analyst',
-        'sales-account-executive'
+        'full-stack-developer'
       ].map(slug => `https://upgradeyourresume.com/resume-for/${slug}`);
     }
 
-    console.log(`\nSubmitting ${slugs.length} programmatic role URLs to Google Indexing API...`);
-    await processBatchUrls(accessToken, slugs);
+    const corePages = [
+      'https://upgradeyourresume.com/',
+      'https://upgradeyourresume.com/ats-resume-checker',
+      'https://upgradeyourresume.com/resume-for',
+      'https://upgradeyourresume.com/ai-resume-writer',
+      'https://upgradeyourresume.com/cover-letter-generator',
+      'https://upgradeyourresume.com/linkedin-optimizer',
+      'https://upgradeyourresume.com/templates',
+      'https://upgradeyourresume.com/blog'
+    ];
+
+    const allUrls = [...corePages, ...slugs];
+    console.log(`\nSubmitting ${allUrls.length} high-priority core & programmatic role URLs to Google Indexing API...`);
+    await processBatchUrls(accessToken, allUrls);
     return;
   }
 }
