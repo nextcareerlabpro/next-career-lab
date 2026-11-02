@@ -31,9 +31,9 @@ Hermes is **already live and operational** on AWS EC2. The second workspace can 
 | **Active Systemd Daemon** | `hermes.service` | Located at `/etc/systemd/system/hermes.service` |
 | **Hermes Root Directory** | `/home/ubuntu/hermes/` | Dedicated application home |
 | **Python Environment** | `/home/ubuntu/hermes/venv/` | Python 3.12 with `requests`, `urllib3`, etc. |
-| **AI LLM Engine** | **Google Gemini 2.5 Flash / Flash-Lite / Pro** | API Key: `AIzaSyCJkP0Hi_5LspraG9zqWzox_vuabDZqL2w` |
+| **AI LLM Engine** | **Google Gemini 2.5 Flash / Flash-Lite / Pro** | Configured in Hermes `config.py` |
 | **Telegram Bot ID** | `@abhayterminalAI_bot` | Bot ID: `8776612922` |
-| **Telegram Bot Token** | `8776612922:AAENzgJKypTCY80XdgdW14Wpg5ysJyCOdbk` | Verified active with 0 polling conflicts |
+| **Telegram Bot Token** | Configured via environment variable / `config.py` | Verified active with 0 polling conflicts |
 | **Authorized Admin User** | `Ashishspn` | Telegram Chat ID: `675701401` |
 | **Server Resources** | RAM: 908 MB (~480 MB free) | Hermes memory footprint is very lean (~20MB) |
 
@@ -185,7 +185,7 @@ INSTAGRAM_HANDLE = "@upgradeyourresume"
 LINKEDIN_PROFILE_URL = "https://www.linkedin.com/company/upgradeyourresume"
 
 # Telegram Admin
-TELEGRAM_BOT_TOKEN = "8776612922:AAENzgJKypTCY80XdgdW14Wpg5ysJyCOdbk"
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN")
 ADMIN_CHAT_ID = "675701401"
 ```
 
