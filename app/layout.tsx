@@ -47,6 +47,16 @@ export const metadata: Metadata = {
   verification: {
     google: "c45870402680d6b9",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon.png", type: "image/png", sizes: "96x96" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 // ── TASK 1: JSON-LD Schema objects ─────────────────────────────────────────────
